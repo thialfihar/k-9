@@ -6,11 +6,13 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 import com.fsck.k9.K9;
 import com.fsck.k9.helper.Utility;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -40,7 +42,18 @@ public class Storage implements SharedPreferences {
     private Context context = null;
 
     private SQLiteDatabase openDB() {
-        SQLiteDatabase mDb = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
+        SQLiteDatabase mDb;
+
+            final File databaseFile = new File(DB_NAME);
+            try {
+                mDb = context.openOrCreateDatabase(databaseFile.getPath(), Context.MODE_PRIVATE, null);
+            } catch (SQLiteException e) {
+                Log.e(K9.LOG_TAG, "Unable to open settings database " + databaseFile + " - removing file and retrying", e);
+                databaseFile.delete();
+                mDb = context.openOrCreateDatabase(databaseFile.getPath(), Context.MODE_PRIVATE, null);
+            }
+
+
 
         if (mDb.getVersion() == 1) {
             Log.i(K9.LOG_TAG, "Updating preferences to urlencoded username/password");
