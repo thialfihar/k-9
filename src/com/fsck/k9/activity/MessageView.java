@@ -273,6 +273,7 @@ public class MessageView extends K9Activity implements OnClickListener {
 
     public static void actionView(Context context, MessageReference messRef, ArrayList<MessageReference> messReferences, Bundle extras) {
         Intent i = new Intent(context, MessageView.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra(EXTRA_MESSAGE_REFERENCE, messRef);
         i.putParcelableArrayListExtra(EXTRA_MESSAGE_REFERENCES, messReferences);
         if (extras != null) {

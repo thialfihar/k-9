@@ -526,6 +526,7 @@ public class MessageList
 
     public static Intent actionHandleFolderIntent(Context context, Account account, String folder) {
         Intent intent = new Intent(context, MessageList.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(EXTRA_ACCOUNT, account.getUuid());
 
         if (folder != null) {
@@ -536,6 +537,7 @@ public class MessageList
 
     public static void actionHandle(Context context, String title, String queryString, boolean integrate, Flag[] flags, Flag[] forbiddenFlags) {
         Intent intent = new Intent(context, MessageList.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(EXTRA_QUERY, queryString);
         if (flags != null) {
             intent.putExtra(EXTRA_QUERY_FLAGS, Utility.combine(flags, ','));
@@ -550,6 +552,7 @@ public class MessageList
 
     public static void actionHandle(Context context, String title, SearchSpecification searchSpecification) {
         Intent intent = new Intent(context, MessageList.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(EXTRA_QUERY, searchSpecification.getQuery());
         if (searchSpecification.getRequiredFlags() != null) {
             intent.putExtra(EXTRA_QUERY_FLAGS, Utility.combine(searchSpecification.getRequiredFlags(), ','));

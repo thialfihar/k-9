@@ -196,6 +196,7 @@ public class FolderList extends K9ListActivity {
 
     public static Intent actionHandleAccountIntent(Context context, Account account, String initialFolder, boolean fromShortcut) {
         Intent intent = new Intent(context, FolderList.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(EXTRA_ACCOUNT, account.getUuid());
 
         if (initialFolder != null) {
@@ -224,7 +225,7 @@ public class FolderList extends K9ListActivity {
             Uri.parse("email://accounts/" + account.getAccountNumber()),
             context,
             FolderList.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(EXTRA_ACCOUNT, account.getUuid());
         intent.putExtra(EXTRA_FROM_NOTIFICATION, true);
 

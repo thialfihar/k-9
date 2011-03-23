@@ -67,7 +67,6 @@
 
         <activity
             android:name="com.fsck.k9.activity.Accounts"
-            android:launchMode="singleInstance"
             android:configChanges="locale"
             android:label="@string/app_name">
             <intent-filter>
@@ -187,7 +186,6 @@
         </activity>
         <activity
             android:name="com.fsck.k9.activity.FolderList"
-            android:launchMode="singleTask"
             android:configChanges="locale"
             >
             <intent-filter>
@@ -197,7 +195,6 @@
         </activity>
         <activity
             android:name="com.fsck.k9.activity.MessageList"
-            android:launchMode="singleTask"
             android:configChanges="locale"
             >
         </activity>
@@ -319,7 +316,7 @@
               android:enabled="true"
               >
             <intent-filter>
-<!-- 
+<!--
 android.intent.action.MEDIA_MOUNTED
 
      * Broadcast Action:  External media is present and mounted at its mount point.
@@ -329,9 +326,9 @@ android.intent.action.MEDIA_MOUNTED
 
  -->
                 <action android:name="android.intent.action.MEDIA_MOUNTED"/>
-<!-- 
+<!--
 
-MEDIA_EJECT and MEDIA_UNMOUNTED are not defined here: they have to be dynamically registered 
+MEDIA_EJECT and MEDIA_UNMOUNTED are not defined here: they have to be dynamically registered
 otherwise it would make K-9 start at the wrong time
 
  -->
