@@ -1,8 +1,6 @@
 
 package com.fsck.k9.activity;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,6 +61,8 @@ import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.store.StorageManager;
 import com.fsck.k9.view.ColorChip;
+import com.fsck.k9.preferences.StorageFormat;
+
 
 public class Accounts extends K9ListActivity implements OnItemClickListener, OnClickListener {
 
@@ -661,7 +661,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
             onRecreate(realAccount);
             break;
         case R.id.export:
-            onExport(realAccount);
+            onExport(false, realAccount);
             break;
         case R.id.move_up:
             onMove(realAccount, true);
@@ -731,7 +731,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
             onSearchRequested();
             break;
         case R.id.export_all:
-            onExport(null);
+            onExport(true, null);
             break;
         case R.id.import_settings:
             onImport();
@@ -1130,6 +1130,61 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
                 MessageList.actionHandle(Accounts.this, description, searchSpec);
             }
         }
+
+    }
+
+    public void onExport(final boolean includeGlobals, final Account account) {
+
+        // TODO, prompt to allow a user to choose which accounts to export
+        HashSet<String> accountUuids;
+        accountUuids = new HashSet<String>();
+        if (account != null) {
+            accountUuids.add(account.getUuid());
+        }
+
+        // Once there are more file formats, build a UI to select which one to use.  For now, use the encrypted/encoded format:
+        String storageFormat = StorageFormat.ENCRYPTED_XML_FILE;
+        AsyncUIProcessor.getInstance(this.getApplication()).exportSettings(this, storageFormat, includeGlobals, accountUuids, new ExportListener() {
+
+            @Override
+            public void canceled() {
+                setProgress(false);
+            }
+
+            @Override
+            public void failure(String message, Exception e) {
+                setProgress(false);
+                showDialog(Accounts.this, R.string.settings_export_failed_header, Accounts.this.getString(R.string.settings_export_failure, message));
+            }
+
+            @Override
+            public void started() {
+                setProgress(true);
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        String toastText = Accounts.this.getString(R.string.settings_exporting);
+                        Toast toast = Toast.makeText(Accounts.this, toastText, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                });
+            }
+
+            @Override
+            public void success(String fileName) {
+                setProgress(false);
+                showDialog(Accounts.this, R.string.settings_export_success_header, Accounts.this.getString(R.string.settings_export_success, fileName));
+            }
+
+            @Override
+            public void success() {
+                // This one should never be called here because the AsyncUIProcessor will generate a filename
+                setProgress(false);
+            }
+        });
+
+
 
     }
 

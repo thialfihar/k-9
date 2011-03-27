@@ -39,12 +39,12 @@ public class StorageImporter {
             xr.parse(new InputSource(is));
 
             ImportElement dataset = handler.getRootElement();
-            String version = dataset.attributes.get("version");
-            Log.i(K9.LOG_TAG, "Got settings file version " + version);
+            String storageFormat = dataset.attributes.get("version");
+            Log.i(K9.LOG_TAG, "Got settings file version " + storageFormat);
 
-            IStorageImporter storageImporter = StorageVersioning.createImporter(version);
+            IStorageImporter storageImporter = StorageFormat.createImporter(storageFormat);
             if (storageImporter == null) {
-                throw new StorageImportExportException(activity.getString(R.string.settings_unknown_version, version));
+                throw new StorageImportExportException(activity.getString(R.string.settings_unknown_version, storageFormat));
             }
             if (storageImporter.needsKey() && providedEncryptionKey == null) {
                 gatherPassword(activity, storageImporter, dataset, listener);
@@ -83,7 +83,7 @@ public class StorageImporter {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                PasswordEntryDialog dialog = new PasswordEntryDialog(activity, activity.getString(R.string.settings_encryption_password_prompt),
+                PasswordEntryDialog dialog = new PasswordEntryDialog(activity, activity.getString(R.string.settings_import_encryption_password_prompt),
                 new PasswordEntryDialog.PasswordEntryListener() {
                     public void passwordChosen(final String chosenPassword) {
                         AsyncUIProcessor.getInstance(activity.getApplication()).execute(new Runnable() {

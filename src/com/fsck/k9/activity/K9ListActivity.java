@@ -7,7 +7,6 @@ import android.view.KeyEvent;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.helper.DateFormatter;
 
@@ -90,37 +89,5 @@ public class K9ListActivity extends ListActivity {
         return super.onKeyUp(keyCode, event);
     }
 
-    public void setProgress(boolean progress) {
-    }
-
-    public void onExport(final Account account) {
-        ExportHelper.exportSettings(this, account, new ExportListener() {
-
-            @Override
-            public void canceled() {
-                setProgress(false);
-            }
-
-            @Override
-            public void failure(String message, Exception e) {
-                setProgress(false);
-            }
-
-            @Override
-            public void started() {
-                setProgress(true);
-            }
-
-            @Override
-            public void success(String fileName) {
-                setProgress(false);
-            }
-
-            @Override
-            public void success() {
-                setProgress(false);
-            }
-        });
-    }
 
 }
