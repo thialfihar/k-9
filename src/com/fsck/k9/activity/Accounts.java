@@ -3,6 +3,8 @@ package com.fsck.k9.activity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -376,9 +378,29 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
         StorageManager.getInstance(getApplication()).removeListener(storageListener);
 
     }
-
+    
+    private BaseAccount[] accounts = new BaseAccount[0];
+    private enum ACCOUNT_LOCATION {
+        TOP, MIDDLE, BOTTOM;
+    }
+    private EnumSet<ACCOUNT_LOCATION> accountLocation(BaseAccount account) {
+        EnumSet<ACCOUNT_LOCATION> accountLocation = EnumSet.of(ACCOUNT_LOCATION.MIDDLE);
+        if (accounts.length > 0) {
+            if (accounts[0].equals(account)) {
+                accountLocation.remove(ACCOUNT_LOCATION.MIDDLE);
+                accountLocation.add(ACCOUNT_LOCATION.TOP);
+            }
+            if (accounts[accounts.length - 1].equals(account)) {
+                accountLocation.remove(ACCOUNT_LOCATION.MIDDLE);
+                accountLocation.add(ACCOUNT_LOCATION.BOTTOM);
+            }  
+        }
+        return accountLocation;
+    }
+    
+    
     private void refresh() {
-        BaseAccount[] accounts = Preferences.getPreferences(this).getAccounts();
+        accounts = Preferences.getPreferences(this).getAccounts();
 
         List<BaseAccount> newAccounts = new ArrayList<BaseAccount>(accounts.length + 4);
         if (accounts.length > 0) {
@@ -846,6 +868,21 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
                 if (item.getItemId() != R.id.open) {
                     item.setVisible(false);
                 }
+            }
+        }
+        else {
+            EnumSet<ACCOUNT_LOCATION> accountLocation = accountLocation(account);
+            if (accountLocation.contains(ACCOUNT_LOCATION.TOP)) {
+                menu.findItem(R.id.move_up).setEnabled(false);
+            }
+            else {
+                menu.findItem(R.id.move_up).setEnabled(true);
+            }
+            if (accountLocation.contains(ACCOUNT_LOCATION.BOTTOM)) {
+                menu.findItem(R.id.move_down).setEnabled(false);
+            }
+            else {
+                menu.findItem(R.id.move_down).setEnabled(true);
             }
         }
     }
