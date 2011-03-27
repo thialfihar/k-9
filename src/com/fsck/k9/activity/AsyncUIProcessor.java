@@ -31,7 +31,7 @@ public class AsyncUIProcessor {
     private AsyncUIProcessor(Application application) {
         mApplication = application;
     }
-    public synchronized static AsyncUIProcessor getInstance(Application application) {
+   public synchronized static AsyncUIProcessor getInstance(Application application) {
         if (inst == null) {
             inst = new AsyncUIProcessor(application);
         }
