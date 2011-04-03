@@ -683,7 +683,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
             onRecreate(realAccount);
             break;
         case R.id.export:
-            onExport(false, realAccount);
+            onExport(false, realAccount, false);
             break;
         case R.id.move_up:
             onMove(realAccount, true);
@@ -755,7 +755,10 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
             onSearchRequested();
             break;
         case R.id.export_all:
-            onExport(true, null);
+            onExport(true, null, true);
+            break;
+        case R.id.export_only_globals:
+            onExport(true, null, false);
             break;
         case R.id.import_settings:
             onImport();
@@ -1172,17 +1175,23 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
 
     }
 
-    public void onExport(final boolean includeGlobals, final Account account) {
-
+    public void onExport(final boolean includeGlobals, final Account singleAccount, final boolean allAccounts) {
         // TODO, prompt to allow a user to choose which accounts to export
-        HashSet<String> accountUuids;
-        accountUuids = new HashSet<String>();
-        if (account != null) {
-            accountUuids.add(account.getUuid());
+        HashSet<String> accountUuids = null;
+        if (allAccounts) {
+            accountUuids = new HashSet<String>();
+            Account[] accounts = Preferences.getPreferences(this).getAccounts();
+            for (Account account : accounts) {
+                accountUuids.add(account.getUuid());
+            }
+        }
+        else if (singleAccount != null) {
+            accountUuids = new HashSet<String>();
+            accountUuids.add(singleAccount.getUuid());
         }
 
-        // Once there are more file formats, build a UI to select which one to use.  For now, use the encrypted/encoded format:
-        String storageFormat = StorageFormat.ENCRYPTED_XML_FILE;
+        // Once there are more file formats, build a UI to select which one to use.
+        String storageFormat = StorageFormat.ENCRYPTED_BLOB;
         AsyncUIProcessor.getInstance(this.getApplication()).exportSettings(this, storageFormat, includeGlobals, accountUuids, new ExportListener() {
 
             @Override

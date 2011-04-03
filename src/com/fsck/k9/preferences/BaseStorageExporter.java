@@ -3,7 +3,7 @@ package com.fsck.k9.preferences;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,15 +11,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 
-public class StorageExporterEncryptedXml implements IStorageExporter {
+public abstract class BaseStorageExporter {
     public void exportPreferences(Context context, boolean includeGlobals, Set<String> accountUuids, OutputStream os, String encryptionKey) throws StorageImportExportException {
         try {
-            Log.i(K9.LOG_TAG, "Exporting preferences");
-            K9Krypto krypto = new K9Krypto(encryptionKey, K9Krypto.MODE.ENCRYPT);
+            initialize(encryptionKey);
             OutputStreamWriter sw = new OutputStreamWriter(os);
             PrintWriter pf = new PrintWriter(sw);
             long keysEvaluated = 0;
@@ -29,12 +27,10 @@ public class StorageExporterEncryptedXml implements IStorageExporter {
             SharedPreferences storage = preferences.getPreferences();
 
             if (accountUuids == null) {
-                Account[] accounts = preferences.getAccounts();
-                accountUuids = new HashSet<String>();
-                for (Account account : accounts) {
-                    accountUuids.add(account.getUuid());
-                }
+                accountUuids = Collections.emptySet();
             }
+            Log.i(K9.LOG_TAG, "Exporting preferences for " + accountUuids.size() + " accounts and "
+                    + (includeGlobals ? "" : "not ") + " globals");
 
             Map < String, ? extends Object > prefs = storage.getAll();
             for (Map.Entry < String, ? extends Object > entry : prefs.entrySet()) {
@@ -53,15 +49,12 @@ public class StorageExporterEncryptedXml implements IStorageExporter {
                     // Skip global config entries if the user didn't request them
                         continue;
                 }
-                String keyEnc = krypto.encrypt(key);
-                String valueEnc = krypto.encrypt(value);
-                String output = keyEnc + ":" + valueEnc;
-                //Log.i(K9.LOG_TAG, "For key " + key + ", output is " + output);
-                pf.println(output);
+                output(pf, key, value);
+                
                 keysExported++;
 
             }
-
+            finish(pf);
             pf.flush();
 
             Log.i(K9.LOG_TAG, "Exported " + keysExported + " of " + keysEvaluated + " settings.");
@@ -69,9 +62,11 @@ public class StorageExporterEncryptedXml implements IStorageExporter {
             throw new StorageImportExportException("Unable to encrypt settings", e);
         }
     }
-
-    @Override
-    public boolean needsKey() {
-        return true;
-    }
+    
+    public abstract void initialize(String encryptionKey) throws StorageImportExportException;
+    
+    public abstract void finish(PrintWriter pf) throws StorageImportExportException;
+    
+    public abstract void output(PrintWriter pf, String key, String value) throws StorageImportExportException;
+    
 }
