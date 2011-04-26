@@ -269,6 +269,13 @@
             android:name="com.fsck.k9.activity.AccessibleEmailContentActivity"
             >
         </activity>
+        <activity
+            android:name="com.fsck.k9.activity.PickDirectory"
+            android:label="@string/attachment_save_title"
+            android:theme="@style/Theme.K9Dialog"
+            android:configChanges="locale"
+            >
+        </activity>
 
         <receiver android:name="com.fsck.k9.service.BootReceiver"
               android:enabled="true"
@@ -319,7 +326,7 @@
               android:enabled="true"
               >
             <intent-filter>
-<!-- 
+<!--
 android.intent.action.MEDIA_MOUNTED
 
      * Broadcast Action:  External media is present and mounted at its mount point.
@@ -329,9 +336,9 @@ android.intent.action.MEDIA_MOUNTED
 
  -->
                 <action android:name="android.intent.action.MEDIA_MOUNTED"/>
-<!-- 
+<!--
 
-MEDIA_EJECT and MEDIA_UNMOUNTED are not defined here: they have to be dynamically registered 
+MEDIA_EJECT and MEDIA_UNMOUNTED are not defined here: they have to be dynamically registered
 otherwise it would make K-9 start at the wrong time
 
  -->

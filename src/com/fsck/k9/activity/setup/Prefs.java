@@ -1,6 +1,5 @@
 package com.fsck.k9.activity.setup;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Vector;
@@ -25,9 +24,8 @@ import com.fsck.k9.R;
 import com.fsck.k9.activity.Accounts;
 import com.fsck.k9.activity.ColorPickerDialog;
 import com.fsck.k9.activity.K9PreferenceActivity;
+import com.fsck.k9.activity.PickDirectory;
 import com.fsck.k9.helper.DateFormatter;
-import com.fsck.k9.helper.FileBrowserHelper;
-import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.preferences.CheckBoxListPreference;
 import com.fsck.k9.preferences.TimePickerPreference;
 
@@ -308,32 +306,13 @@ public class Prefs extends K9PreferenceActivity {
 
         mAttachmentPathPreference = findPreference(PREFERENCE_ATTACHMENT_DEF_PATH);
         mAttachmentPathPreference.setSummary(K9.getAttachmentDefaultPath());
-        mAttachmentPathPreference
-        .setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        mAttachmentPathPreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                FileBrowserHelper
-                .getInstance()
-                .showFileBrowserActivity(Prefs.this,
-                                         new File(K9.getAttachmentDefaultPath()),
-                                         ACTIVITY_CHOOSE_FOLDER, callback);
-
+                PickDirectory.actionPick(Prefs.this, ACTIVITY_CHOOSE_FOLDER,
+                        K9.getAttachmentDefaultPath());
                 return true;
             }
-
-            FileBrowserFailOverCallback callback = new FileBrowserFailOverCallback() {
-
-                @Override
-                public void onPathEntered(String path) {
-                    mAttachmentPathPreference.setSummary(path);
-                    K9.setAttachmentDefaultPath(path);
-                }
-
-                @Override
-                public void onCancel() {
-                    // canceled, do nothing
-                }
-            };
         });
     }
 
@@ -429,6 +408,7 @@ public class Prefs extends K9PreferenceActivity {
                 if (fileUri != null) {
                     String filePath = fileUri.getPath();
                     if (filePath != null) {
+                        //TODO: check if directory is writeable
                         mAttachmentPathPreference.setSummary(filePath.toString());
                         K9.setAttachmentDefaultPath(filePath.toString());
                     }

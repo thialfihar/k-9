@@ -17,8 +17,6 @@ import com.fsck.k9.*;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.crypto.PgpData;
-import com.fsck.k9.helper.FileBrowserHelper;
-import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.*;
 import com.fsck.k9.mail.store.StorageManager;
 import com.fsck.k9.view.AttachmentView;
@@ -308,28 +306,12 @@ public class MessageView extends K9Activity implements OnClickListener {
         //set a callback for the attachment view. With this callback the attachmentview
         //request the start of a filebrowser activity.
         mMessageView.setAttachmentCallback(new AttachmentFileDownloadCallback() {
-
             @Override
             public void showFileBrowser(final AttachmentView caller) {
-                FileBrowserHelper.getInstance()
-                .showFileBrowserActivity(MessageView.this,
-                                         null,
-                                         MessageView.ACTIVITY_CHOOSE_DIRECTORY,
-                                         callback);
                 attachmentTmpStore = caller;
+                PickDirectory.actionPick(MessageView.this, MessageView.ACTIVITY_CHOOSE_DIRECTORY,
+                        K9.getAttachmentDefaultPath());
             }
-            FileBrowserFailOverCallback callback = new FileBrowserFailOverCallback() {
-
-                @Override
-                public void onPathEntered(String path) {
-                    attachmentTmpStore.writeFile(new File(path));
-                }
-
-                @Override
-                public void onCancel() {
-                    // canceled, do nothing
-                }
-            };
         });
         mMessageView.initialize(this);
 
@@ -755,6 +737,7 @@ public class MessageView extends K9Activity implements OnClickListener {
                 if (fileUri != null) {
                     String filePath = fileUri.getPath();
                     if (filePath != null) {
+                        //TODO: check if directory is writeable
                         attachmentTmpStore.writeFile(new File(filePath));
                     }
                 }
