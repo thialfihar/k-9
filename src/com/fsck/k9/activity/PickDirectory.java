@@ -42,7 +42,7 @@ public class PickDirectory extends Activity {
         Uri uri = (startPath != null) ? Uri.fromFile(new File(startPath)) : null;
 
         try {
-            Intent intent = new Intent("1org.openintents.action.PICK_DIRECTORY");
+            Intent intent = new Intent("org.openintents.action.PICK_DIRECTORY");
             intent.setData(uri);
             activity.startActivityForResult(intent, requestCode);
             return;
