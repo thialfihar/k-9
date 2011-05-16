@@ -1892,7 +1892,7 @@ public class LocalStore extends Store implements Serializable {
             if (!(folder instanceof LocalFolder)) {
                 throw new MessagingException("copyMessages called with incorrect Folder");
             }
-            ((LocalFolder) folder).appendMessages(msgs, true);
+            ((LocalFolder) folder).appendMessages(msgs, true, false);
         }
 
         @Override
@@ -1993,7 +1993,11 @@ public class LocalStore extends Store implements Serializable {
          */
         @Override
         public void appendMessages(Message[] messages) throws MessagingException {
-            appendMessages(messages, false);
+            appendMessages(messages, false, false);
+        }
+
+        public void replaceMessageContents(Message message) throws MessagingException {
+            appendMessages(new Message[] { message }, false, true);
         }
 
         public void destroyMessages(final Message[] messages) throws MessagingException {
@@ -2030,7 +2034,8 @@ public class LocalStore extends Store implements Serializable {
          * @param messages
          * @param copy
          */
-        private void appendMessages(final Message[] messages, final boolean copy) throws MessagingException {
+        private void appendMessages(final Message[] messages, final boolean copy,
+                final boolean retainFlags) throws MessagingException {
             open(OpenMode.READ_WRITE);
             try {
                 database.execute(true, new DbCallback<Void>() {
@@ -2042,6 +2047,7 @@ public class LocalStore extends Store implements Serializable {
                                     throw new Error("LocalStore can only store Messages that extend MimeMessage");
                                 }
 
+                                Message oldMessage = null;
                                 String uid = message.getUid();
                                 if (uid == null || copy) {
                                     uid = K9.LOCAL_UID_PREFIX + UUID.randomUUID().toString();
@@ -2049,7 +2055,7 @@ public class LocalStore extends Store implements Serializable {
                                         message.setUid(uid);
                                     }
                                 } else {
-                                    Message oldMessage = getMessage(uid);
+                                    oldMessage = getMessage(uid);
                                     if (oldMessage != null && !oldMessage.isSet(Flag.SEEN)) {
                                         setUnreadMessageCount(getUnreadMessageCount() - 1);
                                     }
@@ -2105,6 +2111,8 @@ public class LocalStore extends Store implements Serializable {
                                     preview = calculateContentPreview(HtmlConverter.htmlToText(html));
                                 }
 
+                                Message flagMessage = (retainFlags) ? oldMessage : message;
+
                                 try {
                                     ContentValues cv = new ContentValues();
                                     cv.put("uid", uid);
@@ -2112,8 +2120,8 @@ public class LocalStore extends Store implements Serializable {
                                     cv.put("sender_list", Address.pack(message.getFrom()));
                                     cv.put("date", message.getSentDate() == null
                                            ? System.currentTimeMillis() : message.getSentDate().getTime());
-                                    cv.put("flags", Utility.combine(message.getFlags(), ',').toUpperCase());
-                                    cv.put("deleted", message.isSet(Flag.DELETED) ? 1 : 0);
+                                    cv.put("flags", Utility.combine(flagMessage.getFlags(), ',').toUpperCase());
+                                    cv.put("deleted", flagMessage.isSet(Flag.DELETED) ? 1 : 0);
                                     cv.put("folder_id", mFolderId);
                                     cv.put("to_list", Address.pack(message.getRecipients(RecipientType.TO)));
                                     cv.put("cc_list", Address.pack(message.getRecipients(RecipientType.CC)));
@@ -2136,11 +2144,12 @@ public class LocalStore extends Store implements Serializable {
                                     for (Part attachment : attachments) {
                                         saveAttachment(messageUid, attachment, copy);
                                     }
-                                    saveHeaders(messageUid, (MimeMessage)message);
-                                    if (!message.isSet(Flag.SEEN)) {
+                                    saveHeaders(messageUid, (MimeMessage)message, flagMessage.getFlags());
+
+                                    if (!flagMessage.isSet(Flag.SEEN)) {
                                         setUnreadMessageCount(getUnreadMessageCount() + 1);
                                     }
-                                    if (message.isSet(Flag.FLAGGED)) {
+                                    if (flagMessage.isSet(Flag.FLAGGED)) {
                                         setFlaggedMessageCount(getFlaggedMessageCount() + 1);
                                     }
                                 } catch (Exception e) {
@@ -2251,7 +2260,7 @@ public class LocalStore extends Store implements Serializable {
                                     Part attachment = attachments.get(i);
                                     saveAttachment(message.mId, attachment, false);
                                 }
-                                saveHeaders(message.getId(), message);
+                                saveHeaders(message.getId(), message, message.getFlags());
                             } catch (Exception e) {
                                 throw new MessagingException("Error appending message", e);
                             }
@@ -2273,7 +2282,7 @@ public class LocalStore extends Store implements Serializable {
          * @param message
          * @throws com.fsck.k9.mail.MessagingException
          */
-        private void saveHeaders(final long id, final MimeMessage message) throws MessagingException {
+        private void saveHeaders(final long id, final MimeMessage message, final Flag[] flags) throws MessagingException {
             database.execute(true, new DbCallback<Void>() {
                 @Override
                 public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
@@ -2300,7 +2309,7 @@ public class LocalStore extends Store implements Serializable {
                         // Remember that all headers for this message have been saved, so it is
                         // not necessary to download them again in case the user wants to see all headers.
                         List<Flag> appendedFlags = new ArrayList<Flag>();
-                        appendedFlags.addAll(Arrays.asList(message.getFlags()));
+                        appendedFlags.addAll(Arrays.asList(flags));
                         appendedFlags.add(Flag.X_GOT_ALL_HEADERS);
 
                         db.execSQL("UPDATE messages " + "SET flags = ? " + " WHERE id = ?",

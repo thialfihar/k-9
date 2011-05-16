@@ -2598,13 +2598,14 @@ public class MessagingController implements Runnable {
                         remoteFolder.fetch(new Message[] { remoteMessage }, fp, null);
 
                         // Store the message locally and load the stored message into memory
-                        localFolder.appendMessages(new Message[] { remoteMessage });
+                        localFolder.replaceMessageContents(remoteMessage);
                         fp.add(FetchProfile.Item.ENVELOPE);
                         message = localFolder.getMessage(uid);
                         localFolder.fetch(new Message[] { message }, fp, null);
 
                         // Mark that this message is now fully synched
                         message.setFlag(Flag.X_DOWNLOADED_FULL, true);
+                        message.setFlag(Flag.X_DOWNLOADED_PARTIAL, false);
                     }
 
                     // now that we have the full message, refresh the headers
