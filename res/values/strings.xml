@@ -379,6 +379,8 @@ http://k9mail.googlecode.com/
     <string name="account_setup_autoconfig_missing">not found!</string>
     <string name="account_setup_autoconfig_succesful">successful!</string>
     <string name="account_setup_autoconfig_fail">failed!</string>
+    <string name="account_setup_autoconfig_forcemanual">No settings found, use manual configuration.</string>
+    <string name="account_setup_autoconfig_trynext">Searching other places for configuration settings...</string>
 
     <string name="account_setup_names_title">You\'re almost done!</string>
     <string name="account_setup_names_instructions">Your account is set up, and mail is on its way!</string>
