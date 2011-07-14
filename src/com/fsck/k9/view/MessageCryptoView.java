@@ -59,7 +59,7 @@ public class MessageCryptoView extends LinearLayout {
      * they should be visible.
      */
     public void updateLayout(final CryptoProvider cryptoProvider, final PgpData pgpData, final Message message) {
-        if ((message == null) || pgpData == null || pgpData.getDecryptedData() == null) {
+        if ((message == null) && (pgpData == null || pgpData.getDecryptedData() == null)) {
             this.setVisibility(View.GONE);
             return;
         }
@@ -87,6 +87,7 @@ public class MessageCryptoView extends LinearLayout {
             this.setVisibility(View.VISIBLE);
         } else {
             mCryptoSignatureLayout.setVisibility(View.INVISIBLE);
+            this.setVisibility(View.VISIBLE);
         }
         if (pgpData.getDecryptedData() != null) {
             if (pgpData.getSignatureKeyId() == 0) {
