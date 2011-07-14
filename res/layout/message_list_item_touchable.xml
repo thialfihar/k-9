@@ -45,12 +45,13 @@
         android:layout_alignParentTop="true"
         android:paddingBottom="4dip"
                android:button="@drawable/star" />
+
     <TextView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/flagged"
+        android:layout_below="@+id/subject"
         android:singleLine="true"
         android:textColor="?android:attr/textColorSecondary"
         android:textAppearance="?android:attr/textAppearanceSmall"  />
@@ -79,11 +80,11 @@
         android:layout_below="@+id/subject"
         android:layout_toLeftOf="@+id/date"
         android:layout_toRightOf="@+id/chip"
+        android:layout_alignTop="@+id/date"
         android:layout_marginLeft="1dip"
         android:layout_marginRight="1dip"
         android:singleLine="false"
         android:bufferType="spannable"
         android:textColor="?android:attr/textColorPrimary"
         android:textAppearance="?android:attr/textAppearanceSmall" />
-
 </RelativeLayout>
