@@ -313,6 +313,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
         //actionBar.setHomeAction(new IntentAction(this, HomeActivity.createIntent(this), R.drawable.ic_title_home_default));
         //actionBar.addAction(new IntentAction(this, createShareIntent(), R.drawable.ic_title_share_default));
         ActionBar mActionBar = (ActionBar) findViewById(R.id.actionbar);
+        mActionBar.removeAllActions();
         mActionBar.addAction(new SearchAction());
         mActionBar.addAction(new SyncAction());
         mActionBar.addAction(new ComposeAction());

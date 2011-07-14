@@ -316,6 +316,7 @@ public class FolderList extends K9ListActivity {
 
     private void initializeActionBar() {
         ActionBar mActionBar = getActionBar();
+        mActionBar.removeAllActions();
         mActionBar.addAction(new SearchAction());
         mActionBar.addAction(new SyncAction());
         mActionBar.addAction(new ComposeAction());
