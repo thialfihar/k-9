@@ -373,7 +373,6 @@ public class AccountSettings extends K9PreferenceActivity {
         });
 
 
-
         mMessageAge = (ListPreference) findPreference(PREFERENCE_MESSAGE_AGE);
 
         if (!mAccount.isSearchByDateCapable()) {
@@ -390,7 +389,6 @@ public class AccountSettings extends K9PreferenceActivity {
 	                return false;
 	            }
 	        });
-
         }
 
         mMessageSize = (ListPreference) findPreference(PREFERENCE_MESSAGE_SIZE);
@@ -724,14 +722,12 @@ public class AccountSettings extends K9PreferenceActivity {
 
         mAccount.setShowPictures(Account.ShowPictures.valueOf(mAccountShowPictures.getValue()));
         mAccount.save(Preferences.getPreferences(this));
-
 	    if (mIsPushCapable) {
 	        boolean needsPushRestart = mAccount.setFolderPushMode(Account.FolderMode.valueOf(mPushMode.getValue()));
 	        if (mAccount.getFolderPushMode() != FolderMode.NONE) {
 	            needsPushRestart |= displayModeChanged;
 	            needsPushRestart |= mIncomingChanged;
 	        }
-
 	        if (needsRefresh && needsPushRestart) {
 	            MailService.actionReset(this, null);
 	        } else if (needsRefresh) {
