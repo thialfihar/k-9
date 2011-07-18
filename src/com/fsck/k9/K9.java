@@ -181,7 +181,7 @@ public class K9 extends Application {
     private static boolean mMeasureAccounts = true;
     private static boolean mCountSearchMessages = true;
     private static boolean mHideSpecialAccounts = false;
-    private static boolean mZoomControlsEnabled = false;
+    private static boolean mZoomControlsEnabled = true;
     private static boolean mMobileOptimizedLayout = false;
     private static boolean mQuietTimeEnabled = false;
     private static String mQuietTimeStarts = null;
@@ -487,7 +487,7 @@ public class K9 extends Application {
         mMessageListSplitView = sprefs.getString("messageListSplitView", "AUTOMATIC");
 
         mMobileOptimizedLayout = sprefs.getBoolean("mobileOptimizedLayout", false);
-        mZoomControlsEnabled = sprefs.getBoolean("zoomControlsEnabled", false);
+        mZoomControlsEnabled = sprefs.getBoolean("zoomControlsEnabled", true);
 
         mQuietTimeEnabled = sprefs.getBoolean("quietTimeEnabled", false);
         mQuietTimeStarts = sprefs.getString("quietTimeStarts", "21:00");
