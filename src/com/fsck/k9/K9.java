@@ -164,6 +164,7 @@ public class K9 extends Application {
     private static boolean mMessageListCheckboxes = false;
     private static boolean mMessageListTouchable = true;
     private static int mMessageListPreviewLines = 2;
+    private static String mMessageListSplitView = "AUTOMATIC";
 
     private static boolean mShowCorrespondentNames = true;
     private static boolean mShowContactName = false;
@@ -189,7 +190,6 @@ public class K9 extends Application {
     private static int mPrimaryMessageListContentSize = 300;
     private static String mAttachmentDefaultPath = "";
 
-    private static String mMessageListSplitView = "AUTOMATIC";
 
     private static boolean useGalleryBugWorkaround = false;
     private static boolean galleryBuggy;
