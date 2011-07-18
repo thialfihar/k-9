@@ -69,7 +69,11 @@ public class MessageWebView extends WebView {
         this.setVerticalScrollBarEnabled(true);
         this.setVerticalScrollbarOverlay(true);
         this.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
-
+        if (K9.getK9Theme() == android.R.style.Theme)  {
+            // Black theme should get a black webview background
+            // we'll set the background of the messages on load
+            this.setBackgroundColor(0xff000000);
+        }
 
         final WebSettings webSettings = this.getSettings();
 
