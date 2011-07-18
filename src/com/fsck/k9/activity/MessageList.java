@@ -1409,7 +1409,6 @@ public class MessageList
                         gotoNextItem();
                         return true;
                     }
-                    /* TODO - MESSAGE VIEW SPECIAL KEYS
                     case KeyEvent.KEYCODE_SHIFT_LEFT:
                     case KeyEvent.KEYCODE_SHIFT_RIGHT: {
                         // Selecting text started via shift key. Disable scrolling as
@@ -1417,6 +1416,7 @@ public class MessageList
                         mToggleScrollView.setScrolling(false);
                         break;
                     }
+                    /* TODO - MESSAGE VIEW SPECIAL KEYS
                     case KeyEvent.KEYCODE_S: {
                         onRefile(mAccount.getSpamFolderName());
                         return true;
@@ -2138,6 +2138,8 @@ public class MessageList
 
         menu.findItem(R.id.select_all).setVisible(! anySelected);
         menu.findItem(R.id.batch_ops).setVisible(anySelected);
+        // No message loaded? no select text option
+        menu.findItem(R.id.select_text).setVisible(mCurrentMessageInfo == null ? false: true);
 
         setOpsState(menu, true, anySelected);
 

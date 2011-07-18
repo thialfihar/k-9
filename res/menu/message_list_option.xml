@@ -72,6 +72,11 @@
         android:title="@string/mark_all_as_read_action"
         android:icon="@drawable/ic_menu_inbox"
     />
+	<item
+		android:id="@+id/select_text"
+		android:title="@string/select_text_action"
+        android:icon="@drawable/ic_menu_select_text"
+	/>
     <item
         android:id="@+id/settings"
         android:title="@string/preferences_action"
