@@ -189,6 +189,7 @@ public class K9 extends Application {
     private static int mPrimaryMessageListContentSize = 300;
     private static String mAttachmentDefaultPath = "";
 
+    private static String mMessageListSplitView = "AUTOMATIC";
 
     private static boolean useGalleryBugWorkaround = false;
     private static boolean galleryBuggy;
@@ -431,6 +432,7 @@ public class K9 extends Application {
         editor.putBoolean("messageListStars", mMessageListStars);
         editor.putBoolean("messageListCheckboxes", mMessageListCheckboxes);
         editor.putBoolean("messageListTouchable", mMessageListTouchable);
+        editor.putString("messageListSplitView", mMessageListSplitView);
         editor.putInt("messageListPreviewLines", mMessageListPreviewLines);
 
         editor.putBoolean("showCorrespondentNames", mShowCorrespondentNames);
@@ -482,6 +484,7 @@ public class K9 extends Application {
         mMessageListCheckboxes = sprefs.getBoolean("messageListCheckboxes", false);
         mMessageListTouchable = sprefs.getBoolean("messageListTouchable", true);
         mMessageListPreviewLines = sprefs.getInt("messageListPreviewLines", 2);
+        mMessageListSplitView = sprefs.getString("messageListSplitView", "AUTOMATIC");
 
         mMobileOptimizedLayout = sprefs.getBoolean("mobileOptimizedLayout", false);
         mZoomControlsEnabled = sprefs.getBoolean("zoomControlsEnabled", false);
@@ -833,6 +836,14 @@ public class K9 extends Application {
     public static void setMessageListCheckboxes(boolean checkboxes) {
         mMessageListCheckboxes = checkboxes;
     }
+    public static String messageListSplitView() {
+        return mMessageListSplitView;
+    }
+
+    public static void setMessageListSplitView(String messageListSplitView) {
+        mMessageListSplitView = messageListSplitView;
+    }
+
 
     public static boolean showCorrespondentNames() {
         return mShowCorrespondentNames;

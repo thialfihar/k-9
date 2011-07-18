@@ -1066,13 +1066,28 @@ public class MessageList
         actionBar.setOnTitleClickListener(null);
     }
 
+
+    private boolean enableSplitScreen() {
+        if (K9.messageListSplitView().equals("ALWAYS")) {
+            return true;
+        } else if (K9.messageListSplitView().equals("NEVER")) {
+            return false;
+        }
+        // otherwise it's automatic
+        if (getScreenSizeInInches() < K9.TABLET_MIN_SIZE) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private void setInitialListViewSize() {
 
 
-        if (getScreenSizeInInches() < K9.TABLET_MIN_SIZE) {
-            mSplitView.maximizePrimaryContent();
-        } else {
+        if (enableSplitScreen()) {
             mSplitView.setPrimaryContentSize(K9.getPrimaryMessageListContentSize());
+        } else {
+            mSplitView.maximizePrimaryContent();
         }
     }
 
@@ -1513,10 +1528,10 @@ public class MessageList
         mHandler.post(new Runnable() {
             public void run() {
                 if (mSplitView.isPrimaryContentMaximized()) {
-                    if (getScreenSizeInInches() < K9.TABLET_MIN_SIZE) {
-                        mSplitView.maximizeSecondaryContent();
-                    } else {
+                    if (enableSplitScreen()) {
                         mSplitView.setPrimaryContentSize(K9.getPrimaryMessageListContentSize());
+                    } else {
+                        mSplitView.maximizeSecondaryContent();
                     }
                 }
                 displayMessage(message);

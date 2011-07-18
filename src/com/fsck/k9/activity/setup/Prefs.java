@@ -65,6 +65,7 @@ public class Prefs extends K9PreferenceActivity {
     private static final String PREFERENCE_MESSAGELIST_SHOW_CORRESPONDENT_NAMES = "messagelist_show_correspondent_names";
     private static final String PREFERENCE_MESSAGELIST_SHOW_CONTACT_NAME = "messagelist_show_contact_name";
     private static final String PREFERENCE_MESSAGELIST_CONTACT_NAME_COLOR = "messagelist_contact_name_color";
+    private static final String PREFERENCE_MESSAGELIST_SHOW_SPLIT_VIEW = "messagelist_show_split_view";
     private static final String PREFERENCE_MESSAGEVIEW_FIXEDWIDTH = "messageview_fixedwidth_font";
     private static final String PREFERENCE_COMPACT_LAYOUTS = "compact_layouts";
 
@@ -113,6 +114,7 @@ public class Prefs extends K9PreferenceActivity {
     private CheckBoxPreference mDebugLogging;
     private CheckBoxPreference mSensitiveLogging;
     private CheckBoxPreference compactLayouts;
+    private ListPreference mMessageListSplitView;
 
     private CheckBoxPreference mQuietTimeEnabled;
     private com.fsck.k9.preferences.TimePickerPreference mQuietTimeStarts;
@@ -176,6 +178,9 @@ public class Prefs extends K9PreferenceActivity {
 
         compactLayouts = (CheckBoxPreference)findPreference(PREFERENCE_COMPACT_LAYOUTS);
         compactLayouts.setChecked(K9.useCompactLayouts());
+
+        mMessageListSplitView = setupListPreference(PREFERENCE_MESSAGELIST_SHOW_SPLIT_VIEW,
+                                            K9.messageListSplitView());
 
         mVolumeNavigation = (CheckBoxListPreference)findPreference(PREFERENCE_VOLUME_NAVIGATION);
         mVolumeNavigation.setItems(new CharSequence[] {getString(R.string.volume_navigation_message), getString(R.string.volume_navigation_list)});
@@ -360,6 +365,7 @@ public class Prefs extends K9PreferenceActivity {
         K9.setMessageListPreviewLines(Integer.parseInt(mPreviewLines.getValue()));
         K9.setMessageListStars(mStars.isChecked());
         K9.setMessageListCheckboxes(mCheckboxes.isChecked());
+        K9.setMessageListSplitView(mMessageListSplitView.getValue());
         K9.setShowCorrespondentNames(mShowCorrespondentNames.isChecked());
         K9.setShowContactName(mShowContactName.isChecked());
         K9.setChangeContactNameColor(mChangeContactNameColor.isChecked());

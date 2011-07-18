@@ -683,4 +683,20 @@
         <item>HTML</item>
     </string-array>
 
+   <string-array name="global_settings_show_split_values">
+        <item>NEVER</item>
+        <item>AUTOMATIC</item>
+        <item>ALWAYS</item>
+    </string-array>
+
+    <string-array name="global_settings_show_split_entries">
+        <item>@string/global_settings_show_split_never</item>
+        <item>@string/global_settings_show_split_automatic</item>
+        <item>@string/global_settings_show_split_always</item>
+    </string-array>
+
+
+
+
+
 </resources>

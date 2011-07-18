@@ -217,6 +217,14 @@
             android:title="@string/global_settings_messageview_return_to_list_label"
             android:summary="@string/global_settings_messageview_return_to_list_summary" />
 
+        <ListPreference
+            android:persistent="false"
+            android:key="messagelist_show_split_view"
+            android:entries="@array/global_settings_show_split_entries"
+            android:entryValues="@array/global_settings_show_split_values"
+            android:title="@string/global_settings_messagelist_show_split_label"
+            android:summary="@string/global_settings_messagelist_show_split_summary" />
+
         <CheckBoxPreference
             android:persistent="false"
             android:key="messageview_zoom_controls"

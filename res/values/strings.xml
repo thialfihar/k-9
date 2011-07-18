@@ -340,6 +340,11 @@ Welcome to K-9 Mail setup.  K-9 is an open source mail client for Android origin
     <string name="global_settings_messageview_return_to_list_label">Return to list after delete</string>
     <string name="global_settings_messageview_return_to_list_summary">Return to message list after message deletion</string>
 
+    <string name="global_settings_messagelist_show_split_label">Split-screen</string>
+    <string name="global_settings_messagelist_show_split_summary">Show message list and messages at the same time</string>
+    <string name="global_settings_show_split_never">Never</string>
+    <string name="global_settings_show_split_automatic">Automatic</string>
+    <string name="global_settings_show_split_always">Always</string>
     <string name="global_settings_confirm_actions_title">Confirm actions</string>
     <string name="global_settings_confirm_actions_summary">Show a dialog whenever you perform selected actions</string>
     <string name="global_settings_confirm_action_archive">Archive</string>
