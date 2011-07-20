@@ -369,6 +369,8 @@ http://k9mail.googlecode.com/
     <string name="account_setup_check_settings_canceling_msg">Canceling\u2026</string>
 
     <string name="account_setup_autoconfig_title">Autoconfiguration attempt</string>
+    <string name="account_setup_confirm_incoming_title">Confirm incoming server settings</string>
+    <string name="account_setup_confirm_outgoing_title">Confirm outgoing server settings</string>
     <string name="account_setup_autoconfig_info">Attempting to configure your account...</string>
     <string name="account_setup_autoconfig_test_safe_serverside">Looking for safe server-side configuration files...</string>
     <string name="account_setup_autoconfig_test_unsafe_serverside">Looking for UNSAFE server-side configuration files...</string>
