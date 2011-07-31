@@ -2013,8 +2013,15 @@ public class MessageList
     }
 
     private void checkMail(Account account, String folderName) {
-        mController.synchronizeMailbox(account, folderName, mAdapter.mListener, null);
-        mController.sendPendingMessages(account, mAdapter.mListener);
+        if (account != null && folderName != null) {
+            mController.synchronizeMailbox(account, folderName, mAdapter.mListener, null);
+            mController.sendPendingMessages(account, mAdapter.mListener);
+        } else {
+            // mController.checkMail takes an account name as its second
+            // argument. if that's null, it checks for all accounts
+            mController.checkMail(this, null, true, true, null);
+            mController.sendPendingMessages(null);
+        }
     }
 
     @Override
