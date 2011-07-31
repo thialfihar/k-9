@@ -5,6 +5,15 @@ Open issues / roadmap for experimental/tabletui
 * save fewer drafts
 * better "mail not sent" notifications.
 * Verify Yahoo IMAP IDLE
+* Set -NONE- as drafts folder creates a folder called -NONE-
+* moving messages from unsyncced folders is busted
+* DELETE DRAFTS WHEN YOU ARE DONE SENDING
+* the top of the screen displays "Search results /" when in the Unified Inbox. I can understand why that is, but it is confusing. And the "All messages" display shows exactly the same thing,
+* select text menu option doesn't work in the unified inbox
+* When in a message and i switch to landscape or pack i'm sent to the inbox again
+* figure out if I broke "autmatically download an attachment when you click open"
+
+
 
 = Features (In no particular order) =
 
@@ -17,6 +26,7 @@ Open issues / roadmap for experimental/tabletui
 * Bandwidth counters (with some level of explanation)
 * Move ongoing notifications into the platform notifications api
 * Compose view doesn't respect the dark theme
+* mail to groups
 
 = Architecture =
 
