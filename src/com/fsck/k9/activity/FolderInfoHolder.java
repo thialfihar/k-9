@@ -23,6 +23,9 @@ public class FolderInfoHolder implements Comparable<FolderInfoHolder> {
 
     @Override
     public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
         return this.name.equals(((FolderInfoHolder)o).name);
     }
 
