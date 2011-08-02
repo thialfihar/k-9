@@ -244,7 +244,6 @@ public class MessageList
     private static final String EXTRA_FOLDER_NAMES = "folderNames";
     private static final String EXTRA_TITLE = "title";
     private static final String EXTRA_LIST_POSITION = "listPosition";
-    private static final String EXTRA_NEXT = "com.fsck.k9.MessageView_next";
 
 
     private MessageInfoHolder mNextMessage;
