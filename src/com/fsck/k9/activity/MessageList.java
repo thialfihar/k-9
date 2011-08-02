@@ -760,11 +760,13 @@ public class MessageList
 
 
 
-        }
+        } );
 
-
-
-                                           );
+        if (mCurrentMessageInfo != null) {
+            mHandler.post(new Runnable() {
+                public void run() { displayMessage(mCurrentMessageInfo); }
+            });
+        }   
 
         /// Loading up by a URL TODO!!!
         showMessageFromIntentURL(intent);
@@ -810,6 +812,11 @@ public class MessageList
         if (previousData != null) {
             mAdapter.messages.addAll(previousData.messages);
             mActiveMessages = previousData.activeMessages;
+            mCurrentMessageInfo = previousData.currentMessageInfo;
+            mSelectedCount = previousData.selectedCount;
+            if (previousData.currentMessageMaximized) {
+                mSplitView.maximizeSecondaryContent();
+            }
         }
     }
 
@@ -1176,6 +1183,9 @@ public class MessageList
     static class ActivityState {
         public List<MessageInfoHolder> messages;
         public List<MessageInfoHolder> activeMessages;
+        public MessageInfoHolder currentMessageInfo;
+        public int selectedCount;
+        public boolean currentMessageMaximized;
     }
 
     /* (non-Javadoc)
@@ -1190,6 +1200,9 @@ public class MessageList
         final ActivityState state = new ActivityState();
         state.messages = mAdapter.messages;
         state.activeMessages = mActiveMessages;
+        state.currentMessageInfo = mCurrentMessageInfo;
+        state.currentMessageMaximized = mSplitView.isSecondaryContentMaximized();
+        state.selectedCount = mSelectedCount;
         return state;
     }
 
