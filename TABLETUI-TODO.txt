@@ -12,8 +12,7 @@ Open issues / roadmap for experimental/tabletui
 * select text menu option doesn't work in the unified inbox
 * When in a message and i switch to landscape or pack i'm sent to the inbox again
 * figure out if I broke "autmatically download an attachment when you click open"
-* do the right thing when rotating the screen with a message loaded.
-
+* when opening kaiten from a notification, I get an endless spinner, not a message list
 
 = Features (In no particular order) =
 
