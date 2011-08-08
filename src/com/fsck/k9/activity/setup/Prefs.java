@@ -75,6 +75,7 @@ public class Prefs extends K9PreferenceActivity {
     private static final String PREFERENCE_QUIET_TIME_ENDS = "quiet_time_ends";
 
 
+    private static final String PREFERENCE_MESSAGEVIEW_OVERVIEW_LAYOUT = "messageview_overview_layout";
     private static final String PREFERENCE_MESSAGEVIEW_MOBILE_LAYOUT = "messageview_mobile_layout";
     private static final String PREFERENCE_BACKGROUND_OPS = "background_ops";
     private static final String PREFERENCE_GALLERY_BUG_WORKAROUND = "use_gallery_bug_workaround";
@@ -108,6 +109,7 @@ public class Prefs extends K9PreferenceActivity {
     private CheckBoxPreference mReturnToList;
     private CheckBoxPreference mZoomControlsEnabled;
     private CheckBoxPreference mMobileOptimizedLayout;
+    private CheckBoxPreference mOverviewMode;
     private ListPreference mBackgroundOps;
     private CheckBoxPreference mUseGalleryBugWorkaround;
     private CheckBoxPreference mDebugLogging;
@@ -259,6 +261,9 @@ public class Prefs extends K9PreferenceActivity {
         mZoomControlsEnabled = (CheckBoxPreference) findPreference(PREFERENCE_MESSAGEVIEW_ZOOM_CONTROLS_ENABLED);
         mZoomControlsEnabled.setChecked(K9.zoomControlsEnabled());
 
+        mOverviewMode = (CheckBoxPreference) findPreference(PREFERENCE_MESSAGEVIEW_OVERVIEW_LAYOUT);
+        mOverviewMode.setChecked(K9.getOverviewMode()); 
+
         mMobileOptimizedLayout = (CheckBoxPreference) findPreference(PREFERENCE_MESSAGEVIEW_MOBILE_LAYOUT);
         if (Integer.parseInt(Build.VERSION.SDK)  <= 7) {
             mMobileOptimizedLayout.setEnabled(false);
@@ -365,6 +370,7 @@ public class Prefs extends K9PreferenceActivity {
         K9.setChangeContactNameColor(mChangeContactNameColor.isChecked());
         K9.setMessageViewFixedWidthFont(mFixedWidth.isChecked());
         K9.setMessageViewReturnToList(mReturnToList.isChecked());
+        K9.setOverviewMode(mOverviewMode.isChecked());
         K9.setMobileOptimizedLayout(mMobileOptimizedLayout.isChecked());
         K9.setQuietTimeEnabled(mQuietTimeEnabled.isChecked());
 

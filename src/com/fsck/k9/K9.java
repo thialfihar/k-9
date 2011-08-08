@@ -178,6 +178,7 @@ public class K9 extends Application {
     private static boolean mCountSearchMessages = true;
     private static boolean mHideSpecialAccounts = false;
     private static boolean mZoomControlsEnabled = false;
+    private static boolean mOverviewMode = false;
     private static boolean mMobileOptimizedLayout = false;
     private static boolean mQuietTimeEnabled = false;
     private static String mQuietTimeStarts = null;
@@ -415,6 +416,7 @@ public class K9 extends Application {
         editor.putBoolean("useVolumeKeysForListNavigation", mUseVolumeKeysForListNavigation);
         editor.putBoolean("manageBack", mManageBack);
         editor.putBoolean("zoomControlsEnabled", mZoomControlsEnabled);
+        editor.putBoolean("overviewMode", mOverviewMode);
         editor.putBoolean("mobileOptimizedLayout", mMobileOptimizedLayout);
         editor.putBoolean("quietTimeEnabled", mQuietTimeEnabled);
         editor.putString("quietTimeStarts", mQuietTimeStarts);
@@ -478,6 +480,7 @@ public class K9 extends Application {
         mMessageListTouchable = sprefs.getBoolean("messageListTouchable", false);
         mMessageListPreviewLines = sprefs.getInt("messageListPreviewLines", 2);
 
+        mOverviewMode = sprefs.getBoolean("overviewMode", false);
         mMobileOptimizedLayout = sprefs.getBoolean("mobileOptimizedLayout", false);
         mZoomControlsEnabled = sprefs.getBoolean("zoomControlsEnabled", false);
 
@@ -700,6 +703,14 @@ public class K9 extends Application {
 
     public static void setZoomControlsEnabled(boolean zoomControlsEnabled) {
         mZoomControlsEnabled = zoomControlsEnabled;
+    }
+
+    public static boolean getOverviewMode() {
+        return mOverviewMode;
+    }
+
+    public static void setOverviewMode(boolean OverviewMode) {
+        mOverviewMode = OverviewMode;
     }
 
 

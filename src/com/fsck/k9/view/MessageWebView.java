@@ -85,12 +85,17 @@ public class MessageWebView extends WebView {
 
         // SINGLE_COLUMN layout was broken on Android < 2.2, so we
         // administratively disable it
-        if (
-            (Integer.parseInt(Build.VERSION.SDK)  > 7)
-            &&  K9.mobileOptimizedLayout()) {
-            webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        } else {
-            webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
+        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
+        if (Integer.parseInt(Build.VERSION.SDK)  > 7) {
+
+            webSettings.setLoadWithOverviewMode(K9.getOverviewMode());
+            webSettings.setUseWideViewPort(K9.getOverviewMode());
+            setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+            setScrollbarFadingEnabled(true);
+
+            if (K9.mobileOptimizedLayout()) {
+                webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+            }
         }
 
         webSettings.setTextSize(K9.getFontSizes().getMessageViewContent());

@@ -82,7 +82,7 @@ public class MessageView extends K9Activity implements OnClickListener {
     private View mArchive;
     private View mMove;
     private View mSpam;
-    private ToggleScrollView mToggleScrollView;
+    //private ToggleScrollView mToggleScrollView;
     private Account mAccount;
     private MessageReference mMessageReference;
     private ArrayList<MessageReference> mMessageReferences;
@@ -132,14 +132,14 @@ public class MessageView extends K9Activity implements OnClickListener {
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_UP) {
             // Text selection is finished. Allow scrolling again.
-            mToggleScrollView.setScrolling(true);
+            //mToggleScrollView.setScrolling(true);
         } else if (K9.zoomControlsEnabled()) {
             // If we have system zoom controls enabled, disable scrolling so the screen isn't wiggling around while
             // trying to zoom.
             if (ev.getAction() == MotionEvent.ACTION_POINTER_2_DOWN) {
-                mToggleScrollView.setScrolling(false);
+             //   mToggleScrollView.setScrolling(false);
             } else if (ev.getAction() == MotionEvent.ACTION_POINTER_2_UP) {
-                mToggleScrollView.setScrolling(true);
+              //  mToggleScrollView.setScrolling(true);
             }
         }
         return super.dispatchTouchEvent(ev);
@@ -187,7 +187,7 @@ public class MessageView extends K9Activity implements OnClickListener {
              * Selecting text started via shift key. Disable scrolling as
              * this causes problems when selecting text.
              */
-            mToggleScrollView.setScrolling(false);
+            //mToggleScrollView.setScrolling(false);
             break;
         }
         case KeyEvent.KEYCODE_DEL: {
@@ -386,7 +386,7 @@ public class MessageView extends K9Activity implements OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.message_view);
 
-        mTopView = mToggleScrollView = (ToggleScrollView) findViewById(R.id.top_view);
+        mTopView = (LinearLayout) findViewById(R.id.top_view);
         mMessageView = (SingleMessageView) findViewById(R.id.message_view);
 
         //set a callback for the attachment view. With this callback the attachmentview
@@ -563,7 +563,7 @@ public class MessageView extends K9Activity implements OnClickListener {
 
     private void clearMessageDisplay() {
         mTopView.setVisibility(View.GONE);
-        mTopView.scrollTo(0, 0);
+        //mTopView.scrollTo(0, 0);
         mMessageView.resetView();
 
     }
@@ -1026,7 +1026,7 @@ public class MessageView extends K9Activity implements OnClickListener {
             });
             break;
         case R.id.select_text:
-            mToggleScrollView.setScrolling(false);
+            //ToggleScrollView.setScrolling(false);
             mMessageView.beginSelectingText();
             break;
         default:
@@ -1119,7 +1119,7 @@ public class MessageView extends K9Activity implements OnClickListener {
     public void displayMessageBody(final Account account, final String folder, final String uid, final Message message) {
         runOnUiThread(new Runnable() {
             public void run() {
-                mTopView.scrollTo(0, 0);
+                //mTopView.scrollTo(0, 0);
                 try {
                     if (MessageView.this.mMessage != null
                             && MessageView.this.mMessage.isSet(Flag.X_DOWNLOADED_PARTIAL)

@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.ScrollView;
+import android.widget.LinearLayout;
 import com.fsck.k9.K9;
 import com.fsck.k9.helper.DateFormatter;
 
@@ -22,7 +22,7 @@ import com.fsck.k9.helper.DateFormatter;
 public class K9Activity extends Activity {
     private GestureDetector gestureDetector;
 
-    protected ScrollView mTopView;
+    protected LinearLayout mTopView;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -125,10 +125,10 @@ public class K9Activity extends Activity {
             if (mTopView != null) {
                 int height = getResources().getDisplayMetrics().heightPixels;
                 if (ev.getRawY() < (height / 4)) {
-                    mTopView.fullScroll(View.FOCUS_UP);
+                    //mTopView.fullScroll(View.FOCUS_UP);
 
                 } else if (ev.getRawY() > (height - height / 4)) {
-                    mTopView.fullScroll(View.FOCUS_DOWN);
+                    //mTopView.fullScroll(View.FOCUS_DOWN);
 
                 }
             }
