@@ -175,12 +175,13 @@ public final class TrustManagerFactory {
         return lastCertChain;
     }
 
-    public static void addCertificateChain(String alias, X509Certificate[] chain) throws CertificateException {
+    public static void addCertificateChain(String host, int port, X509Certificate[] chain)
+            throws CertificateException {
         try {
+            String alias = host + ":" + port;
             javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory.getInstance("X509");
             for (X509Certificate element : chain) {
-                keyStore.setCertificateEntry
-                (element.getSubjectDN().toString(), element);
+                keyStore.setCertificateEntry(element.getSubjectDN().toString(), element);
             }
 
             tmf.init(keyStore);

@@ -243,6 +243,14 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                 }
 
                 mProgressBar.setIndeterminate(false);
+
+                final Uri storeUri = Uri.parse(mAccount.getStoreUri());
+                final Uri transportUri = Uri.parse(mAccount.getStoreUri());
+
+                // we need these for matching
+                final String storeHost = storeUri.getHost();
+                final String transportHost = transportUri.getHost();
+
                 StringBuffer chainInfo = new StringBuffer(100);
                 MessageDigest sha1 = null;
                 try {
@@ -266,10 +274,6 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                             // The list of SubjectAltNames may be very long
                             //TODO: localize this string
                             StringBuffer altNamesText = new StringBuffer("Subject has " + subjectAlternativeNames.size() + " alternative names\n");
-
-                            // we need these for matching
-                            String storeURIHost = (Uri.parse(mAccount.getStoreUri())).getHost();
-                            String transportURIHost = (Uri.parse(mAccount.getTransportUri())).getHost();
 
                             for (List<?> subjectAlternativeName : subjectAlternativeNames) {
                                 Integer type = (Integer)subjectAlternativeName.get(0);
@@ -307,11 +311,11 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
 
                                 // if some of the SubjectAltNames match the store or transport -host,
                                 // display them
-                                if (name.equalsIgnoreCase(storeURIHost) || name.equalsIgnoreCase(transportURIHost)) {
+                                if (name.equalsIgnoreCase(storeHost) || name.equalsIgnoreCase(transportHost)) {
                                     //TODO: localize this string
                                     altNamesText.append("Subject(alt): " + name + ",...\n");
                                 } else if (name.startsWith("*.")) {
-                                    if (storeURIHost.endsWith(name.substring(2)) || transportURIHost.endsWith(name.substring(2))) {
+                                    if (storeHost.endsWith(name.substring(2)) || transportHost.endsWith(name.substring(2))) {
                                         //TODO: localize this string
                                         altNamesText.append("Subject(alt): " + name + ",...\n");
                                     }
@@ -348,14 +352,19 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         try {
-                            String alias = mAccount.getUuid();
+                            String host = null;
+                            int port = 0;
                             if (mCheckIncoming) {
-                                alias = alias + ".incoming";
+                                host = storeHost;
+                                port = storeUri.getPort();
                             }
                             if (mCheckOutgoing) {
-                                alias = alias + ".outgoing";
+                                host = transportHost;
+                                port = transportUri.getPort();
                             }
-                            TrustManagerFactory.addCertificateChain(alias, chain);
+                            if (host != null) {
+                                TrustManagerFactory.addCertificateChain(host, port, chain);
+                            }
                         } catch (CertificateException e) {
                             showErrorDialog(
                                 R.string.account_setup_failed_dlg_certificate_message_fmt,
