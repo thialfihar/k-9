@@ -350,7 +350,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
         StorageManager.getInstance(getApplication()).removeListener(storageListener);
 
     }
-    
+
     private BaseAccount[] accounts = new BaseAccount[0];
     private enum ACCOUNT_LOCATION {
         TOP, MIDDLE, BOTTOM;
@@ -365,12 +365,12 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
             if (accounts[accounts.length - 1].equals(account)) {
                 accountLocation.remove(ACCOUNT_LOCATION.MIDDLE);
                 accountLocation.add(ACCOUNT_LOCATION.BOTTOM);
-            }  
+            }
         }
         return accountLocation;
     }
-    
-    
+
+
     private void refresh() {
         accounts = Preferences.getPreferences(this).getAccounts();
 
@@ -521,6 +521,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener, OnC
                             // Ignore, this may lead to localStores on sd-cards that are
                             // currently not inserted to be left
                         }
+                        //TODO: Remove certificate chains from the keystore (see TrustManagerFactory)
                         MessagingController.getInstance(getApplication())
                         .notifyAccountCancel(Accounts.this, realAccount);
                         Preferences.getPreferences(Accounts.this).deleteAccount(realAccount);

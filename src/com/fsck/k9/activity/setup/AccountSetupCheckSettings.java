@@ -363,6 +363,7 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                                 port = transportUri.getPort();
                             }
                             if (host != null) {
+                                //TODO: Remove the old certificate chain from the keystore (see TrustManagerFactory)
                                 TrustManagerFactory.addCertificateChain(host, port, chain);
                             }
                         } catch (CertificateException e) {

@@ -36,11 +36,13 @@ public final class TrustManagerFactory {
 
     private static class SimpleX509TrustManager implements X509TrustManager {
         public void checkClientTrusted(X509Certificate[] chain, String authType)
-        throws CertificateException {
+                throws CertificateException {
+            /* We accept every certificate */
         }
 
         public void checkServerTrusted(X509Certificate[] chain, String authType)
-        throws CertificateException {
+                throws CertificateException {
+            /* We accept every certificate */
         }
 
         public X509Certificate[] getAcceptedIssuers() {
@@ -74,12 +76,12 @@ public final class TrustManagerFactory {
         }
 
         public void checkClientTrusted(X509Certificate[] chain, String authType)
-        throws CertificateException {
+                throws CertificateException {
             defaultTrustManager.checkClientTrusted(chain, authType);
         }
 
         public void checkServerTrusted(X509Certificate[] chain, String authType)
-        throws CertificateException {
+                throws CertificateException {
             TrustManagerFactory.setLastCertChain(chain);
             try {
                 defaultTrustManager.checkServerTrusted(chain, authType);
@@ -96,15 +98,13 @@ public final class TrustManagerFactory {
                 } catch (KeyStoreException e) {
                     throw new CertificateException("Certificate cannot be verified; KeyStore Exception: " + e);
                 }
-                throw new CertificateException("Certificate domain name does not match "
-                                               + mHost);
+                throw new CertificateException("Certificate domain name does not match " + mHost);
             }
         }
 
         public X509Certificate[] getAcceptedIssuers() {
             return defaultTrustManager.getAcceptedIssuers();
         }
-
     }
 
     static {
@@ -162,6 +162,7 @@ public final class TrustManagerFactory {
     }
 
     private TrustManagerFactory() {
+        /* Private constructor */
     }
 
     public static X509TrustManager get(String host, int port, boolean secure) {
@@ -175,6 +176,7 @@ public final class TrustManagerFactory {
     public static void setLastCertChain(X509Certificate[] chain) {
         lastCertChain = chain;
     }
+
     public static X509Certificate[] getLastCertChain() {
         return lastCertChain;
     }
