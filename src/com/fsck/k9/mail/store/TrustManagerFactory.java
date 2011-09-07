@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -52,18 +53,21 @@ public final class TrustManagerFactory {
             new HashMap<String, SecureX509TrustManager>();
 
         private final String mHost;
+        private final int mPort;
 
-        private SecureX509TrustManager(String host) {
+        private SecureX509TrustManager(String host, int port) {
             mHost = host;
+            mPort = port;
         }
 
-        public synchronized static X509TrustManager getInstance(String host) {
+        public synchronized static X509TrustManager getInstance(String host, int port) {
+            String key = host + ":" + port;
             SecureX509TrustManager trustManager;
-            if (mTrustManager.containsKey(host)) {
-                trustManager = mTrustManager.get(host);
+            if (mTrustManager.containsKey(key)) {
+                trustManager = mTrustManager.get(key);
             } else {
-                trustManager = new SecureX509TrustManager(host);
-                mTrustManager.put(host, trustManager);
+                trustManager = new SecureX509TrustManager(host, port);
+                mTrustManager.put(key, trustManager);
             }
 
             return trustManager;
@@ -84,8 +88,9 @@ public final class TrustManagerFactory {
             }
             if (!DomainNameChecker.match(chain[0], mHost)) {
                 try {
-                    String dn = chain[0].getSubjectDN().toString();
-                    if ((dn != null) && (dn.equalsIgnoreCase(keyStore.getCertificateAlias(chain[0])))) {
+                    String alias = mHost + ":" + mPort;
+                    Certificate storedCert = keyStore.getCertificate(alias);
+                    if (chain[0].equals(storedCert)) {
                         return;
                     }
                 } catch (KeyStoreException e) {
@@ -159,9 +164,8 @@ public final class TrustManagerFactory {
     private TrustManagerFactory() {
     }
 
-    public static X509TrustManager get(String host, boolean secure) {
-        return secure ? SecureX509TrustManager.getInstance(host) :
-               unsecureTrustManager;
+    public static X509TrustManager get(String host, int port, boolean secure) {
+        return secure ? SecureX509TrustManager.getInstance(host, port) : unsecureTrustManager;
     }
 
     public static KeyStore getKeyStore() {
@@ -181,7 +185,7 @@ public final class TrustManagerFactory {
             String alias = host + ":" + port;
             javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory.getInstance("X509");
             for (X509Certificate element : chain) {
-                keyStore.setCertificateEntry(element.getSubjectDN().toString(), element);
+                keyStore.setCertificateEntry(alias, element);
             }
 
             tmf.init(keyStore);

@@ -21,10 +21,10 @@ public class TrustedSocketFactory implements LayeredSocketFactory {
     private SSLSocketFactory mSocketFactory;
     private org.apache.http.conn.ssl.SSLSocketFactory mSchemeSocketFactory;
 
-    public TrustedSocketFactory(String host, boolean secure) throws NoSuchAlgorithmException, KeyManagementException {
+    public TrustedSocketFactory(String host, int port, boolean secure) throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(null, new TrustManager[] {
-                            TrustManagerFactory.get(host, secure)
+                            TrustManagerFactory.get(host, port, secure)
                         }, new SecureRandom());
         mSocketFactory = sslContext.getSocketFactory();
         mSchemeSocketFactory = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();

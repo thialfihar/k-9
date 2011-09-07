@@ -1898,7 +1898,8 @@ public class ImapStore extends Store {
                     SSLContext sslContext = SSLContext.getInstance("TLS");
                     final boolean secure = mSettings.getConnectionSecurity() == CONNECTION_SECURITY_SSL_REQUIRED;
                     sslContext.init(null, new TrustManager[] {
-                                        TrustManagerFactory.get(mSettings.getHost(), secure)
+                                        TrustManagerFactory.get(mSettings.getHost(),
+                                                mSettings.getPort(), secure)
                                     }, new SecureRandom());
                     mSocket = sslContext.getSocketFactory().createSocket();
                     mSocket.connect(socketAddress, SOCKET_CONNECT_TIMEOUT);
@@ -1942,7 +1943,8 @@ public class ImapStore extends Store {
                         SSLContext sslContext = SSLContext.getInstance("TLS");
                         boolean secure = mSettings.getConnectionSecurity() == CONNECTION_SECURITY_TLS_REQUIRED;
                         sslContext.init(null, new TrustManager[] {
-                                            TrustManagerFactory.get(mSettings.getHost(), secure)
+                                            TrustManagerFactory.get(mSettings.getHost(),
+                                                    mSettings.getPort(), secure)
                                         }, new SecureRandom());
                         mSocket = sslContext.getSocketFactory().createSocket(mSocket, mSettings.getHost(), mSettings.getPort(),
                                   true);

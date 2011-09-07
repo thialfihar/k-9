@@ -72,27 +72,27 @@ public class TrustManagerFactoryTest extends AndroidTestCase {
         TrustManagerFactory.addCertificateChain(NOT_MATCHING_HOST, PORT1, mCertChain1);
         TrustManagerFactory.addCertificateChain(NOT_MATCHING_HOST, PORT2, mCertChain2);
 
-        X509TrustManager trustManager1 = TrustManagerFactory.get(NOT_MATCHING_HOST, true);
-        X509TrustManager trustManager2 = TrustManagerFactory.get(NOT_MATCHING_HOST, true);
+        X509TrustManager trustManager1 = TrustManagerFactory.get(NOT_MATCHING_HOST, PORT1, true);
+        X509TrustManager trustManager2 = TrustManagerFactory.get(NOT_MATCHING_HOST, PORT2, true);
         trustManager2.checkServerTrusted(mCertChain2, "authType");
         trustManager1.checkServerTrusted(mCertChain1, "authType");
     }
 
     public void testSelfSignedCertificateMatchingHost() throws Exception {
         TrustManagerFactory.addCertificateChain(MATCHING_HOST, PORT1, mCertChain1);
-        X509TrustManager trustManager = TrustManagerFactory.get(MATCHING_HOST, true);
+        X509TrustManager trustManager = TrustManagerFactory.get(MATCHING_HOST, PORT1, true);
         trustManager.checkServerTrusted(mCertChain1, "authType");
     }
 
     public void testSelfSignedCertificateNotMatchingHost() throws Exception {
         TrustManagerFactory.addCertificateChain(NOT_MATCHING_HOST, PORT1, mCertChain1);
-        X509TrustManager trustManager = TrustManagerFactory.get(NOT_MATCHING_HOST, true);
+        X509TrustManager trustManager = TrustManagerFactory.get(NOT_MATCHING_HOST, PORT1, true);
         trustManager.checkServerTrusted(mCertChain1, "authType");
     }
 
     public void testWrongCertificate() throws Exception {
         TrustManagerFactory.addCertificateChain(MATCHING_HOST, PORT1, mCertChain1);
-        X509TrustManager trustManager = TrustManagerFactory.get(MATCHING_HOST, true);
+        X509TrustManager trustManager = TrustManagerFactory.get(MATCHING_HOST, PORT1, true);
         boolean certificateValid;
         try {
             trustManager.checkServerTrusted(mCertChain2, "authType");
