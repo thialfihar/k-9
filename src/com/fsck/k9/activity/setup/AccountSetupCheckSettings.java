@@ -242,15 +242,9 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                     }
                 }
 
+                final CertificateValidationException cve = (CertificateValidationException) ex;
+
                 mProgressBar.setIndeterminate(false);
-
-                final Uri storeUri = Uri.parse(mAccount.getStoreUri());
-                final Uri transportUri = Uri.parse(mAccount.getStoreUri());
-
-                // we need these for matching
-                final String storeHost = storeUri.getHost();
-                final String transportHost = transportUri.getHost();
-
                 StringBuffer chainInfo = new StringBuffer(100);
                 MessageDigest sha1 = null;
                 try {
@@ -311,11 +305,11 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
 
                                 // if some of the SubjectAltNames match the store or transport -host,
                                 // display them
-                                if (name.equalsIgnoreCase(storeHost) || name.equalsIgnoreCase(transportHost)) {
+                                if (name.equalsIgnoreCase(cve.getHost())) {
                                     //TODO: localize this string
                                     altNamesText.append("Subject(alt): " + name + ",...\n");
                                 } else if (name.startsWith("*.")) {
-                                    if (storeHost.endsWith(name.substring(2)) || transportHost.endsWith(name.substring(2))) {
+                                    if (cve.getHost().endsWith(name.substring(2))) {
                                         //TODO: localize this string
                                         altNamesText.append("Subject(alt): " + name + ",...\n");
                                     }
@@ -351,21 +345,9 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                     getString(R.string.account_setup_failed_dlg_invalid_certificate_accept),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            String host = null;
-                            int port = 0;
-                            if (mCheckIncoming) {
-                                host = storeHost;
-                                port = storeUri.getPort();
-                            }
-                            if (mCheckOutgoing) {
-                                host = transportHost;
-                                port = transportUri.getPort();
-                            }
-                            if (host != null) {
-                                //TODO: Remove the old certificate chain from the keystore (see TrustManagerFactory)
-                                TrustManagerFactory.addCertificateChain(host, port, chain);
-                            }
+                        try {                        	
+                            //TODO: Remove the old certificate chain from the keystore (see TrustManagerFactory)
+                            TrustManagerFactory.addCertificateChain(cve.getHost(), cve.getPort(), chain);
                         } catch (CertificateException e) {
                             showErrorDialog(
                                 R.string.account_setup_failed_dlg_certificate_message_fmt,

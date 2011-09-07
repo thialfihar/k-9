@@ -677,7 +677,7 @@ public class WebDavStore extends Store {
                                       response.getStatusLine().toString());
             }
         } catch (SSLException e) {
-            throw new CertificateValidationException(e.getMessage(), e);
+            throw new CertificateValidationException(e.getMessage(), e, mHost, mUri.getPort());
         } catch (IOException ioe) {
             Log.e(K9.LOG_TAG, "IOException: " + ioe + "\nTrace: " + processException(ioe));
             throw new MessagingException("IOException", ioe);

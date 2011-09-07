@@ -270,7 +270,7 @@ public class Pop3Store extends Store {
 
                 mCapabilities = getCapabilities();
             } catch (SSLException e) {
-                throw new CertificateValidationException(e.getMessage(), e);
+                throw new CertificateValidationException(e.getMessage(), e, mHost, mPort);
             } catch (GeneralSecurityException gse) {
                 throw new MessagingException(
                     "Unable to open connection to POP server due to security error.", gse);
