@@ -139,22 +139,7 @@ public abstract class CoreService extends Service {
 
     @Override
     public void onStart(Intent intent, int startId) {
-// deprecated method but still used for backwards compatibility with Android version <2.0
-
-
-        /*
-         * When a process is killed due to low memory, it's later restarted and services that were
-         * started with START_STICKY are started with the intent being null.
-         *
-         * For now we just ignore these restart events. This should be fine because all necessary
-         * services are started from K9.onCreate() when the Application object is initialized.
-         *
-         * See issue 3750
-         */
-        if (intent == null) {
-            stopSelf(startId);
-            return;
-        }
+        // deprecated method but still used for backwards compatibility with Android version <2.0
       
         // CK:DocAdded: Manage wake-locks, especially, release any wake-locks held so far and define a new "local" wake lock.
         //           Also, because we create a new wakelock, we re-initialize the wakelock timeout and give
