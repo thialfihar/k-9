@@ -384,6 +384,8 @@ http://k9mail.googlecode.com/
     <string name="account_setup_autoconfig_fail">failed!</string>
     <string name="account_setup_autoconfig_forcemanual">No were settings found, use manual configuration to continue.</string>
     <string name="account_setup_autoconfig_trynext">Searching other places for configuration settings...</string>
+    <string name="account_setup_autoconfig_trydns">Checking for DNS redirects...</string>
+    <string name="account_setup_autoconfig_new_domain">Retrying autoconfiguration for a new domain.</string>
 
     <string name="account_setup_names_title">You\'re almost done!</string>
     <string name="account_setup_names_instructions">Your account is set up, and mail is on its way!</string>
