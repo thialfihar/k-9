@@ -351,7 +351,7 @@ http://k9mail.googlecode.com/
     <string name="account_setup_dialog_enter_password">Enter the password for the this account: </string>
     <string name="account_setup_dialog_new_title">Setup a new account</string>
     <string name="accounts_setup_help">
-        Select an account here to setup, press menu to load more backup files or create an new account.
+        Select an account here to configure or press this button start configuring another account.
     </string>
     <string name="account_setup_device_sectionheader">Found on Device</string>
     <string name="account_setup_basics_instructions">Enter this account\'s email address:</string>
