@@ -14,7 +14,6 @@ import com.fsck.k9.R;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.helper.configxmlparser.AutoconfigInfo;
 import com.fsck.k9.helper.configxmlparser.ConfigurationXMLHandler;
-import com.fsck.k9.mail.store.TrustManagerFactory;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -171,43 +170,43 @@ public class AccountSetupAutoConfiguration extends K9Activity implements View.On
         Checks if an url is available / exists
      */
     private String getXMLData(URL url) throws IOException, ErrorCodeException, SocketTimeoutException, FileNotFoundException {
-        // think we should assume no redirects
         // TODO: use k9's own TrustManager so the right exception gets throwed and the user can choose to accept the certificate
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-        conn.setInstanceFollowRedirects(false);
+        conn.setInstanceFollowRedirects(true);
 
         // prepare request
         conn.setConnectTimeout(TIMEOUT);
 
         // get the data
-        String tmp, line;
-        tmp = "";
+        StringBuilder response = new StringBuilder();
         BufferedReader reader = null;
 
 		try {
-			reader = new BufferedReader(new InputStreamReader(
-					conn.getInputStream()));
-			while ((line = reader.readLine()) != null)
-				tmp += line;
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
 
-			if (conn.getResponseCode() != 200)
-				throw new ErrorCodeException(
-						"Server did not return as expected.",
-						conn.getResponseCode());
-		} catch (SocketTimeoutException ex) {
-			throw ex;
-		} catch (FileNotFoundException e){
-			throw e;
-		}catch (ConnectException ex) {
-			// ignore this, it just means the url doesn't exist which happens
-			// often, we test for it!
-		} finally {
-			if (reader != null)
-				reader.close();
-			conn.disconnect();
-		}
+            if (conn.getResponseCode() != 200) {
+                throw new ErrorCodeException(
+                    "Server did not return as expected.",
+                    conn.getResponseCode());
+            }
+        } catch (ConnectException ex) {
+            // ignore this, it just means the url doesn't exist which happens
+            // often, we test for it!
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+            if (conn.getInputStream() != null) {
+                conn.getInputStream().close();
+            }
+            conn.disconnect();
+        }
 
-        return tmp;
+        return response.toString();
     }
 
 
@@ -492,7 +491,7 @@ public class AccountSetupAutoConfiguration extends K9Activity implements View.On
 					// parse and finish
 					setMessage(R.string.account_setup_autoconfig_processing,true);
 					parse(data);
-					setMessage(R.string.account_setup_autoconfig_succesful,false);
+					setMessage(R.string.account_setup_autoconfig_success,false);
 
 					// alert user these settings might be tampered with!!! ( no https )
 					if( templateIndex >= UNSAFE_URL_START ) bUnsafe = true;
@@ -584,7 +583,7 @@ public class AccountSetupAutoConfiguration extends K9Activity implements View.On
 
 				// 1. All good, continue
 				if( !bForceManual ){
-					mStatusTitle.setText(R.string.account_setup_autoconfig_succesful_attempt);
+					mStatusTitle.setText(R.string.account_setup_autoconfig_success);
 					mDoneMark.setVisibility(View.VISIBLE);
 				// 2. Nothing came up, must manually config.. + help?
 				}else{
