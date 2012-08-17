@@ -236,12 +236,18 @@ public class Account implements BaseAccount {
     }
 
     /**
-     * Default Format to display incoming mails.
-     * TEXT -> only show text/plain part
-     * HTML -> show HTML mimepart, if present
+     * Specifies how to display messages.
      */
     public enum MessageDisplayMode {
-        TEXT, HTML
+        /**
+         * Display {@code text/plain} part.
+         */
+        TEXT,
+
+        /**
+         * Display {@code text/html} part, if available.
+         */
+        HTML
     }
 
     protected Account(Context context) {
@@ -332,7 +338,9 @@ public class Account implements BaseAccount {
         mIdleRefreshMinutes = prefs.getInt(mUuid + ".idleRefreshMinutes", 24);
         mSaveAllHeaders = prefs.getBoolean(mUuid + ".saveAllHeaders", true);
         mPushPollOnConnect = prefs.getBoolean(mUuid + ".pushPollOnConnect", true);
-        mDefaultMessageDisplayMode = MessageDisplayMode.valueOf(prefs.getString(mUuid + ".defaultMessageDisplayMode", DEFAULT_MESSAGE_DISPLAY_MODE.name()));
+        mDefaultMessageDisplayMode = MessageDisplayMode.valueOf(
+                prefs.getString(mUuid + ".defaultMessageDisplayMode",
+                        DEFAULT_MESSAGE_DISPLAY_MODE.name()));
         mDisplayCount = prefs.getInt(mUuid + ".displayCount", K9.DEFAULT_VISIBLE_LIMIT);
         if (mDisplayCount < 0) {
             mDisplayCount = K9.DEFAULT_VISIBLE_LIMIT;
@@ -1659,6 +1667,4 @@ public class Account implements BaseAccount {
     public void setDefaultMessageDisplayMode(MessageDisplayMode defaultMode) {
         this.mDefaultMessageDisplayMode = defaultMode;
     }
-
-
 }

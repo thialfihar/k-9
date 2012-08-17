@@ -2994,48 +2994,59 @@ public class LocalStore extends Store implements Serializable {
         }
 
         /**
-         * Fetch the message text for display. This will return an  HTML-ified version of the
-         * message, if displayMode = HTML
-         * @param displayMode the first try for display Mode. If html fails, it switches back to text
-         * @return HTML version of message for display purposes or null.
+         * Fetch the message text for display.
+         *
+         * <p>
+         * This will return either the {@code text/html} part of this message or the HTML-ified
+         * version of the {@code text/plain} part.
+         * </p>
+         *
+         * @param displayMode
+         *         Specifies which message part to return. Use {@link MessageDisplayMode#HTML} for
+         *         the {@code text/html} part. If the message doesn't contain an HTML part or this
+         *         argument is {@link MessageDisplayMode#TEXT} the {@code text/plain} part will be
+         *         returned.
+         *
+         * @return HTML version of message for display purposes. Could be {@code null}.
+         *
          * @throws MessagingException
          */
         public String getTextForDisplay(MessageDisplayMode displayMode) throws MessagingException {
             return getTextForDisplayImpl(displayMode);
         }
 
-        private String getTextForDisplayImpl(MessageDisplayMode displayMode) throws MessagingException {
-            String text = null;    // First try and fetch an HTML part.
-            Part part;
+        private String getTextForDisplayImpl(MessageDisplayMode displayMode)
+                throws MessagingException {
+            String text = null;
             switch (displayMode) {
                 case HTML: {
-                    part = MimeUtility.findFirstPartByMimeType(this, "text/html");
+                    Part part = MimeUtility.findFirstPartByMimeType(this, "text/html");
                     if (part == null) {
-                        /*
-                         * If that fails, try and get a text part.
-                         * Fall back to the text mimepart
-                         */
-                        return this.getTextForDisplayImpl(MessageDisplayMode.TEXT);
+                        // No "text/html" part found; try "text/plain" part
+                        return getTextForDisplayImpl(MessageDisplayMode.TEXT);
                     } else {
-                        // We successfully found an HTML part; do the necessary character set decoding.
+                        // We found an HTML part; do the necessary character set decoding
                         text = MimeUtility.getTextFromPart(part);
                     }
                     break;
                 }
                 case TEXT: {
-                    part = MimeUtility.findFirstPartByMimeType(this, "text/plain");
+                    Part part = MimeUtility.findFirstPartByMimeType(this, "text/plain");
                     if (part != null && part.getBody() instanceof LocalStore.LocalTextBody) {
-                        if (this.getMimeType().equalsIgnoreCase("text/plain")) {
-                            //already htmlified in the database
+                        if (getMimeType().equalsIgnoreCase("text/plain")) {
+                            // This is a "text/plain" message, so the database already contains
+                            // an HTML-ified version of this part
                             text = ((LocalStore.LocalTextBody) part.getBody()).getBodyForDisplay();
                         } else {
-                            text = HtmlConverter.textToHtml(((LocalStore.LocalTextBody) part.getBody()).getText(), true);
+                            // HTML-ify "text/plain" part
+                            String bodyText = ((LocalStore.LocalTextBody) part.getBody()).getText();
+                            text = HtmlConverter.textToHtml(bodyText, true);
                         }
                     }
                     break;
                 }
                 default: {
-                    text = "UNKNOWN MessageDisplayMode";
+                    throw new RuntimeException("Case not handled in getTextForDisplayImpl()");
                 }
             }
             return text;
