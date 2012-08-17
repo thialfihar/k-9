@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.fsck.k9.Account;
+import com.fsck.k9.Account.MessageDisplayMode;
 import com.fsck.k9.K9;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.K9Activity;
@@ -38,6 +39,7 @@ import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.helper.ClipboardManager;
 import com.fsck.k9.helper.Contacts;
+import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.*;
 import com.fsck.k9.mail.internet.MimeUtility;
@@ -533,12 +535,12 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         String text = null;
         if (pgpData != null) {
             text = pgpData.getDecryptedData();
+            if (text != null) {
+                text = HtmlConverter.textToHtml(text, true);
+            }
         }
-        if (text != null) {
-            text = "<html><body><pre>" + text + "</pre></body></html>";
-        } else {
-            // getTextForDisplay() always returns HTML-ified content.
-            text = message.getTextForDisplay();
+        if (text == null) {
+            text = message.getTextForDisplay(account.getDefaultMessageDisplayMode());
         }
 
         // Save the text so we can reset the WebView when the user clicks the "Show pictures" button
