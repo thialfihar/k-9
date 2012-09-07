@@ -100,12 +100,12 @@ public class FolderList extends K9ListActivity {
     private int mUnreadMessageCount;
 
     private FolderInfoHolder mSelectedContextFolder = null;
-    
+
     private FontSizes mFontSizes = K9.getFontSizes();
     private Context context;
-    
-	private MenuItem mRefreshMenuItem;
-	private View mActionBarProgressView;
+
+    private MenuItem mRefreshMenuItem;
+    private View mActionBarProgressView;
     private ActionBar mActionBar;
     private ActionMode mActionMode;
 
@@ -118,9 +118,9 @@ public class FolderList extends K9ListActivity {
         public void refreshTitle() {
             runOnUiThread(new Runnable() {
                 public void run() {
-                	mActionBarTitle.setText(getString(R.string.folders_title));
+                    mActionBarTitle.setText(getString(R.string.folders_title));
                     mActionBarUnread.setText(String.valueOf(mUnreadMessageCount));
-                    
+
                     String operation = mAdapter.mListener.getOperation(FolderList.this, getTimeFormat()).trim();
                     if (operation.length() < 1) {
                         mActionBarSubTitle.setText(mAccount.getEmail());
@@ -184,10 +184,10 @@ public class FolderList extends K9ListActivity {
             if (mRefreshMenuItem == null) {
                 return;
             }
-            
+
             runOnUiThread(new Runnable() {
                 public void run() {
-                	if (progress) {
+                    if (progress) {
                         mRefreshMenuItem.setActionView(mActionBarProgressView);
                     } else {
                         mRefreshMenuItem.setActionView(null);
@@ -304,12 +304,12 @@ public class FolderList extends K9ListActivity {
                 onOpenFolder(((FolderInfoHolder)mAdapter.getItem(position)).name);
             }
         });
-        
+
         // Enable context action bar behaviour
         mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                    int position, long id) {
                 // is already in selection mode we ignore the next long presses
                 if (mSelectedContextFolder != null) {
                     return false;
@@ -323,8 +323,8 @@ public class FolderList extends K9ListActivity {
                 mActionMode.setTitle(String.format(getString(R.string.actionbar_string_selected),
                                                    mSelectedContextFolder.displayName));
                 return true;
-			}});
-        
+            }});
+
         registerForContextMenu(mListView);
 
         mListView.setSaveEnabled(true);
@@ -347,7 +347,7 @@ public class FolderList extends K9ListActivity {
 
         mActionBar.setDisplayHomeAsUpEnabled(true);
     }
-    
+
     @Override
     public void onNewIntent(Intent intent) {
         setIntent(intent); // onNewIntent doesn't autoset our "internal" intent
@@ -576,11 +576,11 @@ public class FolderList extends K9ListActivity {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case android.R.id.home: 
+        case android.R.id.home:
             onAccounts();
-            
+
             return true;
-        
+
         case R.id.compose:
             MessageCompose.actionCompose(this, mAccount);
 
@@ -593,7 +593,7 @@ public class FolderList extends K9ListActivity {
 
         case R.id.send_messages:
             MessagingController.getInstance(getApplication()).sendPendingMessages(mAccount, null);
-            
+
             return true;
 
         case R.id.list_folders:
@@ -1388,11 +1388,11 @@ public class FolderList extends K9ListActivity {
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        	FolderInfoHolder folder = mSelectedContextFolder;
+            FolderInfoHolder folder = mSelectedContextFolder;
 
             menu.findItem(R.id.empty_trash).setVisible(
-            		folder.name.equals(mAccount.getTrashFolderName()) ? false : true);
-            
+                    folder.name.equals(mAccount.getTrashFolderName()) ? false : true);
+
             if (folder.name.equals(mAccount.getOutboxFolderName())) {
                 menu.findItem(R.id.check_mail).setVisible(false);
                 menu.findItem(R.id.send_messages).setVisible(true);
@@ -1400,29 +1400,29 @@ public class FolderList extends K9ListActivity {
                 menu.findItem(R.id.send_messages).setVisible(false);
                 menu.findItem(R.id.check_mail).setVisible(true);
             }
-            
+
             menu.findItem(R.id.expunge).setVisible(
-            		K9.ERROR_FOLDER_NAME.equals(folder.name) ? false : true);
+                    K9.ERROR_FOLDER_NAME.equals(folder.name) ? false : true);
 
             if (!MessagingController.getInstance(getApplication()).isMoveCapable(mAccount)) {
                 // FIXME: Really we want to do this for all local-only folders
                 if (!mAccount.getInboxFolderName().equals(folder.name)) {
                     menu.findItem(R.id.check_mail).setVisible(false);
                 } else {
-                	menu.findItem(R.id.check_mail).setVisible(true);
+                    menu.findItem(R.id.check_mail).setVisible(true);
                 }
 
                 menu.findItem(R.id.expunge).setVisible(false);
             } else {
                 menu.findItem(R.id.expunge).setVisible(true);
             }
-            
+
             return true;
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-        	mSelectedContextFolder = null;
+            mSelectedContextFolder = null;
             mActionMode = null;
         }
 

@@ -312,7 +312,7 @@ public class MessageView extends K9Activity implements OnClickListener {
         setContentView(R.layout.message_view);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
+
         mMessageView = (SingleMessageView) findViewById(R.id.message_view);
 
         //set a callback for the attachment view. With this callback the attachmentview
@@ -742,15 +742,15 @@ public class MessageView extends K9Activity implements OnClickListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case android.R.id.home: 
-            finish();        
+        case android.R.id.home:
+            finish();
             break;
         case R.id.next_message:
-        	onNext();
-        	break;
+            onNext();
+            break;
         case R.id.previous_message:
-        	onPrevious();
-        	break;
+            onPrevious();
+            break;
         case R.id.delete:
             onDelete();
             break;
@@ -801,59 +801,59 @@ public class MessageView extends K9Activity implements OnClickListener {
         configureMenu(menu);
         return true;
     }
-    
+
     private void configureMenu(Menu menu){
-    	// first run displayMessage() gets called before onCreateOptionMenu()
-    	if (menu == null) {
-    		return;
-    	}
-    	
-    	// enable them all
-    	menu.findItem(R.id.copy).setVisible(true);
-    	menu.findItem(R.id.move).setVisible(true);
-    	menu.findItem(R.id.archive).setVisible(true);
-    	menu.findItem(R.id.spam).setVisible(true);
+        // first run displayMessage() gets called before onCreateOptionMenu()
+        if (menu == null) {
+            return;
+        }
+
+        // enable them all
+        menu.findItem(R.id.copy).setVisible(true);
+        menu.findItem(R.id.move).setVisible(true);
+        menu.findItem(R.id.archive).setVisible(true);
+        menu.findItem(R.id.spam).setVisible(true);
         toggleActionsState(menu, true);
-        
-    	menu.findItem(R.id.next_message).setVisible(mNextMessage != null);
-    	menu.findItem(R.id.previous_message).setVisible(mPreviousMessage != null);
-        
+
+        menu.findItem(R.id.next_message).setVisible(mNextMessage != null);
+        menu.findItem(R.id.previous_message).setVisible(mPreviousMessage != null);
+
         // comply with the setting
         if (!mAccount.getEnableMoveButtons()) {
             menu.findItem(R.id.move).setVisible(false);
             menu.findItem(R.id.archive).setVisible(false);
             menu.findItem(R.id.spam).setVisible(false);
         } else {
-        	// check message, folder capability
+            // check message, folder capability
             if (!mController.isCopyCapable(mAccount)) {
                 menu.findItem(R.id.copy).setVisible(false);
             }
-            
+
             if (mController.isMoveCapable(mAccount)) {
                 menu.findItem(R.id.move).setVisible(true);
-                
+
                 menu.findItem(R.id.archive).setVisible(
-                		!mMessageReference.folderName.equals(mAccount.getArchiveFolderName()) 
-                		&& mAccount.hasArchiveFolder());
-                
+                        !mMessageReference.folderName.equals(mAccount.getArchiveFolderName())
+                        && mAccount.hasArchiveFolder());
+
                 menu.findItem(R.id.spam).setVisible(
-                		!mMessageReference.folderName.equals(mAccount.getSpamFolderName()) 
-                		&& mAccount.hasSpamFolder());
+                        !mMessageReference.folderName.equals(mAccount.getSpamFolderName())
+                        && mAccount.hasSpamFolder());
             } else {
-            	menu.findItem(R.id.copy).setVisible(false);
-            	menu.findItem(R.id.move).setVisible(false);
-            	menu.findItem(R.id.archive).setVisible(false);
-            	menu.findItem(R.id.spam).setVisible(false);	
+                menu.findItem(R.id.copy).setVisible(false);
+                menu.findItem(R.id.move).setVisible(false);
+                menu.findItem(R.id.archive).setVisible(false);
+                menu.findItem(R.id.spam).setVisible(false);
             }
-        }       
+        }
     }
-    
+
     private void toggleActionsState(Menu menu, boolean state){
-    	for(int i=0; i<menu.size(); ++i) {
-    		menu.getItem(i).setEnabled(state);
-    	}
+        for(int i=0; i<menu.size(); ++i) {
+            menu.getItem(i).setEnabled(state);
+        }
     }
-    
+
     // TODO: when switching to API version 8, override onCreateDialog(int, Bundle)
 
     /**
