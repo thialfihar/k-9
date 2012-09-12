@@ -49,6 +49,22 @@
         android:textColor="?android:attr/textColorSecondary"
         android:textAppearance="?android:attr/textAppearanceSmall"  />
 
+    <TextView
+        android:id="@+id/thread_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/flagged"
+        android:layout_marginLeft="6dip"
+        android:layout_marginRight="6dip"
+        android:gravity="bottom"
+        android:paddingLeft="4dip"
+        android:paddingRight="4dip"
+        android:paddingTop="2dip"
+        android:paddingBottom="2dip"
+        android:background="#50000000"
+        android:focusable="false" />
+
     <CheckBox
         android:id="@+id/flagged"
         android:layout_width="wrap_content"
@@ -82,7 +98,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/subject"
-        android:layout_toLeftOf="@+id/flagged"
+        android:layout_toLeftOf="@+id/thread_count"
         android:layout_toRightOf="@+id/chip_wrapper"
         android:layout_marginLeft="1dip"
         android:layout_marginRight="0dip"

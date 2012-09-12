@@ -5,9 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -26,20 +29,19 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -80,7 +82,11 @@ import com.fsck.k9.mail.store.StorageManager;
  * shows a list of messages.
  * From this Activity the user can perform all standard message operations.
  */
-public class MessageList extends K9ListActivity implements OnItemClickListener {
+public class MessageList extends K9Activity implements OnItemClickListener,
+        ExpandableListView.OnGroupClickListener, ExpandableListView.OnChildClickListener {
+
+    // FIXME: this needs to become a setting
+    private static final boolean THREADED = true;
 
     /**
      * Reverses the result of a {@link Comparator}.
@@ -250,7 +256,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         SORT_COMPARATORS = Collections.unmodifiableMap(map);
     }
 
-    private ListView mListView;
+    private ExpandableListView mListView;
 
     private int mPreviewLines = 0;
 
@@ -664,12 +670,33 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             if (mCurrentFolder != null) {
                 mController.loadMoreMessages(mAccount, mFolderName, mAdapter.mListener);
             }
-            return;
+        }
+    }
+
+    @Override
+    public boolean onGroupClick (ExpandableListView parent, View v, int groupPosition, long id) {
+        if (mAdapter.getChildrenCount(groupPosition) <= 1) {
+            MessageInfoHolder message = mAdapter.getGroup(groupPosition);
+            handleClick(message);
+            return true;
         }
 
-        MessageInfoHolder message = (MessageInfoHolder) mAdapter.getItem(position);
+        return false;
+    }
+
+    @Override
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
+            int childPosition, long id) {
+
+        MessageInfoHolder message = (MessageInfoHolder) mAdapter.getChild(groupPosition, childPosition);
+        handleClick(message);
+
+        return true;
+    }
+
+    private void handleClick(MessageInfoHolder message) {
         if (mSelectedCount > 0) {
-            toggleMessageSelect(position);
+            toggleMessageSelect(message);
         } else {
             onOpenMessage(message);
         }
@@ -693,10 +720,10 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         mPreviewLines = K9.messageListPreviewLines();
 
         initializeMessageList(getIntent(), true);
-        getListView().setVerticalFadingEdgeEnabled(false);
+        mListView.setVerticalFadingEdgeEnabled(false);
 
         // Enable context action bar behaviour
-        getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+        mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view,
                     int position, long id) {
@@ -769,6 +796,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             mFolderName = mAccount.getAutoExpandFolderName();
         }
 
+        mListView.setGroupIndicator(null);
         mAdapter = new MessageListAdapter();
         restorePreviousData();
 
@@ -931,17 +959,20 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
     }
 
     private void initializeLayout() {
-        mListView = getListView();
+        setContentView(android.R.layout.expandable_list_content);
+
+        mListView = (ExpandableListView) findViewById(android.R.id.list);
         mListView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         mListView.setLongClickable(true);
         mListView.setFastScrollEnabled(true);
         mListView.setScrollingCacheEnabled(false);
         mListView.setOnItemClickListener(this);
+        mListView.setOnGroupClickListener(this);
+        mListView.setOnChildClickListener(this);
         mListView.addFooterView(getFooterView(mListView));
 
         registerForContextMenu(mListView);
     }
-
 
     /**
      * Container for values to be kept while the device configuration is
@@ -952,7 +983,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
      * @see MessageList#getLastNonConfigurationInstance()
      */
     static class ActivityState {
-        public List<MessageInfoHolder> messages;
+        public Set<MessageInfoHolder> messages;
         public List<MessageInfoHolder> activeMessages;
     }
 
@@ -1043,11 +1074,10 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         }
 
         boolean retval = true;
-        int position = mListView.getSelectedItemPosition();
         try {
-            if (position >= 0) {
-                MessageInfoHolder message = (MessageInfoHolder) mAdapter.getItem(position);
+            MessageInfoHolder message = (MessageInfoHolder) mListView.getSelectedItem();
 
+            if (message != null) {
                 final List<MessageInfoHolder> selection = getSelectionFromMessage(message);
 
                 if (message != null) {
@@ -1602,9 +1632,11 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         return true;
     }
 
-    class MessageListAdapter extends BaseAdapter {
-        private final List<MessageInfoHolder> mMessages =
-                Collections.synchronizedList(new ArrayList<MessageInfoHolder>());
+    class MessageListAdapter extends BaseExpandableListAdapter {
+        private final List<MessageInfoHolder> mMessages = new ArrayList<MessageInfoHolder>();
+        private final Set<MessageInfoHolder> mAllMessages = new HashSet<MessageInfoHolder>();
+        private final Map<Long, MessageInfoHolder> mThreadHeads = new HashMap<Long, MessageInfoHolder>();
+        private final Map<Long, List<MessageInfoHolder>> mMessagesInThread = new HashMap<Long, List<MessageInfoHolder>>();
 
         private final ActivityListener mListener = new ActivityListener() {
 
@@ -1735,12 +1767,12 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             }
         }
 
-        public List<MessageInfoHolder> getMessages() {
-            return mMessages;
+        public Set<MessageInfoHolder> getMessages() {
+            return mAllMessages;
         }
 
-        public void restoreMessages(List<MessageInfoHolder> messages) {
-            mMessages.addAll(messages);
+        public void restoreMessages(Set<MessageInfoHolder> messages) {
+            addMessages(new ArrayList<MessageInfoHolder>(messages));
         }
 
         private Drawable mAttachmentIcon;
@@ -1807,7 +1839,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
          * @param selected Selection state to set.
          */
         public void setSelectionForAllMesages(final boolean selected) {
-            for (MessageInfoHolder message : mMessages) {
+            for (MessageInfoHolder message : mAllMessages) {
                 message.selected = selected;
             }
 
@@ -1820,9 +1852,76 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             }
 
             final boolean wasEmpty = mMessages.isEmpty();
+            final Comparator<MessageInfoHolder> dateComparator =
+                    SORT_COMPARATORS.get(SortType.SORT_DATE);
 
             for (final MessageInfoHolder message : messages) {
                 if (mFolderName == null || (message.folder != null && message.folder.name.equals(mFolderName))) {
+                    mAllMessages.add(message);
+
+                    LocalMessage localMessage = message.message;
+                    long rootId = localMessage.getRootId();
+
+                    /*
+                     * Message threading
+                     */
+                    if (THREADED) {
+                        if (rootId != -1) {
+                            // This message belongs to a thread but is not the thread's root
+
+                            // Get the most recent message in this thread
+                            MessageInfoHolder threadHead = mThreadHeads.get(rootId);
+                            if (threadHead == null) {
+                                // There was none, so make this message the "thread head"
+                                mThreadHeads.put(rootId, message);
+
+                                /*
+                                 * Remove the thread root from mAdapter.messages
+                                 *
+                                 * It could have ended up in there because the root messages
+                                 * have a thread_root value of NULL in the database. So it
+                                 * could have been added by the (rootId == -1) case below.
+                                 */
+                                Iterator<MessageInfoHolder> it = mMessages.iterator();
+                                while (it.hasNext()) {
+                                    MessageInfoHolder msg = it.next();
+                                    if (msg.message.getId() == rootId) {
+                                        it.remove();
+                                        addMessageToThread(rootId, msg);
+                                        break;
+                                    }
+                                    }
+                            }
+
+                            addMessageToThread(rootId, message);
+
+                            // Is message more recent than current "thread head"?
+                            if (threadHead != null && dateComparator.compare(message, threadHead) <= 0) {
+                                continue;
+                            }
+
+                            // Use this message as new "thread head"
+                            mThreadHeads.put(rootId, message);
+
+                            // Remove old "thread head" from mAdapter.messages
+                            mMessages.remove(threadHead);
+                        } else {
+                            // We don't know if this message belongs to a thread. But if it
+                            // does it's the thread root.
+
+                            long id = localMessage.getId();
+                            MessageInfoHolder threadHead = mThreadHeads.get(id);
+
+                            if (threadHead != null) {
+                                // This is the root of a thread we already know about. Don't
+                                // add it to mAdapter.messages
+                                addMessageToThread(id, message);
+
+                                continue;
+                            }
+                        }
+                    }
+
                     int index = Collections.binarySearch(mMessages, message, getComparator());
 
                     if (index < 0) {
@@ -1839,6 +1938,23 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             resetUnreadCount();
 
             notifyDataSetChanged();
+        }
+
+        private void addMessageToThread(Long rootId, MessageInfoHolder message) {
+            List<MessageInfoHolder> messages = mAdapter.mMessagesInThread.get(rootId);
+            if (messages == null) {
+                messages = new ArrayList<MessageInfoHolder>();
+                mAdapter.mMessagesInThread.put(rootId, messages);
+            }
+
+            int index = Collections.binarySearch(messages, message,
+                    new ReverseComparator<MessageInfoHolder>(SORT_COMPARATORS.get(SortType.SORT_DATE)));
+
+            if (index < 0) {
+                index = (index * -1) - 1;
+            }
+
+            messages.add(index, message);
         }
 
         public void changeMessageUid(MessageReference ref, String newUid) {
@@ -1964,7 +2080,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         private MessageInfoHolder getMessage(Message message) {
             String uid;
             Folder folder;
-            for (MessageInfoHolder holder : mMessages) {
+            for (MessageInfoHolder holder : mAllMessages) {
                 uid = message.getUid();
                 if (holder.uid == uid || uid.equals(holder.uid)) {
                     folder = message.getFolder();
@@ -1993,7 +2109,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
          */
         private MessageInfoHolder getMessage(MessageReference messageReference) {
             String uid;
-            for (MessageInfoHolder holder : mMessages) {
+            for (MessageInfoHolder holder : mAllMessages) {
                 uid = messageReference.uid;
                 if ((holder.uid == uid || uid.equals(holder.uid)) &&
                         holder.folder.name.equals(messageReference.folderName) &&
@@ -2025,44 +2141,12 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             @Override
             public void onClick(View v) {
                 // Perform action on clicks
-                MessageInfoHolder message = (MessageInfoHolder) getItem((Integer)v.getTag());
+                MessageInfoHolder message = (MessageInfoHolder) v.getTag();
                 onToggleFlag(Arrays.asList(new MessageInfoHolder[]{message}));
             }
         };
 
-        @Override
-        public int getCount() {
-            return mMessages.size();
-        }
-
-        @Override
-        public long getItemId(int position) {
-            try {
-                MessageInfoHolder messageHolder = (MessageInfoHolder) getItem(position);
-                if (messageHolder != null) {
-                    return messageHolder.message.getId();
-                }
-            } catch (Exception e) {
-                Log.i(K9.LOG_TAG, "getItemId(" + position + ") ", e);
-            }
-            return -1;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            try {
-                if (position < mMessages.size()) {
-                    return mMessages.get(position);
-                }
-            } catch (Exception e) {
-                Log.e(K9.LOG_TAG, "getItem(" + position + "), but folder.messages.size() = " + mMessages.size(), e);
-            }
-            return null;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            MessageInfoHolder message = (MessageInfoHolder) getItem(position);
+        private View getView(int groupPosition, int childPosition, MessageInfoHolder message, View convertView, ViewGroup parent) {
             View view;
 
             if ((convertView != null) && (convertView.getId() == R.layout.message_list_item)) {
@@ -2083,6 +2167,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
                 holder.preview = (TextView) view.findViewById(R.id.preview);
                 holder.selected = (CheckBox) view.findViewById(R.id.selected_checkbox);
                 holder.flagged = (CheckBox) view.findViewById(R.id.flagged);
+                holder.threadCount = (TextView) view.findViewById(R.id.thread_count);
 
                 holder.flagged.setOnClickListener(flagClickListener);
 
@@ -2108,7 +2193,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             }
 
             if (message != null) {
-                bindView(position, view, holder, message);
+                bindView(groupPosition, childPosition, view, holder, message);
             } else {
                 // This branch code is triggered when the local store
                 // hands us an invalid message
@@ -2138,7 +2223,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
                 holder.date.setText(getString(R.string.general_no_date));
 
                 //WARNING: Order of the next 2 lines matter
-                holder.position = -1;
+                holder.groupPosition = -1;
                 holder.selected.setChecked(false);
 
                 if (!mCheckboxes) {
@@ -2165,17 +2250,17 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
          * @param message
          *            Never <code>null</code>.
          */
-        private void bindView(final int position, final View view, final MessageViewHolder holder,
+        private void bindView(int groupPosition, int childPosition, final View view, final MessageViewHolder holder,
                               final MessageInfoHolder message) {
+
             holder.subject.setTypeface(null, message.read ? Typeface.NORMAL : Typeface.BOLD);
 
-            // XXX TODO there has to be some way to walk our view hierarchy and get this
-            holder.flagged.setTag(position);
+            holder.flagged.setTag(message);
             holder.flagged.setChecked(message.flagged);
 
             // So that the mSelectedCount is only incremented/decremented
             // when a user checks the checkbox (vs code)
-            holder.position = -1;
+            holder.groupPosition = -1;
             holder.selected.setChecked(message.selected);
 
             if (!mCheckboxes) {
@@ -2199,6 +2284,21 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
                 holder.subject.setText(getText(R.string.general_no_subject));
             } else {
                 holder.subject.setText(message.message.getSubject());
+            }
+
+            long rootId = message.message.getRootId();
+            final int threadCount;
+            if (THREADED && childPosition == -1 && rootId != -1) {
+                threadCount = mAdapter.mMessagesInThread.get(rootId).size();
+            } else {
+                threadCount = 0;
+            }
+
+            if (threadCount > 1) {
+                holder.threadCount.setText(Integer.toString(threadCount));
+                holder.threadCount.setVisibility(View.VISIBLE);
+            } else {
+                holder.threadCount.setVisibility(View.GONE);
             }
 
             int senderTypeface = message.read ? Typeface.NORMAL : Typeface.BOLD;
@@ -2254,7 +2354,8 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
                     null, // top
                     message.message.hasAttachments() ? mAttachmentIcon : null, // right
                     null); // bottom
-            holder.position = position;
+            holder.groupPosition = groupPosition;
+            holder.childPosition = childPosition;
         }
 
         private String recipientSigil(MessageInfoHolder message) {
@@ -2271,6 +2372,67 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         public boolean hasStableIds() {
             return true;
         }
+
+        public boolean isItemSelectable(int position) {
+            if (position < mMessages.size()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public MessageInfoHolder getChild(int groupPosition, int childPosition) {
+            MessageInfoHolder threadHead = getGroup(groupPosition);
+            long rootId = threadHead.message.getRootId();
+
+            return mMessagesInThread.get(rootId).get(childPosition);
+        }
+
+        @Override
+        public long getChildId(int groupPosition, int childPosition) {
+            return getChild(groupPosition, childPosition).message.getId();
+        }
+
+        @Override
+        public View getChildView(int groupPosition, int childPosition, boolean isLastChild,
+                View convertView, ViewGroup parent) {
+            return getView(groupPosition, childPosition, getChild(groupPosition, childPosition), convertView, parent);
+        }
+
+        @Override
+        public int getChildrenCount(int groupPosition) {
+            MessageInfoHolder threadHead = getGroup(groupPosition);
+            List<MessageInfoHolder> messages = mMessagesInThread.get(threadHead.message.getRootId());
+            return (messages == null) ? 0 : messages.size();
+        }
+
+        @Override
+        public MessageInfoHolder getGroup(int groupPosition) {
+            return mMessages.get(groupPosition);
+        }
+
+        @Override
+        public int getGroupCount() {
+            return mMessages.size();
+        }
+
+        @Override
+        public long getGroupId(int groupPosition) {
+            return getGroup(groupPosition).message.getId();
+        }
+
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
+                ViewGroup parent) {
+            MessageInfoHolder message = getGroup(groupPosition);
+            return getView(groupPosition, -1, message, convertView, parent);
+        }
+
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition) {
+            return true;
+        }
     }
 
     class MessageViewHolder
@@ -2283,12 +2445,17 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         public CheckBox flagged;
         public View chip;
         public CheckBox selected;
-        public int position = -1;
+        public TextView threadCount;
+        public int groupPosition = -1;
+        public int childPosition = -1;
 
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            if (position != -1) {
-                MessageInfoHolder message = (MessageInfoHolder) mAdapter.getItem(position);
+            if (groupPosition != -1) {
+                MessageInfoHolder message = (childPosition == -1) ?
+                        mAdapter.getGroup(groupPosition) :
+                        mAdapter.getChild(groupPosition, childPosition);
+
                     toggleMessageSelect(message);
                     if (!mCheckboxes) {
                          selected.setVisibility(isChecked ? View.VISIBLE : View.GONE);
@@ -2369,7 +2536,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
         mAdapter.setSelectionForAllMesages(newState);
 
         if (newState) {
-            mSelectedCount = mAdapter.getCount();
+            mSelectedCount = mAdapter.getMessages().size();
             mActionMode = MessageList.this.startActionMode(mActionModeCallback);
             mActionMode.setTitle(String.format(getString(R.string.actionbar_selected), mSelectedCount));
         } else {
@@ -2389,7 +2556,13 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
     }
 
     private void toggleMessageSelect(int position){
-        MessageInfoHolder holder = (MessageInfoHolder) mAdapter.getItem(position);
+        long packedPosition = mListView.getExpandableListPosition(position);
+        int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+        int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+        final MessageInfoHolder holder = (childPosition == -1) ?
+                mAdapter.getGroup(groupPosition) :
+                mAdapter.getChild(groupPosition, childPosition);
+
         toggleMessageSelect(holder);
     }
 
@@ -2905,4 +3078,9 @@ public class MessageList extends K9ListActivity implements OnItemClickListener {
             return true;
         }
     };
+
+    public interface MessageThreadHead {
+        int getThreadId();
+        MessageInfoHolder getMessage();
+    }
 }
