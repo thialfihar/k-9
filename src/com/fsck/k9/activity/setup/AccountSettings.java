@@ -109,6 +109,7 @@ public class AccountSettings extends K9PreferenceActivity {
     private static final String PREFERENCE_STRIP_SIGNATURE = "strip_signature";
     private static final String PREFERENCE_SYNC_REMOTE_DELETIONS = "account_sync_remote_deletetions";
     private static final String PREFERENCE_CRYPTO = "crypto";
+    private static final String PREFERENCE_SPAMASS = "account_spamass";
     private static final String PREFERENCE_CRYPTO_APP = "crypto_app";
     private static final String PREFERENCE_CRYPTO_AUTO_SIGNATURE = "crypto_auto_signature";
     private static final String PREFERENCE_CRYPTO_AUTO_ENCRYPT = "crypto_auto_encrypt";
@@ -171,6 +172,7 @@ public class AccountSettings extends K9PreferenceActivity {
     private CheckBoxPreference mReplyAfterQuote;
     private CheckBoxPreference mStripSignature;
     private CheckBoxPreference mSyncRemoteDeletions;
+    private CheckBoxPreference mSpamassFilter;
     private CheckBoxPreference mPushPollOnConnect;
     private ListPreference mIdleRefreshPeriod;
     private ListPreference mMaxPushFolders;
@@ -388,6 +390,9 @@ public class AccountSettings extends K9PreferenceActivity {
 
         mSyncRemoteDeletions = (CheckBoxPreference) findPreference(PREFERENCE_SYNC_REMOTE_DELETIONS);
         mSyncRemoteDeletions.setChecked(mAccount.syncRemoteDeletions());
+
+        mSpamassFilter = (CheckBoxPreference) findPreference(PREFERENCE_SPAMASS);
+        mSpamassFilter.setChecked(mAccount.spamassFilter());
 
         mSearchableFolders = (ListPreference) findPreference(PREFERENCE_SEARCHABLE_FOLDERS);
         mSearchableFolders.setValue(mAccount.getSearchableFolders().name());
@@ -756,6 +761,7 @@ public class AccountSettings extends K9PreferenceActivity {
             mAccount.setExpungePolicy(mExpungePolicy.getValue());
         }
         mAccount.setSyncRemoteDeletions(mSyncRemoteDeletions.isChecked());
+        mAccount.setSpamassFilter(mSpamassFilter.isChecked());
         mAccount.setSearchableFolders(Account.Searchable.valueOf(mSearchableFolders.getValue()));
         mAccount.setMessageFormat(Account.MessageFormat.valueOf(mMessageFormat.getValue()));
         mAccount.setAlwaysShowCcBcc(mAlwaysShowCcBcc.isChecked());
