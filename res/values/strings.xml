@@ -4,7 +4,7 @@
 
     <!--
          When removing strings from the main file, please cleanup the translations.
-         
+
          This doesn't work on multiline strings, nor strings with the NEW tag.
          find . -name strings.xml | xargs perl -pi -e's!^\s+<string name="string_name_here".+?</string>\s*\z!!'
      -->
@@ -646,9 +646,9 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_settings_sync_remote_deletetions_label">Sync server deletions</string>
     <string name="account_settings_sync_remote_deletetions_summary">Remove messages when deleted on server</string>
 
-    <string name="account_settings_spamass_label">Filter using Spamassassin</string>
-    <string name="account_settings_spamass_summary">Move Flagged Spam messages to Spam folder.</string>
-    
+    <string name="account_settings_spamassassin_label">Filter using SpamAssassin</string>
+    <string name="account_settings_spamassassin_summary">Move flagged spam messages to Spam folder</string>
+
     <string name="folder_settings_title">Folder settings</string>
 
     <string name="folder_settings_in_top_group_label">Show in top group</string>

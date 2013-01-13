@@ -135,10 +135,9 @@
 
         <CheckBoxPreference
             android:persistent="false"
-            android:key="account_spamass"
-            android:title="@string/account_settings_spamass_label"
-            android:defaultValue="true"
-            android:summary="@string/account_settings_spamass_summary" />
+            android:key="spamassassin_filtering"
+            android:title="@string/account_settings_spamassassin_label"
+            android:summary="@string/account_settings_spamassassin_summary" />
 
         <ListPreference
             android:persistent="false"
