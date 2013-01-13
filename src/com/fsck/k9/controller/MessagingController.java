@@ -1256,6 +1256,7 @@ public class MessagingController implements Runnable {
         messages.clear();
         final ArrayList<Message> largeMessages = new ArrayList<Message>();
         final ArrayList<Message> smallMessages = new ArrayList<Message>();
+        final Map<String, String> spamMessages = new HashMap<String, String>();
         if (!unsyncedMessages.isEmpty()) {
 
             /*
@@ -1280,7 +1281,33 @@ public class MessagingController implements Runnable {
                 Log.d(K9.LOG_TAG, "SYNC: About to fetch " + unsyncedMessages.size() + " unsynced messages for folder " + folder);
 
 
-            fetchUnsyncedMessages(account, remoteFolder, localFolder, unsyncedMessages, smallMessages, largeMessages, progress, todo, fp);
+            fetchUnsyncedMessages(account, remoteFolder, localFolder, unsyncedMessages, smallMessages, largeMessages, spamMessages, progress, todo, fp);
+
+            if (spamMessages.size() > 0) {
+                if (K9.DEBUG) {
+                    Log.d(K9.LOG_TAG, "Moving " + spamMessages.size() +
+                            " messages to the Spam folder.");
+                }
+
+                queueMoveOrCopy(account, localFolder.getName(), account.getSpamFolderName(), false,
+                        spamMessages.keySet().toArray(EMPTY_STRING_ARRAY), spamMessages);
+                spamMessages.clear();
+
+                try {
+                    processPendingCommandsSynchronous(account);
+                } catch (Exception e) {
+                    addErrorMessage(account, null, e);
+                    Log.e(K9.LOG_TAG, "Failure processing command, but continuing message sync attempt", e);
+                }
+
+                // FIXME: This is bad!
+                // ImapStore is using a cache for ImapFolder instances which causes our remoteFolder
+                // object to be used and later closed by processPendingMoveOrCopy(). So we have to
+                // re-open it here.
+                if (!remoteFolder.isOpen()) {
+                    remoteFolder.open(OpenMode.READ_WRITE);
+                }
+            }
 
             // If a message didn't exist, messageFinished won't be called, but we shouldn't try again
             // If we got here, nothing failed
@@ -1433,6 +1460,7 @@ public class MessagingController implements Runnable {
                                        List<Message> unsyncedMessages,
                                        final ArrayList<Message> smallMessages,
                                        final ArrayList<Message> largeMessages,
+                                       final Map<String, String> spamMessages,
                                        final AtomicInteger progress,
                                        final int todo,
                                        FetchProfile fp) throws MessagingException {
@@ -1444,6 +1472,11 @@ public class MessagingController implements Runnable {
          * Messages to be batch written
          */
         final List<Message> chunk = new ArrayList<Message>(UNSYNC_CHUNK_SIZE);
+
+        final String spamFolderName = account.getSpamFolderName();
+        final LocalFolder spamFolder = account.getLocalStore().getFolder(spamFolderName);
+        final boolean isSpamFilterEnabled = (account.isSpamAssassinFilterEnabled() &&
+                !spamFolder.equals(localFolder));
 
         remoteFolder.fetch(unsyncedMessages.toArray(EMPTY_MESSAGE_ARRAY), fp,
         new MessageRetrievalListener() {
@@ -1469,6 +1502,15 @@ public class MessagingController implements Runnable {
                         for (MessagingListener l : getListeners()) {
                             l.synchronizeMailboxProgress(account, folder, progress.get(), todo);
                         }
+                        return;
+                    }
+
+                    if (isSpamFilterEnabled && isSpam(message)) {
+                        // Write message to the local Spam folder
+                        Map<String, String> uidMap = spamFolder.insertAsLocalMessages(
+                                new Message[] { message });
+
+                        spamMessages.putAll(uidMap);
                         return;
                     }
 
@@ -1516,6 +1558,11 @@ public class MessagingController implements Runnable {
             writeUnsyncedMessages(chunk, localFolder, account, folder);
             chunk.clear();
         }
+    }
+
+    private boolean isSpam(Message message) throws MessagingException {
+        String[] headers = message.getHeader(K9.SPAM_FLAG_HEADER);
+        return (headers != null && headers.length > 0 && headers[0].equalsIgnoreCase("YES"));
     }
 
     /**

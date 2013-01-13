@@ -294,6 +294,8 @@ public class K9 extends Application {
 
     public static final String IDENTITY_HEADER = "X-K9mail-Identity";
 
+    public static final String SPAM_FLAG_HEADER = "X-Spam-Flag";
+
     /**
      * Specifies how many messages will be shown in a folder by default. This number is set
      * on each new folder and can be incremented with "Load more messages..." by the

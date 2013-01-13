@@ -2130,7 +2130,7 @@ public class LocalStore extends Store implements Serializable {
             if (!(folder instanceof LocalFolder)) {
                 throw new MessagingException("copyMessages called with incorrect Folder");
             }
-            return ((LocalFolder) folder).appendMessages(msgs, true);
+            return ((LocalFolder) folder).appendMessages(msgs, true, false);
         }
 
         @Override
@@ -2299,7 +2299,7 @@ public class LocalStore extends Store implements Serializable {
          */
         @Override
         public Map<String, String> appendMessages(Message[] messages) throws MessagingException {
-            return appendMessages(messages, false);
+            return appendMessages(messages, false, false);
         }
 
         public void destroyMessages(final Message[] messages) {
@@ -2389,6 +2389,11 @@ public class LocalStore extends Store implements Serializable {
             return null;
         }
 
+        public Map<String, String> insertAsLocalMessages(Message[] messages)
+                throws MessagingException {
+            return appendMessages(messages, false, true);
+        }
+
         /**
          * The method differs slightly from the contract; If an incoming message already has a uid
          * assigned and it matches the uid of an existing message then this message will replace
@@ -2401,9 +2406,14 @@ public class LocalStore extends Store implements Serializable {
          * message, retrieve the appropriate local message instance first (if it already exists).
          * @param messages
          * @param copy
+         * @param createAsLocal
+         *         If {@code true} the message will get a local UID. The mapping is added to the map
+         *         that is returned by this method.
+         *
          * @return Map<String, String> uidMap of srcUids -> destUids
          */
-        private Map<String, String> appendMessages(final Message[] messages, final boolean copy) throws MessagingException {
+        private Map<String, String> appendMessages(final Message[] messages, final boolean copy,
+                final boolean createAsLocal) throws MessagingException {
             open(OpenMode.READ_WRITE);
             try {
                 final Map<String, String> uidMap = new HashMap<String, String>();
@@ -2418,14 +2428,14 @@ public class LocalStore extends Store implements Serializable {
 
                                 long oldMessageId = -1;
                                 String uid = message.getUid();
-                                if (uid == null || copy) {
+                                if (uid == null || copy || createAsLocal) {
                                     /*
                                      * Create a new message in the database
                                      */
                                     String randomLocalUid = K9.LOCAL_UID_PREFIX +
                                             UUID.randomUUID().toString();
 
-                                    if (copy) {
+                                    if (copy || createAsLocal) {
                                         // Save mapping: source UID -> target UID
                                         uidMap.put(uid, randomLocalUid);
                                     } else {
