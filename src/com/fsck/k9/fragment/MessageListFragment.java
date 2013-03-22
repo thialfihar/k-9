@@ -55,6 +55,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
@@ -742,7 +743,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         mController = MessagingController.getInstance(getActivity().getApplication());
 
         mPreviewLines = K9.messageListPreviewLines();
-        mCheckboxes = K9.messageListCheckboxes();
+        //mCheckboxes = K9.messageListCheckboxes();
 
         if (K9.showContactPicture()) {
             mContactsPictureLoader = new ContactPictureLoader(getActivity(),
@@ -1721,16 +1722,10 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
     class MessageListAdapter extends CursorAdapter {
 
         private Drawable mAttachmentIcon;
-        private Drawable mForwardedIcon;
-        private Drawable mAnsweredIcon;
-        private Drawable mForwardedAnsweredIcon;
 
         MessageListAdapter() {
             super(getActivity(), null, 0);
-            mAttachmentIcon = getResources().getDrawable(R.drawable.ic_email_attachment_small);
-            mAnsweredIcon = getResources().getDrawable(R.drawable.ic_email_answered_small);
-            mForwardedIcon = getResources().getDrawable(R.drawable.ic_email_forwarded_small);
-            mForwardedAnsweredIcon = getResources().getDrawable(R.drawable.ic_email_forwarded_answered_small);
+            mAttachmentIcon = getResources().getDrawable(R.drawable.ic_badge_attachment);
         }
 
         private String recipientSigil(boolean toMe, boolean ccMe) {
@@ -1751,7 +1746,9 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             MessageViewHolder holder = new MessageViewHolder();
             holder.date = (TextView) view.findViewById(R.id.date);
             holder.chip = view.findViewById(R.id.chip);
+            holder.star = (CheckBox) view.findViewById(R.id.star);
             holder.preview = (TextView) view.findViewById(R.id.preview);
+            holder.sendState = (ImageView) view.findViewById(R.id.send_state);
 
             QuickContactBadge contactBadge =
                     (QuickContactBadge) view.findViewById(R.id.contact_badge);
@@ -1845,12 +1842,21 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             long uniqueId = cursor.getLong(mUniqueIdColumn);
             boolean selected = mSelected.contains(uniqueId);
 
+            int chipColor = account.getChipColor();
+            int chipColorAlpha = (read) ? 127 : 255;
+            holder.chip.setBackgroundColor(chipColor);
+            //holder.chip.getBackground().setAlpha(chipColorAlpha);
+
+            holder.star.setChecked(flagged);
+
+            /*
             if (!mCheckboxes && selected) {
                 holder.chip.setBackgroundDrawable(account.getCheckmarkChip().drawable());
             } else {
                 holder.chip.setBackgroundDrawable(account.generateColorChip(read, toMe, ccMe,
                         fromMe, flagged).drawable());
             }
+            */
 
             if (mCheckboxes) {
                 // Set holder.position to -1 to avoid MessageViewHolder.onCheckedChanged() toggling
@@ -1957,24 +1963,18 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             str.setSpan(new ForegroundColorSpan(color), beforePreviewText.length() + sigil.length(),
                     str.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            Drawable statusHolder = null;
+            int sendState = 0;
             if (forwarded && answered) {
-                statusHolder = mForwardedAnsweredIcon;
+                sendState = 3;
             } else if (answered) {
-                statusHolder = mAnsweredIcon;
+                sendState = 1;
             } else if (forwarded) {
-                statusHolder = mForwardedIcon;
+                sendState = 2;
             }
 
             if (holder.from != null ) {
                 holder.from.setTypeface(null, maybeBoldTypeface);
                 if (mSenderAboveSubject) {
-                    holder.from.setCompoundDrawablesWithIntrinsicBounds(
-                            statusHolder, // left
-                            null, // top
-                            hasAttachments ? mAttachmentIcon : null, // right
-                            null); // bottom
-
                     holder.from.setText(displayName);
                 } else {
                     holder.from.setText(new SpannableStringBuilder(sigil).append(displayName));
@@ -1982,17 +1982,17 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             }
 
             if (holder.subject != null ) {
-                if (!mSenderAboveSubject) {
-                    holder.subject.setCompoundDrawablesWithIntrinsicBounds(
-                            statusHolder, // left
-                            null, // top
-                            hasAttachments ? mAttachmentIcon : null, // right
-                            null); // bottom
-                }
-
                 holder.subject.setTypeface(null, maybeBoldTypeface);
                 holder.subject.setText(subject);
             }
+
+            holder.sendState.getDrawable().setLevel(sendState);
+
+            holder.date.setCompoundDrawablesWithIntrinsicBounds(
+                    hasAttachments ? mAttachmentIcon : null, // left
+                    null, // top
+                    null, // right
+                    null); // bottom
 
             holder.date.setText(displayDate);
         }
@@ -2009,6 +2009,8 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         public CheckBox selected;
         public int position = -1;
         public QuickContactBadge contactBadge;
+        public CheckBox star;
+        public ImageView sendState;
 
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
