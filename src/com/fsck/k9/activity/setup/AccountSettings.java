@@ -1,4 +1,3 @@
-
 package com.fsck.k9.activity.setup;
 
 import android.app.Dialog;
@@ -683,6 +682,14 @@ public class AccountSettings extends K9PreferenceActivity {
                 return true;
             }
         });
+
+        mCryptoAutoSignature = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_AUTO_SIGNATURE);
+        mCryptoAutoSignature.setChecked(mAccount.getCryptoAutoSignature());
+
+        mCryptoAutoEncrypt = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_AUTO_ENCRYPT);
+        mCryptoAutoEncrypt.setChecked(mAccount.isCryptoAutoEncrypt());
+
+        handleCryptoAppDependencies();
     }
 
     private void removeListEntry(ListPreference listPreference, String remove) {
