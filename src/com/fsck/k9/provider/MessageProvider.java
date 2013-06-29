@@ -932,7 +932,7 @@ public class MessageProvider extends ContentProvider {
         }
     }
 
-    public static final String AUTHORITY = "com.fsck.k9.messageprovider";
+    public static final String AUTHORITY = "com.imaeses.squeaky.messageprovider";
 
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 

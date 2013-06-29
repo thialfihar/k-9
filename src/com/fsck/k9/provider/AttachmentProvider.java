@@ -31,7 +31,7 @@ import java.util.List;
  * </p>
  */
 public class AttachmentProvider extends ContentProvider {
-    public static final Uri CONTENT_URI = Uri.parse("content://com.fsck.k9.attachmentprovider");
+    public static final Uri CONTENT_URI = Uri.parse("content://com.imaeses.squeaky.attachmentprovider");
 
     private static final String FORMAT_RAW = "RAW";
     private static final String FORMAT_VIEW = "VIEW";

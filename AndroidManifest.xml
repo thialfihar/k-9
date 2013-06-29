@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:versionCode="18001"
-    android:versionName="4.501" package="com.imaeses.squeaky"
+    android:versionCode="18002"
+    android:versionName="4.501.01" package="com.imaeses.squeaky"
     >
     <uses-sdk
        android:minSdkVersion="7"
@@ -391,14 +391,14 @@ otherwise it would make K-9 start at the wrong time
          </service>
         <provider
             android:name="com.fsck.k9.provider.AttachmentProvider"
-            android:authorities="com.fsck.k9.attachmentprovider"
+            android:authorities="com.imaeses.squeaky.attachmentprovider"
             android:multiprocess="true"
             android:grantUriPermissions="true"
             android:readPermission="com.fsck.k9.permission.READ_ATTACHMENT"
             />
         <provider
             android:name="com.fsck.k9.provider.MessageProvider"
-            android:authorities="com.fsck.k9.messageprovider"
+            android:authorities="com.imaeses.squeaky.messageprovider"
             android:multiprocess="true"
             android:grantUriPermissions="true"
             android:readPermission="com.fsck.k9.permission.READ_MESSAGES"
@@ -406,7 +406,7 @@ otherwise it would make K-9 start at the wrong time
             />
         <provider
             android:name="com.fsck.k9.provider.EmailProvider"
-            android:authorities="com.fsck.k9.provider.email"
+            android:authorities="com.imaeses.squeaky.provider.email"
             android:exported="false"
             />
 
