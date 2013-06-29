@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-import com.fsck.k9.K9;
+import com.imaeses.squeaky.K9;
 import com.fsck.k9.mail.Address;
 
 import java.util.ArrayList;

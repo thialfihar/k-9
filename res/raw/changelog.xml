@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
 
+    <release version="4.502" versioncode="18002">
+        <change>Fixed a bug that prevented Squeaky Mail from being installed on the same device as K-9</change>
+    </release>
+    
     <release version="4.331" versioncode="17032" >
         <change>Checking mail from the Unified Inbox is now supported</change>
         <change>Added "mark all as read" to the menu of the message list</change>
