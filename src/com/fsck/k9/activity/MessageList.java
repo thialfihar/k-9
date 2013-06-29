@@ -214,7 +214,10 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         // Enable gesture detection for MessageLists
         setupGestureDetector(this);
 
-        decodeExtras(getIntent());
+        if (!decodeExtras(getIntent())) {
+            return;
+        }
+
         findFragments();
         initializeDisplayMode(savedInstanceState);
         initializeLayout();
@@ -245,7 +248,10 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         mSearch = null;
         mFolderName = null;
 
-        decodeExtras(intent);
+        if (!decodeExtras(intent)) {
+            return;
+        }
+
         initializeDisplayMode(null);
         initializeFragments();
         displayViews();
@@ -362,7 +368,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         }
     }
 
-    private void decodeExtras(Intent intent) {
+    private boolean decodeExtras(Intent intent) {
         String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
             Uri uri = intent.getData();
@@ -434,25 +440,33 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
             String folderName = intent.getStringExtra("folder");
 
             mSearch = new LocalSearch(folderName);
-            mSearch.addAccountUuid(accountUuid);
+            mSearch.addAccountUuid((accountUuid == null) ? "invalid" : accountUuid);
             if (folderName != null) {
                 mSearch.addAllowedFolder(folderName);
             }
         }
 
+        Preferences prefs = Preferences.getPreferences(getApplicationContext());
+
         String[] accountUuids = mSearch.getAccountUuids();
-        mSingleAccountMode = (accountUuids.length == 1 && !mSearch.searchAllAccounts());
+        if (mSearch.searchAllAccounts()) {
+            Account[] accounts = prefs.getAccounts();
+            mSingleAccountMode = (accounts.length == 1);
+            if (mSingleAccountMode) {
+                mAccount = accounts[0];
+            }
+        } else {
+            mSingleAccountMode = (accountUuids.length == 1);
+            if (mSingleAccountMode) {
+                mAccount = prefs.getAccount(accountUuids[0]);
+            }
+        }
         mSingleFolderMode = mSingleAccountMode && (mSearch.getFolderNames().size() == 1);
 
-        if (mSingleAccountMode) {
-            Preferences prefs = Preferences.getPreferences(getApplicationContext());
-            mAccount = prefs.getAccount(accountUuids[0]);
-
-            if (mAccount != null && !mAccount.isAvailable(this)) {
-                Log.i(K9.LOG_TAG, "not opening MessageList of unavailable account");
-                onAccountUnavailable();
-                return;
-            }
+        if (mSingleAccountMode && (mAccount == null || !mAccount.isAvailable(this))) {
+            Log.i(K9.LOG_TAG, "not opening MessageList of unavailable account");
+            onAccountUnavailable();
+            return false;
         }
 
         if (mSingleFolderMode) {
@@ -461,6 +475,8 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
 
         // now we know if we are in single account mode and need a subtitle
         mActionBarSubTitle.setVisibility((!mSingleFolderMode) ? View.GONE : View.VISIBLE);
+
+        return true;
     }
 
     @Override
@@ -1119,15 +1135,17 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         } else {
             mMessageViewContainer.removeView(mMessageViewPlaceHolder);
 
+            if (mMessageListFragment != null) {
+                mMessageListFragment.setActiveMessage(messageReference);
+            }
+
             MessageViewFragment fragment = MessageViewFragment.newInstance(messageReference);
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.message_view_container, fragment);
             mMessageViewFragment = fragment;
             ft.commit();
 
-            if (mDisplayMode == DisplayMode.SPLIT_VIEW) {
-                mMessageListFragment.setActiveMessage(messageReference);
-            } else {
+            if (mDisplayMode != DisplayMode.SPLIT_VIEW) {
                 showMessageView();
             }
         }

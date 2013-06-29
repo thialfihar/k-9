@@ -53,8 +53,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
@@ -1043,12 +1041,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         mSenderAboveSubject = K9.messageListSenderAboveSubject();
 
         if (!mLoaderJustInitialized) {
-            // Refresh the message list
-            LoaderManager loaderManager = getLoaderManager();
-            for (int i = 0; i < mAccountUuids.length; i++) {
-                loaderManager.restartLoader(i, null, this);
-                mCursorValid[i] = false;
-            }
+            restartLoader();
         } else {
             mLoaderJustInitialized = false;
         }
@@ -1089,6 +1082,19 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         }
 
         updateTitle();
+    }
+
+    private void restartLoader() {
+        if (mCursorValid == null) {
+            return;
+        }
+
+        // Refresh the message list
+        LoaderManager loaderManager = getLoaderManager();
+        for (int i = 0; i < mAccountUuids.length; i++) {
+            loaderManager.restartLoader(i, null, this);
+            mCursorValid[i] = false;
+        }
     }
 
     private void initializePullToRefresh(LayoutInflater inflater, View layout) {
@@ -1810,12 +1816,9 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             holder.threadCount = (TextView) view.findViewById(R.id.thread_count);
 
             holder.selected = (CheckBox) view.findViewById(R.id.selected_checkbox);
-            if (mCheckboxes) {
-                holder.selected.setOnCheckedChangeListener(holder);
-                holder.selected.setVisibility(View.VISIBLE);
-            } else {
-                holder.selected.setVisibility(View.GONE);
-            }
+            holder.selected.setVisibility((mCheckboxes) ? View.VISIBLE : View.GONE);
+
+            view.findViewById(R.id.chip_wrapper).setOnClickListener(holder);
 
             view.setTag(holder);
 
@@ -1883,17 +1886,9 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             }
 
             if (mCheckboxes) {
-                // Set holder.position to -1 to avoid MessageViewHolder.onCheckedChanged() toggling
-                // the selection state when setChecked() is called below.
-                holder.position = -1;
-
-                // Only set the UI state, don't actually toggle the message selection.
                 holder.selected.setChecked(selected);
-
-                // Now save the position so MessageViewHolder.onCheckedChanged() will know what
-                // message to (de)select.
-                holder.position = cursor.getPosition();
             }
+            holder.position = cursor.getPosition();
 
             if (holder.contactBadge != null) {
                 holder.contactBadge.assignContactFromEmail(counterpartyAddress, true);
@@ -2028,7 +2023,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         }
     }
 
-    class MessageViewHolder implements OnCheckedChangeListener {
+    class MessageViewHolder implements View.OnClickListener {
         public TextView subject;
         public TextView preview;
         public TextView from;
@@ -2041,7 +2036,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         public QuickContactBadge contactBadge;
 
         @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        public void onClick(View view) {
             if (position != -1) {
                 toggleMessageSelectWithAdapterPosition(position);
             }
@@ -3223,7 +3218,19 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         StringBuilder query = new StringBuilder();
         List<String> queryArgs = new ArrayList<String>();
         if (needConditions) {
+            boolean selectActive = mActiveMessage != null && mActiveMessage.accountUuid.equals(accountUuid);
+
+            if (selectActive) {
+                query.append("(" + MessageColumns.UID + " = ? AND " + SpecialColumns.FOLDER_NAME + " = ?) OR (");
+                queryArgs.add(mActiveMessage.uid);
+                queryArgs.add(mActiveMessage.folderName);
+            }
+
             SqlQueryBuilder.buildWhereClause(account, mSearch.getConditions(), query, queryArgs);
+
+            if (selectActive) {
+                query.append(')');
+            }
         }
 
         String selection = query.toString();
@@ -3454,6 +3461,13 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
      */
     public void setActiveMessage(MessageReference messageReference) {
         mActiveMessage = messageReference;
+
+        // Reload message list with modified query that always includes the active message
+        if (isAdded()) {
+            restartLoader();
+        }
+
+        // Redraw list immediately
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
         }
