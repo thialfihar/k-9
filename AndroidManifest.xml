@@ -432,6 +432,11 @@ otherwise it would make K-9 start at the wrong time
             android:name=".activity.UpgradeDatabases"
             android:label="@string/upgrade_databases_title">
         </activity>
+        <activity
+            android:name=".activity.setup.ThemePackActivity"
+            android:label="@string/global_settings_theme_pack_label">
+        </activity>
+
         <service
             android:name=".service.DatabaseUpgradeService"
             android:exported="false">

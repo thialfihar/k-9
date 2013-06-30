@@ -20,6 +20,18 @@ public class K9Activity extends SherlockActivity implements K9ActivityMagic {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        mBase.onResume(getSupportActionBar());
+    }
+
+    @Override
+    public void setContentView(int layoutResId) {
+        super.setContentView(layoutResId);
+        mBase.setContentView(getSupportActionBar());
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         mBase.preDispatchTouchEvent(event);
         return super.dispatchTouchEvent(event);

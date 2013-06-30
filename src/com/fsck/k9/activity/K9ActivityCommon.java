@@ -2,10 +2,13 @@ package com.fsck.k9.activity;
 
 import java.util.Locale;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.fsck.k9.K9;
+import com.fsck.k9.R;
 import com.fsck.k9.activity.misc.SwipeGestureDetector;
 import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
 import com.fsck.k9.helper.StringUtils;
+import com.fsck.k9.theme.ThemeData;
 
 import android.app.Activity;
 import android.content.Context;
@@ -68,12 +71,23 @@ public class K9ActivityCommon {
 
     private Activity mActivity;
     private GestureDetector mGestureDetector;
+    private ThemeData mThemeData;
 
 
     private K9ActivityCommon(Activity activity) {
         mActivity = activity;
         setLanguage(mActivity, K9.getK9Language());
         mActivity.setTheme(K9.getK9ThemeResourceId());
+    }
+
+    public void setContentView(ActionBar actionBar) {
+        setActionBarIcon(actionBar);
+    }
+
+    public void onResume(ActionBar actionBar) {
+        if (actionBar != null && mThemeData != K9.getThemeData()) {
+            setActionBarIcon(actionBar);
+        }
     }
 
     /**
@@ -111,5 +125,14 @@ public class K9ActivityCommon {
     public void setupGestureDetector(OnSwipeGestureListener listener) {
         mGestureDetector = new GestureDetector(mActivity,
                 new SwipeGestureDetector(mActivity, listener));
+    }
+
+    private void setActionBarIcon(ActionBar actionBar) {
+        mThemeData = K9.getThemeData();
+        if (mThemeData == null) {
+            actionBar.setIcon(R.drawable.icon);
+        } else {
+            actionBar.setIcon(mThemeData.icon);
+        }
     }
 }

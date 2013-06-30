@@ -23,6 +23,12 @@ public class K9ListActivity extends SherlockListActivity implements K9ActivityMa
     }
 
     @Override
+    public void setContentView(int layoutResId) {
+        super.setContentView(layoutResId);
+        mBase.setContentView(getSupportActionBar());
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         mBase.preDispatchTouchEvent(event);
         return super.dispatchTouchEvent(event);
@@ -31,6 +37,7 @@ public class K9ListActivity extends SherlockListActivity implements K9ActivityMa
     @Override
     public void onResume() {
         super.onResume();
+        mBase.onResume(getSupportActionBar());
     }
 
     @Override

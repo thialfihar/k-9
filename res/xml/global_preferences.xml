@@ -74,6 +74,12 @@
                 android:dialogTitle="@string/settings_compose_theme_label" />
 
             <Preference
+                    android:persistent="false"
+                    android:key="theme_pack"
+                    android:singleLine="true"
+                    android:title="@string/global_settings_theme_pack_label" />
+
+            <Preference
                 android:persistent="false"
                 android:key="font_size"
                 android:singleLine="true"

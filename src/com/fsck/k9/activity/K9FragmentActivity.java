@@ -20,6 +20,18 @@ public class K9FragmentActivity extends SherlockFragmentActivity implements K9Ac
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        mBase.onResume(getSupportActionBar());
+    }
+
+    @Override
+    public void setContentView(int layoutResId) {
+        super.setContentView(layoutResId);
+        mBase.setContentView(getSupportActionBar());
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         mBase.preDispatchTouchEvent(event);
         return super.dispatchTouchEvent(event);

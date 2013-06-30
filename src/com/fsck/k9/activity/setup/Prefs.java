@@ -56,6 +56,7 @@ public class Prefs extends K9PreferenceActivity {
     private static final String PREFERENCE_FIXED_MESSAGE_THEME = "fixedMessageViewTheme";
     private static final String PREFERENCE_COMPOSER_THEME = "messageComposeTheme";
     private static final String PREFERENCE_FONT_SIZE = "font_size";
+    private static final String PREFERENCE_THEME_PACK = "theme_pack";
     private static final String PREFERENCE_ANIMATIONS = "animations";
     private static final String PREFERENCE_GESTURES = "gestures";
     private static final String PREFERENCE_VOLUME_NAVIGATION = "volumeNavigation";
@@ -181,6 +182,14 @@ public class Prefs extends K9PreferenceActivity {
                 return true;
             }
         });
+
+        findPreference(PREFERENCE_THEME_PACK).setOnPreferenceClickListener(
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        onThemePackSettings();
+                        return true;
+                    }
+                });
 
         mAnimations = (CheckBoxPreference)findPreference(PREFERENCE_ANIMATIONS);
         mAnimations.setChecked(K9.showAnimations());
@@ -503,6 +512,10 @@ public class Prefs extends K9PreferenceActivity {
 
     private void onFontSizeSettings() {
         FontSizeSettings.actionEditSettings(this);
+    }
+
+    private void onThemePackSettings() {
+        ThemePackActivity.actionEditSettings(this);
     }
 
     private void onChooseContactNameColor() {

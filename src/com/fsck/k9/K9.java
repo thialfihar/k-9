@@ -16,10 +16,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Debug;
 import android.os.Environment;
@@ -43,6 +45,9 @@ import com.fsck.k9.service.BootReceiver;
 import com.fsck.k9.service.MailService;
 import com.fsck.k9.service.ShutdownReceiver;
 import com.fsck.k9.service.StorageGoneReceiver;
+import com.fsck.k9.theme.ThemeData;
+import com.fsck.k9.theme.ThemePack;
+import com.fsck.k9.theme.ThemePackLoader;
 
 public class K9 extends Application {
     /**
@@ -260,6 +265,9 @@ public class K9 extends Application {
     private static boolean sUseBackgroundAsUnreadIndicator = true;
     private static boolean sThreadedViewEnabled = true;
     private static SplitViewMode sSplitViewMode = SplitViewMode.NEVER;
+    private static ThemeData sThemeData;
+    private static String sThemeAppName;
+    private static String sThemeActivityName;
 
     /**
      * @see #areDatabasesUpToDate()
@@ -537,6 +545,8 @@ public class K9 extends Application {
         editor.putBoolean("useBackgroundAsUnreadIndicator", sUseBackgroundAsUnreadIndicator);
         editor.putBoolean("threadedView", sThreadedViewEnabled);
         editor.putString("splitViewMode", sSplitViewMode.name());
+        editor.putString("themePackAppName", sThemeAppName);
+        editor.putString("themePackActivityName", sThemeActivityName);
         fontSizes.save(editor);
     }
 
@@ -767,6 +777,10 @@ public class K9 extends Application {
         } else {
             K9.setK9Theme(Theme.LIGHT);
         }
+
+        String appName = sprefs.getString("themePackAppName", null);
+        String activityName = sprefs.getString("themePackActivityName", null);
+        setThemePackInfo(appName, activityName);
 
         themeValue = sprefs.getInt("messageViewTheme", Theme.USE_GLOBAL.ordinal());
         K9.setK9MessageViewThemeSetting(Theme.values()[themeValue]);
@@ -1300,6 +1314,41 @@ public class K9 extends Application {
 
     public static void setShowContactPicture(boolean show) {
         sShowContactPicture = show;
+    }
+
+    public static ComponentName getThemePackComponentName() {
+        return (sThemeActivityName == null) ?
+                null : new ComponentName(sThemeAppName, sThemeActivityName);
+    }
+
+    public static void setThemePackInfo(String appName, String activityName) {
+        sThemeAppName = appName;
+        sThemeActivityName = activityName;
+        setThemeData(K9.app, appName, activityName);
+    }
+
+    public static ThemeData getThemeData() {
+        return sThemeData;
+    }
+
+    public static void setThemeData(Context context, String appName, String activityName) {
+        if (activityName == null) {
+            sThemeData = null;
+            return;
+        }
+
+        ComponentName componentName = new ComponentName(appName, activityName);
+        Drawable icon = new ThemePackLoader(context).getIcon(componentName);
+
+        ThemeData themeData;
+        if (icon == null) {
+            themeData = null;
+        } else {
+            themeData = new ThemeData();
+            themeData.icon = icon;
+        }
+
+        sThemeData = themeData;
     }
 
     /**

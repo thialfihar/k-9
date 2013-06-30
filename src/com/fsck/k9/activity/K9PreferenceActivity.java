@@ -10,20 +10,37 @@ import android.preference.Preference;
 
 
 public class K9PreferenceActivity extends SherlockPreferenceActivity {
-    @Override
-    public void onCreate(Bundle icicle) {
-        K9ActivityCommon.setLanguage(this, K9.getK9Language());
+    private K9ActivityCommon mBase;
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        mBase = K9ActivityCommon.newInstance(this);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void setTheme(int resId) {
         if (Build.VERSION.SDK_INT >= 6 && Build.VERSION.SDK_INT < 14) {
             // There's a display bug in all supported Android versions before 4.0 (SDK 14) which
             // causes PreferenceScreens to have a black background.
             // http://code.google.com/p/android/issues/detail?id=4611
-            setTheme(K9.getK9ThemeResourceId(K9.Theme.DARK));
+            super.setTheme(K9.getK9ThemeResourceId(K9.Theme.DARK));
         } else {
-            setTheme(K9.getK9ThemeResourceId());
+            super.setTheme(K9.getK9ThemeResourceId());
         }
+    }
 
-        super.onCreate(icicle);
+    @Override
+    public void setContentView(int layoutResId) {
+        super.setContentView(layoutResId);
+        mBase.setContentView(getSupportActionBar());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mBase.onResume(getSupportActionBar());
     }
 
     /**
