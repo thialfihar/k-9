@@ -32,7 +32,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.util.Log;
@@ -207,7 +206,7 @@ public class LocalStore extends Store implements Serializable {
         }
 
         @Override
-        public void doDbUpgrade(final SQLiteDatabase db) {
+        public void doDbUpgrade(final LoggingSQLiteDatabase db) {
             try {
                 upgradeDatabase(db);
             } catch (Exception e) {
@@ -217,7 +216,7 @@ public class LocalStore extends Store implements Serializable {
             }
         }
 
-        private void upgradeDatabase(final SQLiteDatabase db) {
+        private void upgradeDatabase(final LoggingSQLiteDatabase db) {
             Log.i(K9.LOG_TAG, String.format("Upgrading database from version %d to version %d",
                                             db.getVersion(), DB_VERSION));
 
@@ -703,7 +702,7 @@ public class LocalStore extends Store implements Serializable {
             }
         }
 
-        private void update41Metadata(final SQLiteDatabase  db, SharedPreferences prefs, int id, String name) {
+        private void update41Metadata(final LoggingSQLiteDatabase  db, SharedPreferences prefs, int id, String name) {
 
 
             Folder.FolderClass displayClass = Folder.FolderClass.NO_CLASS;
@@ -755,7 +754,7 @@ public class LocalStore extends Store implements Serializable {
 
         return database.execute(false, new DbCallback<Long>() {
             @Override
-            public Long doDbWork(final SQLiteDatabase db) {
+            public Long doDbWork(final LoggingSQLiteDatabase db) {
                 final File[] files = attachmentDirectory.listFiles();
                 long attachmentLength = 0;
                 for (File file : files) {
@@ -776,7 +775,7 @@ public class LocalStore extends Store implements Serializable {
 
         database.execute(false, new DbCallback<Void>() {
             @Override
-            public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 db.execSQL("VACUUM");
                 return null;
             }
@@ -804,7 +803,7 @@ public class LocalStore extends Store implements Serializable {
         // been deleted locally.  They take up insignificant space
         database.execute(false, new DbCallback<Void>() {
             @Override
-            public Void doDbWork(final SQLiteDatabase db) {
+            public Void doDbWork(final LoggingSQLiteDatabase db) {
                 // Delete entries from 'threads' table
                 db.execSQL("DELETE FROM threads WHERE message_id IN " +
                         "(SELECT id FROM messages WHERE deleted = 0 AND uid NOT LIKE 'Local%')");
@@ -833,7 +832,7 @@ public class LocalStore extends Store implements Serializable {
     public int getMessageCount() throws MessagingException {
         return database.execute(false, new DbCallback<Integer>() {
             @Override
-            public Integer doDbWork(final SQLiteDatabase db) {
+            public Integer doDbWork(final LoggingSQLiteDatabase db) {
                 Cursor cursor = null;
                 try {
                     cursor = db.rawQuery("SELECT COUNT(*) FROM messages", null);
@@ -849,7 +848,7 @@ public class LocalStore extends Store implements Serializable {
     public int getFolderCount() throws MessagingException {
         return database.execute(false, new DbCallback<Integer>() {
             @Override
-            public Integer doDbWork(final SQLiteDatabase db) {
+            public Integer doDbWork(final LoggingSQLiteDatabase db) {
                 Cursor cursor = null;
                 try {
                     cursor = db.rawQuery("SELECT COUNT(*) FROM folders", null);
@@ -878,7 +877,7 @@ public class LocalStore extends Store implements Serializable {
         try {
             database.execute(false, new DbCallback < List <? extends Folder >> () {
                 @Override
-                public List <? extends Folder > doDbWork(final SQLiteDatabase db) throws WrappedException {
+                public List <? extends Folder > doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                     Cursor cursor = null;
 
                     try {
@@ -932,7 +931,7 @@ public class LocalStore extends Store implements Serializable {
     private void pruneCachedAttachments(final boolean force) throws MessagingException {
         database.execute(false, new DbCallback<Void>() {
             @Override
-            public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 if (force) {
                     ContentValues cv = new ContentValues();
                     cv.putNull("content_uri");
@@ -999,7 +998,7 @@ public class LocalStore extends Store implements Serializable {
         cv.put("visible_limit", Integer.toString(visibleLimit));
         database.execute(false, new DbCallback<Void>() {
             @Override
-            public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 db.update("folders", cv, null, null);
                 return null;
             }
@@ -1009,7 +1008,7 @@ public class LocalStore extends Store implements Serializable {
     public ArrayList<PendingCommand> getPendingCommands() throws UnavailableStorageException {
         return database.execute(false, new DbCallback<ArrayList<PendingCommand>>() {
             @Override
-            public ArrayList<PendingCommand> doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public ArrayList<PendingCommand> doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 Cursor cursor = null;
                 try {
                     cursor = db.query("pending_commands",
@@ -1049,7 +1048,7 @@ public class LocalStore extends Store implements Serializable {
             cv.put("arguments", Utility.combine(command.arguments, ','));
             database.execute(false, new DbCallback<Void>() {
                 @Override
-                public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+                public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                     db.insert("pending_commands", "command", cv);
                     return null;
                 }
@@ -1062,7 +1061,7 @@ public class LocalStore extends Store implements Serializable {
     public void removePendingCommand(final PendingCommand command) throws UnavailableStorageException {
         database.execute(false, new DbCallback<Void>() {
             @Override
-            public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 db.delete("pending_commands", "id = ?", new String[] { Long.toString(command.mId) });
                 return null;
             }
@@ -1072,7 +1071,7 @@ public class LocalStore extends Store implements Serializable {
     public void removePendingCommands() throws UnavailableStorageException {
         database.execute(false, new DbCallback<Void>() {
             @Override
-            public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 db.delete("pending_commands", null, null);
                 return null;
             }
@@ -1147,7 +1146,7 @@ public class LocalStore extends Store implements Serializable {
         final ArrayList<LocalMessage> messages = new ArrayList<LocalMessage>();
         final int j = database.execute(false, new DbCallback<Integer>() {
             @Override
-            public Integer doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public Integer doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 Cursor cursor = null;
                 int i = 0;
                 try {
@@ -1204,7 +1203,7 @@ public class LocalStore extends Store implements Serializable {
     public AttachmentInfo getAttachmentInfo(final String attachmentId) throws UnavailableStorageException {
         return database.execute(false, new DbCallback<AttachmentInfo>() {
             @Override
-            public AttachmentInfo doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public AttachmentInfo doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 String name;
                 String type;
                 int size;
@@ -1245,7 +1244,7 @@ public class LocalStore extends Store implements Serializable {
     public void createFolders(final List<LocalFolder> foldersToCreate, final int visibleLimit) throws UnavailableStorageException {
         database.execute(true, new DbCallback<Void>() {
             @Override
-            public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+            public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                 for (LocalFolder folder : foldersToCreate) {
                     String name = folder.getName();
                     final  LocalFolder.PreferencesHolder prefHolder = folder.new PreferencesHolder();
@@ -1366,7 +1365,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         Cursor cursor = null;
                         try {
                             String baseQuery = "SELECT " + GET_FOLDER_COLS + " FROM folders ";
@@ -1440,7 +1439,7 @@ public class LocalStore extends Store implements Serializable {
         public boolean exists() throws MessagingException {
             return database.execute(false, new DbCallback<Boolean>() {
                 @Override
-                public Boolean doDbWork(final SQLiteDatabase db) throws WrappedException {
+                public Boolean doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                     Cursor cursor = null;
                     try {
                         cursor = db.rawQuery("SELECT id FROM folders "
@@ -1495,7 +1494,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 return database.execute(false, new DbCallback<Integer>() {
                     @Override
-                    public Integer doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public Integer doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         try {
                             open(OpenMode.READ_WRITE);
                         } catch (MessagingException e) {
@@ -1528,7 +1527,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 return database.execute(false, new DbCallback<Integer>() {
                     @Override
-                    public Integer doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public Integer doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         int unreadMessageCount = 0;
                         Cursor cursor = db.query("messages", new String[] { "SUM(read=0)" },
                                 "folder_id = ? AND (empty IS NULL OR empty != 1) AND deleted = 0",
@@ -1559,7 +1558,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 return database.execute(false, new DbCallback<Integer>() {
                     @Override
-                    public Integer doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public Integer doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         int flaggedMessageCount = 0;
                         Cursor cursor = db.query("messages", new String[] { "SUM(flagged)" },
                                 "folder_id = ? AND (empty IS NULL OR empty != 1) AND deleted = 0",
@@ -1644,7 +1643,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         try {
                             open(OpenMode.READ_WRITE);
                         } catch (MessagingException e) {
@@ -1815,7 +1814,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         try {
                             open(OpenMode.READ_WRITE);
                             if (fp.contains(FetchProfile.Item.BODY)) {
@@ -2020,7 +2019,7 @@ public class LocalStore extends Store implements Serializable {
         private void populateHeaders(final List<LocalMessage> messages) throws UnavailableStorageException {
             database.execute(false, new DbCallback<Void>() {
                 @Override
-                public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                     Cursor cursor = null;
                     if (messages.isEmpty()) {
                         return null;
@@ -2066,7 +2065,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 return database.execute(false, new DbCallback<String>() {
                     @Override
-                    public String doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public String doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             open(OpenMode.READ_WRITE);
                             Cursor cursor = null;
@@ -2100,7 +2099,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 return database.execute(false, new DbCallback<LocalMessage>() {
                     @Override
-                    public LocalMessage doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public LocalMessage doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             open(OpenMode.READ_WRITE);
                             LocalMessage message = new LocalMessage(uid, LocalFolder.this);
@@ -2144,7 +2143,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 return database.execute(false, new DbCallback<Message[]>() {
                     @Override
-                    public Message[] doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Message[] doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             open(OpenMode.READ_WRITE);
                             return LocalStore.this.getMessages(
@@ -2206,7 +2205,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             lDestFolder.open(OpenMode.READ_WRITE);
                             for (Message message : msgs) {
@@ -2330,7 +2329,7 @@ public class LocalStore extends Store implements Serializable {
         public Message storeSmallMessage(final Message message, final Runnable runnable) throws MessagingException {
             return database.execute(true, new DbCallback<Message>() {
                 @Override
-                public Message doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                public Message doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                     try {
                         appendMessages(new Message[] { message });
                         final String uid = message.getUid();
@@ -2366,7 +2365,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         for (Message message : messages) {
                             try {
                                 message.destroy();
@@ -2382,7 +2381,7 @@ public class LocalStore extends Store implements Serializable {
             }
         }
 
-        private ThreadInfo getThreadInfo(SQLiteDatabase db, String messageId, boolean onlyEmpty) {
+        private ThreadInfo getThreadInfo(LoggingSQLiteDatabase db, String messageId, boolean onlyEmpty) {
             String sql = "SELECT t.id, t.message_id, t.root, t.parent " +
                     "FROM messages m " +
                     "LEFT JOIN threads t ON (t.message_id = m.id) " +
@@ -2431,7 +2430,7 @@ public class LocalStore extends Store implements Serializable {
                 final Map<String, String> uidMap = new HashMap<String, String>();
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             for (Message message : messages) {
                                 if (!(message instanceof MimeMessage)) {
@@ -2599,7 +2598,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             message.buildMimeRepresentation();
 
@@ -2677,7 +2676,7 @@ public class LocalStore extends Store implements Serializable {
         private void saveHeaders(final long id, final MimeMessage message) throws MessagingException {
             database.execute(true, new DbCallback<Void>() {
                 @Override
-                public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
 
                     deleteHeaders(id);
                     for (String name : message.getHeaderNames()) {
@@ -2709,7 +2708,7 @@ public class LocalStore extends Store implements Serializable {
         private void deleteHeaders(final long id) throws UnavailableStorageException {
             database.execute(false, new DbCallback<Void>() {
                 @Override
-                public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                     db.execSQL("DELETE FROM headers WHERE message_id = ?", new Object[]
                                { id });
                     return null;
@@ -2729,7 +2728,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             long attachmentId = -1;
                             Uri contentUri = null;
@@ -2908,7 +2907,7 @@ public class LocalStore extends Store implements Serializable {
             cv.put("uid", message.getUid());
             database.execute(false, new DbCallback<Void>() {
                 @Override
-                public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                     db.update("messages", cv, "id = ?", new String[]
                               { Long.toString(message.mId) });
                     return null;
@@ -2928,7 +2927,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException,
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException,
                             UnavailableStorageException {
 
                         for (Message message : messages) {
@@ -2991,7 +2990,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         try {
                             // Get UIDs for all messages to delete
                             Cursor cursor = db.query("messages", new String[] { "uid" },
@@ -3035,7 +3034,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             // We need to open the folder first to make sure we've got it's id
                             open(OpenMode.READ_ONLY);
@@ -3073,7 +3072,7 @@ public class LocalStore extends Store implements Serializable {
             open(OpenMode.READ_WRITE);
             database.execute(false, new DbCallback<Void>() {
                 @Override
-                public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                     Cursor attachmentsCursor = null;
                     try {
                         String accountUuid = mAccount.getUuid();
@@ -3117,7 +3116,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(false, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         Cursor messagesCursor = null;
                         try {
                             messagesCursor = db.query("messages", new String[]
@@ -3174,7 +3173,7 @@ public class LocalStore extends Store implements Serializable {
         public void updateLastUid() throws MessagingException {
             Integer lastUid = database.execute(false, new DbCallback<Integer>() {
                 @Override
-                public Integer doDbWork(final SQLiteDatabase db) {
+                public Integer doDbWork(final LoggingSQLiteDatabase db) {
                     Cursor cursor = null;
                     try {
                         open(OpenMode.READ_ONLY);
@@ -3199,7 +3198,7 @@ public class LocalStore extends Store implements Serializable {
         public Long getOldestMessageDate() throws MessagingException {
             return database.execute(false, new DbCallback<Long>() {
                 @Override
-                public Long doDbWork(final SQLiteDatabase db) {
+                public Long doDbWork(final LoggingSQLiteDatabase db) {
                     Cursor cursor = null;
                     try {
                         open(OpenMode.READ_ONLY);
@@ -3218,7 +3217,7 @@ public class LocalStore extends Store implements Serializable {
             });
         }
 
-        private ThreadInfo doMessageThreading(SQLiteDatabase db, Message message)
+        private ThreadInfo doMessageThreading(LoggingSQLiteDatabase db, Message message)
                 throws MessagingException {
             long rootId = -1;
             long parentId = -1;
@@ -3327,7 +3326,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 return database.execute(false, new DbCallback<List<Message>>() {
                     @Override
-                    public List<Message> doDbWork(final SQLiteDatabase db) throws WrappedException {
+                    public List<Message> doDbWork(final LoggingSQLiteDatabase db) throws WrappedException {
                         try {
                             open(OpenMode.READ_WRITE);
                         } catch (MessagingException e) {
@@ -3651,7 +3650,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                         try {
                             if (flag == Flag.DELETED && set) {
                                 delete();
@@ -3697,7 +3696,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException,
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException,
                             UnavailableStorageException {
                         String[] idArg = new String[] { Long.toString(mId) };
 
@@ -3750,7 +3749,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException,
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException,
                         UnavailableStorageException {
                         try {
                             LocalFolder localFolder = (LocalFolder) mFolder;
@@ -3815,14 +3814,14 @@ public class LocalStore extends Store implements Serializable {
          * Get ID of the the given message's parent if the parent is an empty message.
          *
          * @param db
-         *         {@link SQLiteDatabase} instance to access the database.
+         *         {@link LoggingSQLiteDatabase} instance to access the database.
          * @param messageId
          *         The database ID of the message to get the parent for.
          *
          * @return Message ID of the parent message if there exists a parent and it is empty.
          *         Otherwise {@code -1}.
          */
-        private long getEmptyThreadParent(SQLiteDatabase db, long messageId) {
+        private long getEmptyThreadParent(LoggingSQLiteDatabase db, long messageId) {
             Cursor cursor = db.rawQuery(
                     "SELECT m.id " +
                     "FROM threads t1 " +
@@ -3842,13 +3841,13 @@ public class LocalStore extends Store implements Serializable {
          * Check whether or not a message has child messages in the thread structure.
          *
          * @param db
-         *         {@link SQLiteDatabase} instance to access the database.
+         *         {@link LoggingSQLiteDatabase} instance to access the database.
          * @param messageId
          *         The database ID of the message to get the children for.
          *
          * @return {@code true} if the message has children. {@code false} otherwise.
          */
-        private boolean hasThreadChildren(SQLiteDatabase db, long messageId) {
+        private boolean hasThreadChildren(LoggingSQLiteDatabase db, long messageId) {
             Cursor cursor = db.rawQuery(
                     "SELECT COUNT(t2.id) " +
                     "FROM threads t1 " +
@@ -3867,11 +3866,11 @@ public class LocalStore extends Store implements Serializable {
          * Delete a message from the 'messages' and 'threads' tables.
          *
          * @param db
-         *         {@link SQLiteDatabase} instance to access the database.
+         *         {@link LoggingSQLiteDatabase} instance to access the database.
          * @param messageId
          *         The database ID of the message to delete.
          */
-        private void deleteMessageRow(SQLiteDatabase db, long messageId) {
+        private void deleteMessageRow(LoggingSQLiteDatabase db, long messageId) {
             String[] idArg = { Long.toString(messageId) };
 
             // Delete the message
@@ -4083,7 +4082,7 @@ public class LocalStore extends Store implements Serializable {
             try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
-                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException,
+                    public Void doDbWork(final LoggingSQLiteDatabase db) throws WrappedException,
                             UnavailableStorageException {
 
                         selectionCallback.doDbWork(db, selection.toString(),
@@ -4127,7 +4126,7 @@ public class LocalStore extends Store implements Serializable {
          * Execute the SQL statement.
          *
          * @param db
-         *         Use this {@link SQLiteDatabase} instance for your SQL statement.
+         *         Use this {@link LoggingSQLiteDatabase} instance for your SQL statement.
          * @param selectionSet
          *         A partial selection string containing place holders for the argument list, e.g.
          *         {@code " IN (?,?,?)"} (starts with a space).
@@ -4135,12 +4134,12 @@ public class LocalStore extends Store implements Serializable {
          *         The current subset of the argument list.
          * @throws UnavailableStorageException
          */
-        void doDbWork(SQLiteDatabase db, String selectionSet, String[] selectionArgs)
+        void doDbWork(LoggingSQLiteDatabase db, String selectionSet, String[] selectionArgs)
                 throws UnavailableStorageException;
 
         /**
          * This will be executed after each invocation of
-         * {@link #doDbWork(SQLiteDatabase, String, String[])} (after the transaction has been
+         * {@link #doDbWork(LoggingSQLiteDatabase, String, String[])} (after the transaction has been
          * committed).
          */
         void postDbWork();
@@ -4181,7 +4180,7 @@ public class LocalStore extends Store implements Serializable {
             }
 
             @Override
-            public void doDbWork(SQLiteDatabase db, String selectionSet, String[] selectionArgs)
+            public void doDbWork(LoggingSQLiteDatabase db, String selectionSet, String[] selectionArgs)
                     throws UnavailableStorageException {
 
                 db.update("messages", cv, "(empty IS NULL OR empty != 1) AND id" + selectionSet,
@@ -4229,7 +4228,7 @@ public class LocalStore extends Store implements Serializable {
             }
 
             @Override
-            public void doDbWork(SQLiteDatabase db, String selectionSet, String[] selectionArgs)
+            public void doDbWork(LoggingSQLiteDatabase db, String selectionSet, String[] selectionArgs)
                     throws UnavailableStorageException {
 
                 db.execSQL("UPDATE messages SET " + flagColumn + " = " + ((newState) ? "1" : "0") +
@@ -4281,7 +4280,7 @@ public class LocalStore extends Store implements Serializable {
             }
 
             @Override
-            public void doDbWork(SQLiteDatabase db, String selectionSet, String[] selectionArgs)
+            public void doDbWork(LoggingSQLiteDatabase db, String selectionSet, String[] selectionArgs)
                     throws UnavailableStorageException {
 
                 if (threadedList) {

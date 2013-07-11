@@ -15,6 +15,7 @@ import com.fsck.k9.mail.store.LocalStore;
 import com.fsck.k9.mail.store.LockableDatabase;
 import com.fsck.k9.mail.store.LockableDatabase.DbCallback;
 import com.fsck.k9.mail.store.LockableDatabase.WrappedException;
+import com.fsck.k9.mail.store.LoggingSQLiteDatabase;
 import com.fsck.k9.mail.store.UnavailableStorageException;
 import com.fsck.k9.search.SqlQueryBuilder;
 
@@ -26,7 +27,6 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.CursorWrapper;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 /**
@@ -300,7 +300,7 @@ public class EmailProvider extends ContentProvider {
         try {
             return database.execute(false, new DbCallback<Cursor>() {
                 @Override
-                public Cursor doDbWork(SQLiteDatabase db) throws WrappedException,
+                public Cursor doDbWork(LoggingSQLiteDatabase db) throws WrappedException,
                         UnavailableStorageException {
 
                     String where;
@@ -370,7 +370,7 @@ public class EmailProvider extends ContentProvider {
         try {
             return database.execute(false, new DbCallback<Cursor>() {
                 @Override
-                public Cursor doDbWork(SQLiteDatabase db) throws WrappedException,
+                public Cursor doDbWork(LoggingSQLiteDatabase db) throws WrappedException,
                         UnavailableStorageException {
 
                     StringBuilder query = new StringBuilder();
@@ -488,7 +488,7 @@ public class EmailProvider extends ContentProvider {
         try {
             return database.execute(false, new DbCallback<Cursor>() {
                 @Override
-                public Cursor doDbWork(SQLiteDatabase db) throws WrappedException,
+                public Cursor doDbWork(LoggingSQLiteDatabase db) throws WrappedException,
                         UnavailableStorageException {
 
                     StringBuilder query = new StringBuilder();
@@ -587,7 +587,7 @@ public class EmailProvider extends ContentProvider {
         try {
             return database.execute(false, new DbCallback<Cursor>() {
                 @Override
-                public Cursor doDbWork(SQLiteDatabase db) throws WrappedException,
+                public Cursor doDbWork(LoggingSQLiteDatabase db) throws WrappedException,
                         UnavailableStorageException {
 
                     return db.rawQuery(sql.toString(), selectionArgs);

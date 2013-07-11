@@ -22,7 +22,7 @@ public class LockableDatabase {
      * HibernateCallback.
      *
      * @param <T>
-     *            Return value type for {@link #doDbWork(SQLiteDatabase)}
+     *            Return value type for {@link #doDbWork(LoggingSQLiteDatabase)}
      */
     public static interface DbCallback<T> {
         /**
@@ -33,7 +33,7 @@ public class LockableDatabase {
          * @throws WrappedException
          * @throws UnavailableStorageException
          */
-        T doDbWork(SQLiteDatabase db) throws WrappedException, UnavailableStorageException;
+        T doDbWork(LoggingSQLiteDatabase db) throws WrappedException, UnavailableStorageException;
     }
 
     public static interface SchemaDefinition {
@@ -42,7 +42,7 @@ public class LockableDatabase {
         /**
          * @param db Never <code>null</code>.
          */
-        void doDbUpgrade(SQLiteDatabase db);
+        void doDbUpgrade(LoggingSQLiteDatabase db);
     }
 
     /**
@@ -106,7 +106,7 @@ public class LockableDatabase {
 
     private String mStorageProviderId;
 
-    private SQLiteDatabase mDb;
+    private LoggingSQLiteDatabase mDb;
     /**
      * Reentrant read lock
      */
@@ -265,7 +265,7 @@ public class LockableDatabase {
      *            Never <code>null</code>.
      *
      * @param <T>
-     * @return Whatever {@link DbCallback#doDbWork(SQLiteDatabase)} returns.
+     * @return Whatever {@link DbCallback#doDbWork(LoggingSQLiteDatabase)} returns.
      * @throws UnavailableStorageException
      */
     public <T> T execute(final boolean transactional, final DbCallback<T> callback) throws UnavailableStorageException {
@@ -370,13 +370,14 @@ public class LockableDatabase {
         lockWrite();
         try {
             final File databaseFile = prepareStorage(mStorageProviderId);
+            SQLiteDatabase db;
             try {
                 if (StorageManager.InternalStorageProvider.ID.equals(mStorageProviderId)) {
                     // internal storage
-                    mDb = application.openOrCreateDatabase(databaseFile.getName(), Context.MODE_PRIVATE, null);
+                    db = application.openOrCreateDatabase(databaseFile.getName(), Context.MODE_PRIVATE, null);
                 } else {
                     // external storage
-                    mDb = SQLiteDatabase.openOrCreateDatabase(databaseFile, null);
+                    db = SQLiteDatabase.openOrCreateDatabase(databaseFile, null);
                 }
             } catch (SQLiteException e) {
                 // try to gracefully handle DB corruption - see issue 2537
@@ -384,12 +385,14 @@ public class LockableDatabase {
                 databaseFile.delete();
                 if (StorageManager.InternalStorageProvider.ID.equals(mStorageProviderId)) {
                     // internal storage
-                    mDb = application.openOrCreateDatabase(databaseFile.getName(), Context.MODE_PRIVATE, null);
+                    db = application.openOrCreateDatabase(databaseFile.getName(), Context.MODE_PRIVATE, null);
                 } else {
                     // external storage
-                    mDb = SQLiteDatabase.openOrCreateDatabase(databaseFile, null);
+                    db = SQLiteDatabase.openOrCreateDatabase(databaseFile, null);
                 }
             }
+            mDb = new LoggingSQLiteDatabase(db);
+
             if (mDb.getVersion() != mSchemaDefinition.getVersion()) {
                 mSchemaDefinition.doDbUpgrade(mDb);
             }
