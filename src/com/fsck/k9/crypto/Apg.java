@@ -497,6 +497,11 @@ public class Apg extends CryptoProvider {
     }
 
     @Override
+    public boolean decryptFile( Fragment fragment, String filename, boolean showFile ) {
+    	throw new UnsupportedOperationException();
+    }
+    
+    @Override
     public boolean isEncrypted(Message message) {
         String data = null;
         try {
@@ -518,6 +523,11 @@ public class Apg extends CryptoProvider {
 
         Matcher matcher = PGP_MESSAGE.matcher(data);
         return matcher.matches();
+    }
+    
+    @Override
+    public boolean supportsAttachments( Context context ) {
+    	return false;
     }
 
     @Override

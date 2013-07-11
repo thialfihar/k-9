@@ -1897,7 +1897,8 @@ public class MessageCompose extends K9Activity implements OnClickListener {
      *         The MIME type we want our attachment to have.
      */
     private void onAddAttachment2(final String mime_type) {
-        if (mAccount.getCryptoProvider().isAvailable(this)) {
+        //if (!mAccount.getCryptoProvider().supportsAttachments(this) ) {
+    	if( mAccount.getCryptoProvider().isAvailable( this ) ) {
             Toast.makeText(this, R.string.attachment_encryption_unsupported, Toast.LENGTH_LONG).show();
         }
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);

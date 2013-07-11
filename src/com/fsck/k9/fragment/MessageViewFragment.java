@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -27,6 +28,7 @@ import com.fsck.k9.activity.ChooseFolder;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
+import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.CryptoProvider.CryptoDecryptCallback;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
@@ -283,6 +285,10 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         mController.loadMessageForView(mAccount, mMessageReference.folderName, mMessageReference.uid, mListener);
 
         mFragmentListener.updateMenu();
+    }
+    
+    public void setAttachmentView( AttachmentView attachmentView ) {
+    	attachmentTmpStore = attachmentView;
     }
 
     /**
@@ -677,7 +683,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         }
 
         @Override
-        public void loadAttachmentFinished(Account account, Message message, Part part, final Object tag) {
+        public void loadAttachmentFinished(final Account account, Message message, Part part, final Object tag) {
             if (mMessage != message) {
                 return;
             }
@@ -689,11 +695,24 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     Object[] params = (Object[]) tag;
                     boolean download = (Boolean) params[0];
                     AttachmentView attachment = (AttachmentView) params[1];
-                    if (download) {
-                        attachment.writeFile();
+
+                    if( attachment.decrypt.isChecked() ) {
+                    	
+                    	attachment.writeFile();
+                    	CryptoProvider cryptoProvider = account.getCryptoProvider();
+                    	//String filename = Utility.sanitizeFilename(attachment.name);
+                        //File file = Utility.createUniqueFile( new File(K9.getAttachmentDefaultPath() ), filename );
+                        File file = new File( attachment.savedName );
+                    	cryptoProvider.decryptFile( MessageViewFragment.this, Uri.fromFile( file ).toString(), !download );
+                    	
                     } else {
-                        attachment.showFile();
+                    	if (download) {
+                    		attachment.writeFile();
+                    	} else {
+                    		attachment.showFile();
+                    	}
                     }
+                    
                 }
             });
         }
@@ -726,6 +745,52 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         } catch (MessagingException e) {
             Log.e(K9.LOG_TAG, "displayMessageBody failed", e);
         }
+    }
+    
+    @Override
+    public void onDecryptFileDone(PgpData pgpData) {
+    	
+    	if( pgpData.showFile() ) {
+    		
+    		String filename = pgpData.getFilename();
+    		String extension = MimeTypeMap.getFileExtensionFromUrl( filename );
+    		if( extension != null ) {
+    			
+    			MimeTypeMap mime = MimeTypeMap.getSingleton();
+    	        String mimeType = mime.getMimeTypeFromExtension( extension );
+    	        
+    	        if( mimeType != null ) {
+    	        	
+    	        	Uri uri = Uri.parse( filename );
+    	            Intent intent = new Intent(Intent.ACTION_VIEW);
+    	            // We explicitly set the ContentType in addition to the URI because some attachment viewers (such as Polaris office 3.0.x) choke on documents without a mime type
+    	            intent.setDataAndType(uri, mimeType);
+    	            intent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET );
+    	          
+    	            try {
+    	                getActivity().startActivity( Intent.createChooser( intent, null ).addFlags( Intent.FLAG_ACTIVITY_NEW_TASK ) );
+    	            } catch (Exception e) {
+    	                Log.e(K9.LOG_TAG, "Could not display attachment of type " + mimeType, e);
+    	                Toast toast = Toast.makeText(mContext, mContext.getString(R.string.message_view_no_viewer, mimeType), Toast.LENGTH_LONG);
+    	                toast.show();
+    	            }
+    	            
+    	        } else {
+    	        	
+    	        	Toast toast = Toast.makeText(mContext, R.string.cannot_handle_file_extension, Toast.LENGTH_LONG);
+    	            toast.show();
+    	            
+    	        }
+    	        
+    		} else {
+    			
+    			Toast toast = Toast.makeText(mContext, R.string.must_supply_file_extension, Toast.LENGTH_LONG);
+	            toast.show();
+	            
+    		}
+    		
+    	}
+    	
     }
 
     private void showDialog(int dialogId) {

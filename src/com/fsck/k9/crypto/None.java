@@ -80,6 +80,11 @@ public class None extends CryptoProvider {
     public boolean decrypt(Fragment fragment, String data, PgpData pgpData) {
         return false;
     }
+    
+    @Override
+    public boolean decryptFile( Fragment fragment, String filename, boolean showFile ) {
+    	return false;
+    }
 
     @Override
     public boolean isEncrypted(Message message) {
@@ -91,6 +96,11 @@ public class None extends CryptoProvider {
         return false;
     }
 
+    @Override
+    public boolean supportsAttachments( Context context ) {
+    	return false;
+    }
+    
     @Override
     public String getName() {
         return NAME;

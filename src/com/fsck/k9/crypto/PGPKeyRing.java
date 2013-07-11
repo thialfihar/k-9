@@ -41,6 +41,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String PACKAGE_TRIAL = "com.imaeses.keyring.trial";
     public static final String APP_NAME_PAID = "KeyRing";
     public static final int VERSION_REQUIRED_MIN = 22;
+    public static final int VERSION_REQUIRED_ATTACHMENTS_MIN = 29;
 
     public static final String AUTHORITY_PAID = "com.imaeses.KeyRing";
     public static final String AUTHORITY_TRIAL = "com.imaeses.trial.KeyRing";
@@ -53,6 +54,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int ENCRYPT_MESSAGE = 2;
     public static final int SELECT_PUBLIC_KEYS = 3;
     public static final int SELECT_SECRET_KEY = 4;
+    public static final int DECRYPT_FILE = 5;
 
     private Uri uriSelectPrivateSigningKey;
     private Uri uriSelectPublicSigningKey;
@@ -64,6 +66,8 @@ public class PGPKeyRing extends CryptoProvider {
     private boolean isTrialVersion;
     
     public static final String EXTRAS_MSG = "msg";
+    public static final String EXTRAS_FILENAME = "file.name";
+    public static final String EXTRAS_SHOW_FILE = "file.show";
     public static final String EXTRAS_ENCRYPTION_KEYIDS = "keys.enc";
     public static final String EXTRAS_SIGNATURE_KEYID = "sig.key";
     public static final String EXTRAS_SIGNATURE_SUCCESS = "sig.success";
@@ -80,6 +84,7 @@ public class PGPKeyRing extends CryptoProvider {
         
         public static final String ENCRYPT_MSG_AND_RETURN = "com.imaeses.keyring.ENCRYPT_MSG_AND_RETURN";
         public static final String DECRYPT_MSG_AND_RETURN = "com.imaeses.keyring.DECRYPT_MSG_AND_RETURN";
+        public static final String DECRYPT_FILE_AND_RETURN = "com.imaeses.keyring.DECRYPT_FILE_AND_RETURN";
         
     }
     
@@ -95,7 +100,7 @@ public class PGPKeyRing extends CryptoProvider {
     
     public PGPKeyRing() {
         
-        isTrialVersion = true;
+        isTrialVersion = true;      
         setContentUris();
         
     }
@@ -447,6 +452,35 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    @Override
+    public boolean decryptFile( Fragment fragment, String filename, boolean showFile ) {
+    	
+    	boolean success = false;
+        
+        if( filename != null && filename.length() > 0 ) {
+            
+            Intent i = new Intent( PGPKeyRingIntent.DECRYPT_FILE_AND_RETURN );
+            i.addCategory( Intent.CATEGORY_DEFAULT );
+            i.setType( "text/plain" );
+            i.putExtra( EXTRAS_FILENAME, filename );
+            i.putExtra( EXTRAS_SHOW_FILE, showFile );
+            
+            try {
+            
+                fragment.startActivityForResult( i, DECRYPT_FILE );
+                success = true;
+            
+            } catch( ActivityNotFoundException e ) {
+                Toast.makeText( fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
+            }
+            
+        }
+        
+        return success;
+    	
+    }
+    
+    
     /**
      * Handle the activity results that concern us.
      *
@@ -531,6 +565,19 @@ public class PGPKeyRing extends CryptoProvider {
 
             break;
             
+        case DECRYPT_FILE:
+        	
+        	if( resultCode == Activity.RESULT_OK && data != null ) {
+        		
+        		pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
+        		pgpData.setShowFile( data.getBooleanExtra( EXTRAS_SHOW_FILE, false ) );
+        		
+        		callback.onDecryptFileDone( pgpData );
+        		
+        	}
+        	
+        	break;
+            
         default:
             return false;
 
@@ -593,6 +640,35 @@ public class PGPKeyRing extends CryptoProvider {
 
         Matcher matcher = PGP_SIGNED_MESSAGE.matcher(data);
         return matcher.matches();
+        
+    }
+    
+    @Override
+    public boolean supportsAttachments( Context context ) {
+    	
+    	boolean supportsAttachments = false;
+    	
+    	if( isAvailable( context ) ) { 
+    	
+	    	PackageInfo pi = null;
+	        PackageManager packageManager = context.getPackageManager();
+	        
+	        try {
+	        	if( isTrialVersion ) {
+	        		pi = packageManager.getPackageInfo( PACKAGE_TRIAL, 0 );
+	        	} else {
+	        		pi = packageManager.getPackageInfo( PACKAGE_PAID, 0 );
+	        	}	
+	        } catch( NameNotFoundException e ) {
+	        }
+	        
+	        if( pi != null && pi.versionCode >= VERSION_REQUIRED_ATTACHMENTS_MIN ) {
+	        	supportsAttachments = true;
+	        }
+	        
+    	}
+        
+        return supportsAttachments;
         
     }
     
