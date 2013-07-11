@@ -948,6 +948,8 @@ Please submit bug reports, contribute new features and ask questions at
 
     <!--  PGP KeyRing related -->
     <string name="error_pgpkeyring_version_not_supported">The installed version of PGP KeyRing is not supported.</string>
+    <string name="cannot_handle_file_extension">I do not recognize this type of file</string>
+    <string name="must_supply_file_extension">Please supply a file extension</string>
     
     <!-- APG related -->
     <string name="error_activity_not_found">No suitable application for this action found.</string>
@@ -959,7 +961,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="unknown_crypto_signature_user_id">&lt;unknown&gt;</string>
     <string name="key_id">id: %s</string>
     <string name="pgp_mime_unsupported">PGP/MIME messages are not supported yet.</string>
-    <string name="attachment_encryption_unsupported">Warning: attachments are NOT signed or encrypted yet.</string>
+    <string name="attachment_encryption_unsupported">Warning: attachments cannot be signed or encrypted using the current Crypto Provider</string>
     <string name="send_aborted">Send aborted.</string>
 
     <string name="save_or_discard_draft_message_dlg_title">Save draft message?</string>

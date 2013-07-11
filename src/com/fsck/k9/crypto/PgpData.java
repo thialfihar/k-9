@@ -11,6 +11,8 @@ public class PgpData implements Serializable {
     protected boolean mSignatureUnknown = false;
     protected String mDecryptedData = null;
     protected String mEncryptedData = null;
+    protected String filename = null;
+    protected boolean showFile = false;
 
     public void setSignatureKeyId(long keyId) {
         mSignatureKeyId = keyId;
@@ -75,4 +77,21 @@ public class PgpData implements Serializable {
     public void setSignatureUnknown(boolean unknown) {
         mSignatureUnknown = unknown;
     }
+    
+    public String getFilename() {
+    	return filename;
+    }
+    
+    public void setFilename( String filename ) {
+    	this.filename = filename;
+    }
+    
+    public boolean showFile() {
+    	return showFile;
+    }
+    
+    public void setShowFile( boolean showFile ) {
+    	this.showFile = showFile;
+    }
+    
 }

@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import com.fsck.k9.K9;
 import org.thialfihar.android.apg.R;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
+import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.helper.MediaScannerNotifier;
 import com.fsck.k9.helper.SizeFormatter;
 import com.fsck.k9.helper.Utility;
@@ -47,12 +49,14 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     private Context mContext;
     public Button viewButton;
     public Button downloadButton;
+    public CheckBox decrypt;
     public LocalAttachmentBodyPart part;
     private Message mMessage;
     private Account mAccount;
     private MessagingController mController;
     private MessagingListener mListener;
     public String name;
+    public String savedName;
     public String contentType;
     public long size;
     public ImageView iconView;
@@ -153,6 +157,20 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         final ImageView attachmentIcon = (ImageView) findViewById(R.id.attachment_icon);
         viewButton = (Button) findViewById(R.id.view);
         downloadButton = (Button) findViewById(R.id.download);
+        decrypt = ( CheckBox )findViewById( R.id.decrypt );
+		decrypt.setChecked( false );
+        decrypt.setVisibility( View.GONE );
+        
+        if( ( name.endsWith( ".asc" ) && contentType.equals( "text/plain" ) ) ||
+            ( name.endsWith( ".gpg" ) && contentType.equals( "application/octet-stream" ) ) ) {
+        
+        	CryptoProvider crypto = account.getCryptoProvider();
+        	if( crypto.supportsAttachments( mContext ) ) {
+        		decrypt.setVisibility( View.VISIBLE );
+        	}
+        	
+        }
+
         if ((!MimeUtility.mimeTypeMatches(contentType, K9.ACCEPTABLE_ATTACHMENT_VIEW_TYPES))
                 || (MimeUtility.mimeTypeMatches(contentType, K9.UNACCEPTABLE_ATTACHMENT_VIEW_TYPES))) {
             viewButton.setVisibility(View.GONE);
@@ -164,12 +182,13 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         if (size > K9.MAX_ATTACHMENT_DOWNLOAD_SIZE) {
             viewButton.setVisibility(View.GONE);
             downloadButton.setVisibility(View.GONE);
+            decrypt.setVisibility(View.GONE);
         }
 
         viewButton.setOnClickListener(this);
         downloadButton.setOnClickListener(this);
         downloadButton.setOnLongClickListener(this);
-
+        
         attachmentName.setText(name);
         attachmentInfo.setText(SizeFormatter.formatSize(mContext, size));
         new AsyncTask<Void, Void, Bitmap>() {
@@ -342,6 +361,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     }
 
     public void attachmentSaved(final String filename) {
+    	savedName = filename;
         Toast.makeText(mContext, String.format(
                            mContext.getString(R.string.message_view_status_attachment_saved), filename),
                        Toast.LENGTH_LONG).show();
