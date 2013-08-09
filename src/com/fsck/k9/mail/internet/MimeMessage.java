@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.dom.field.DateTimeField;
 import org.apache.james.mime4j.field.DefaultFieldParser;
@@ -54,6 +55,7 @@ public class MimeMessage extends Message {
     protected SimpleDateFormat mDateFormat;
 
     protected Body mBody;
+    protected Body mRawData;
     protected int mSize;
 
     public MimeMessage() {
@@ -403,7 +405,12 @@ public class MimeMessage extends Message {
 
     @Override
     public void addHeader(String name, String value) throws UnavailableStorageException {
-        mHeader.addHeader(name, value);
+        mHeader.addHeader(name, value, null);
+    }
+
+    @Override
+    public void addHeader(String name, String value, byte[] rawByteValue) throws UnavailableStorageException {
+        mHeader.addHeader(name, value, rawByteValue);
     }
 
     @Override
@@ -462,6 +469,7 @@ public class MimeMessage extends Message {
 
     class MimeMessageBuilder implements ContentHandler {
         private final LinkedList<Object> stack = new LinkedList<Object>();
+        private boolean multipartSigned;
 
         public MimeMessageBuilder() {
         }
@@ -506,10 +514,13 @@ public class MimeMessage extends Message {
 
         public void startMultipart(BodyDescriptor bd) {
             expect(Part.class);
-
             Part e = (Part)stack.peek();
             try {
-                MimeMultipart multiPart = new MimeMultipart(e.getContentType());
+            	String contentType = e.getContentType();
+            	if( contentType.contains( "multipart/signed" ) ) {
+            		multipartSigned = true;
+            	}
+                MimeMultipart multiPart = new MimeMultipart(contentType);
                 e.setBody(multiPart);
                 stack.addFirst(multiPart);
             } catch (MessagingException me) {
@@ -519,6 +530,20 @@ public class MimeMessage extends Message {
 
         public void body(BodyDescriptor bd, InputStream in) throws IOException {
             expect(Part.class);
+            Body body = null;
+            if( multipartSigned && bd.getMimeType().contains( "text/" ) ) {
+
+            	body = new BinaryTempFileBody();
+                OutputStream out = ( ( BinaryTempFileBody )body ).getOutputStream();
+                try {
+                    IOUtils.copy(in, out);
+                } finally {
+                    out.close();
+                }
+
+            } else {
+            	body = MimeUtility.decodeBody(in, bd.getTransferEncoding());
+            }
             try {
                 Body body = MimeUtility.decodeBody(in,
                         bd.getTransferEncoding(), bd.getMimeType());
@@ -577,8 +602,21 @@ public class MimeMessage extends Message {
         @Override
         public void field(Field parsedField) throws MimeException {
             expect(Part.class);
+            // We need the original, unparsed header values for PGP/MIME signature calculation
+            byte[] rawByteValue = null;
+            byte[] rawBytes = parsedField.getRaw().toByteArray();
+        	String raw = new String( rawBytes );
+        	if( raw.length() > 0 ) {
+
+        		int index = raw.indexOf( ":" );
+        		if( index != -1 && raw.length() > index+2 ) {
+        			rawByteValue = raw.substring( index+2 ).getBytes();
+        		}
+
+        	}
+
             try {
-                ((Part)stack.peek()).addHeader(parsedField.getName(), parsedField.getBody().trim());
+                ((Part)stack.peek()).addHeader(parsedField.getName(), parsedField.getBody().trim(), rawByteValue);
             } catch (MessagingException me) {
                 throw new Error(me);
             }

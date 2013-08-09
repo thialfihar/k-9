@@ -15,6 +15,7 @@ import org.apache.james.mime4j.codec.Base64InputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
 import org.apache.james.mime4j.util.MimeUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -1058,6 +1059,7 @@ public class MimeUtility {
                             byte[] buf = new byte[256];
                             in.read(buf, 0, buf.length);
                             String str = new String(buf, "US-ASCII");
+                            
 
                             if (str.isEmpty()) {
                                 return "";
@@ -1189,8 +1191,7 @@ public class MimeUtility {
         }
         return tempBody;
     }
-
-
+    
     /**
      * Empty base class for the class hierarchy used by
      * {@link MimeUtility#extractTextAndAttachments(Context, Message)}.

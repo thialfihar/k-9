@@ -44,7 +44,11 @@ public class MimeBodyPart extends BodyPart {
     }
 
     public void addHeader(String name, String value) throws MessagingException {
-        mHeader.addHeader(name, value);
+        mHeader.addHeader(name, value, null);
+    }
+
+    public void addHeader(String name, String value,byte[] rawByteValue) throws MessagingException {
+        mHeader.addHeader(name, value, rawByteValue);
     }
 
     public void setHeader(String name, String value) {
@@ -127,6 +131,10 @@ public class MimeBodyPart extends BodyPart {
 
     public int getSize() {
         return mSize;
+    }
+
+    public void writeHeadersTo( OutputStream out ) throws IOException {
+    	mHeader.writeTo( out );
     }
 
     /**

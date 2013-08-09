@@ -5,14 +5,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public interface Part {
+	
     public void addHeader(String name, String value) throws MessagingException;
+    
+    public void addHeader(String name, String value, byte[] rawByteValue) throws MessagingException;
 
     public void removeHeader(String name) throws MessagingException;
 
     public void setHeader(String name, String value) throws MessagingException;
 
     public Body getBody();
-
+   
     public String getContentType() throws MessagingException;
 
     public String getDisposition() throws MessagingException;
