@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    
     <release version="4.505" versioncode="18005" >
+        <change>Support for receipt of PGP/MIME signed and encrypted messages</change>
         <change>Major performance improvements in folder lists</change>
-        <change>Catalan, Chinese and Russian translation updates</change>
         <change>Several bugfixes</change>
     </release>
+    
     <release version="4.503" versioncode="18003" >
         <change>Added additional shortcuts to the Folder list</change>
         <change>Tweaks to checkboxes and color chip display</change>
@@ -20,6 +22,7 @@
     <release version="4.502" versioncode="18002" >
         <change>Fixed bug that prevented moving to previous and next message in some situations</change>
         <change>Updated Japanese, Czech, and Brazilian Portuguese translation</change>
+        <change>Fixed a bug that prevented Squeaky Mail from being installed on the same device as K-9</change>
         <change>Fixed a couple of bugs</change>
     </release>
 
@@ -28,10 +31,6 @@
         <change>Updated Greek translation</change>
     </release>
 
-    <release version="4.502" versioncode="18002">
-        <change>Fixed a bug that prevented Squeaky Mail from being installed on the same device as K-9</change>
-    </release>
-    
     <release version="4.331" versioncode="17032" >
         <change>Checking mail from the Unified Inbox is now supported</change>
         <change>Added "mark all as read" to the menu of the message list</change>
