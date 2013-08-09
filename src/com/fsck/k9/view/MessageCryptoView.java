@@ -125,6 +125,7 @@ public class MessageCryptoView extends LinearLayout {
             this.setVisibility(View.VISIBLE);
         } else {
             this.setVisibility(View.GONE);
+            /*
             try {
                 // check for PGP/MIME encryption
                 Part pgp = MimeUtility.findFirstPartByMimeType(message, "application/pgp-encrypted");
@@ -134,6 +135,7 @@ public class MessageCryptoView extends LinearLayout {
             } catch (MessagingException e) {
                 // nothing to do...
             }
+            */
         }
     }
 

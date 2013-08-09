@@ -12,7 +12,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
-//import android.util.Log;
+import android.util.Log;
 
 import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.mail.Message;
@@ -20,10 +20,15 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MimeUtility;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+
+import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
 /**
@@ -42,6 +47,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String APP_NAME_PAID = "KeyRing";
     public static final int VERSION_REQUIRED_MIN = 22;
     public static final int VERSION_REQUIRED_ATTACHMENTS_MIN = 29;
+    public static final int VERSION_REQUIRED_FLOATING_SIGS_MIN = 30;
 
     public static final String AUTHORITY_PAID = "com.imaeses.KeyRing";
     public static final String AUTHORITY_TRIAL = "com.imaeses.trial.KeyRing";
@@ -55,6 +61,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int SELECT_PUBLIC_KEYS = 3;
     public static final int SELECT_SECRET_KEY = 4;
     public static final int DECRYPT_FILE = 5;
+    public static final int VERIFY = 6;
 
     private Uri uriSelectPrivateSigningKey;
     private Uri uriSelectPublicSigningKey;
@@ -67,8 +74,10 @@ public class PGPKeyRing extends CryptoProvider {
     
     public static final String EXTRAS_MSG = "msg";
     public static final String EXTRAS_FILENAME = "file.name";
+    public static final String EXTRAS_DEST_FILENAME = "file.dest.name";
     public static final String EXTRAS_SHOW_FILE = "file.show";
     public static final String EXTRAS_ENCRYPTION_KEYIDS = "keys.enc";
+    public static final String EXTRAS_SIGNATURE = "sig";
     public static final String EXTRAS_SIGNATURE_KEYID = "sig.key";
     public static final String EXTRAS_SIGNATURE_SUCCESS = "sig.success";
     public static final String EXTRAS_SIGNATURE_IDENTITY = "sig.identity";
@@ -85,6 +94,7 @@ public class PGPKeyRing extends CryptoProvider {
         public static final String ENCRYPT_MSG_AND_RETURN = "com.imaeses.keyring.ENCRYPT_MSG_AND_RETURN";
         public static final String DECRYPT_MSG_AND_RETURN = "com.imaeses.keyring.DECRYPT_MSG_AND_RETURN";
         public static final String DECRYPT_FILE_AND_RETURN = "com.imaeses.keyring.DECRYPT_FILE_AND_RETURN";
+        public static final String VERIFY_AND_RETURN = "com.imaeses.keyring.VERIFY_AND_RETURN";
         
     }
     
@@ -432,18 +442,18 @@ public class PGPKeyRing extends CryptoProvider {
         
         if( data != null && data.length() > 0 ) {
             
-            Intent i = new Intent( PGPKeyRingIntent.DECRYPT_MSG_AND_RETURN );
+        	Intent i = new Intent( PGPKeyRingIntent.DECRYPT_MSG_AND_RETURN );
             i.addCategory( Intent.CATEGORY_DEFAULT );
             i.setType( "text/plain" );
             i.putExtra( EXTRAS_MSG, data );
             
             try {
             
-                fragment.startActivityForResult( i, DECRYPT_MESSAGE );
-                success = true;
+            	fragment.startActivityForResult( i, DECRYPT_MESSAGE );
+            	success = true;
             
             } catch( ActivityNotFoundException e ) {
-                Toast.makeText( fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
+            	Toast.makeText( fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
             }
             
         }
@@ -453,7 +463,7 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean decryptFile( Fragment fragment, String filename, boolean showFile ) {
+    public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData ) {
     	
     	boolean success = false;
         
@@ -464,6 +474,11 @@ public class PGPKeyRing extends CryptoProvider {
             i.setType( "text/plain" );
             i.putExtra( EXTRAS_FILENAME, filename );
             i.putExtra( EXTRAS_SHOW_FILE, showFile );
+            
+            String destFilename = pgpData.getFilename();
+            if( destFilename != null ) {
+            	i.putExtra( EXTRAS_DEST_FILENAME, destFilename );
+            }
             
             try {
             
@@ -477,6 +492,34 @@ public class PGPKeyRing extends CryptoProvider {
         }
         
         return success;
+    	
+    }
+    
+    @Override
+    public boolean verify( Fragment fragment, byte[] data, String sig, PgpData pgpData ) {
+    	
+    	boolean success = false;
+    	
+    	if( data != null && sig != null ) {
+    		
+    		Intent i = new Intent( PGPKeyRingIntent.VERIFY_AND_RETURN );
+    		i.addCategory( Intent.CATEGORY_DEFAULT );
+            i.setType( "text/plain" );
+            i.putExtra( EXTRAS_MSG, data );
+            i.putExtra( EXTRAS_SIGNATURE, sig );
+            
+            try {
+                
+                fragment.startActivityForResult( i, VERIFY );
+                success = true;
+            
+            } catch( ActivityNotFoundException e ) {
+                Toast.makeText( fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
+            }
+            
+    	}
+    	
+    	return success;
     	
     }
     
@@ -547,6 +590,24 @@ public class PGPKeyRing extends CryptoProvider {
 
         switch( requestCode ) {
         
+        case VERIFY:
+        	
+        	if( resultCode == Activity.RESULT_OK && data != null ) {
+
+                pgpData.setSignatureUserId( data.getStringExtra( EXTRAS_SIGNATURE_IDENTITY ) );
+                pgpData.setSignatureKeyId( data.getLongExtra( EXTRAS_SIGNATURE_KEYID, 0 ) );
+                pgpData.setSignatureSuccess( data.getBooleanExtra( EXTRAS_SIGNATURE_SUCCESS, false ) );
+                pgpData.setSignatureUnknown( data.getBooleanExtra( EXTRAS_SIGNATURE_UNKNOWN, false ) );
+    
+                Log.w( NAME, "signature identity: " + pgpData.getSignatureUserId() + ", keyid: " + pgpData.getSignatureKeyId() + ", success: " + pgpData.getSignatureSuccess() + ", sigs unknown: " + pgpData.getSignatureUnknown() );
+                callback.onDecryptDone( pgpData );
+                
+            } 
+            
+
+            break;
+            
+        	
         case DECRYPT_MESSAGE:
             
             if( resultCode == Activity.RESULT_OK && data != null ) {
@@ -556,12 +617,27 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setSignatureSuccess( data.getBooleanExtra( EXTRAS_SIGNATURE_SUCCESS, false ) );
                 pgpData.setSignatureUnknown( data.getBooleanExtra( EXTRAS_SIGNATURE_UNKNOWN, false ) );
     
-                pgpData.setDecryptedData( data.getStringExtra( EXTRAS_MSG ) );
+                String decrypted = data.getStringExtra( EXTRAS_MSG );
+                if( decrypted == null ) {
+                	
+                	String filename = data.getStringExtra( EXTRAS_FILENAME );
+                	if( filename != null ) {
+                		try {
+                			decrypted = IOUtils.toString( new BufferedInputStream( new FileInputStream( filename ) ) );
+                		} catch( Exception e ) {
+                			Log.e( K9.LOG_TAG, "Unable to read decrypted data from file", e );
+                		}
+                	}
+                	
+                }
                 
+                pgpData.setDecryptedData( decrypted );
+            
                 //Log.w( NAME, "signature identity: " + pgpData.getSignatureUserId() + ", keyid: " + pgpData.getSignatureKeyId() + ", success: " + pgpData.getSignatureSuccess() + ", sigs unknown: " + pgpData.getSignatureUnknown() );
                 callback.onDecryptDone( pgpData );
                 
-            }
+            } 
+            
 
             break;
             
@@ -569,6 +645,11 @@ public class PGPKeyRing extends CryptoProvider {
         	
         	if( resultCode == Activity.RESULT_OK && data != null ) {
         		
+        		pgpData.setSignatureUserId( data.getStringExtra( EXTRAS_SIGNATURE_IDENTITY ) );
+                pgpData.setSignatureKeyId( data.getLongExtra( EXTRAS_SIGNATURE_KEYID, 0 ) );
+                pgpData.setSignatureSuccess( data.getBooleanExtra( EXTRAS_SIGNATURE_SUCCESS, false ) );
+                pgpData.setSignatureUnknown( data.getBooleanExtra( EXTRAS_SIGNATURE_UNKNOWN, false ) );
+    
         		pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
         		pgpData.setShowFile( data.getBooleanExtra( EXTRAS_SHOW_FILE, false ) );
         		
@@ -577,7 +658,7 @@ public class PGPKeyRing extends CryptoProvider {
         	}
         	
         	break;
-            
+        	           
         default:
             return false;
 
@@ -672,6 +753,35 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    @Override
+    public boolean supportsPgpMime( Context context ) {
+    	
+    	boolean supportsFloatingSigs = false;
+    	
+    	if( isAvailable( context ) ) { 
+    	
+	    	PackageInfo pi = null;
+	        PackageManager packageManager = context.getPackageManager();
+	        
+	        try {
+	        	if( isTrialVersion ) {
+	        		pi = packageManager.getPackageInfo( PACKAGE_TRIAL, 0 );
+	        	} else {
+	        		pi = packageManager.getPackageInfo( PACKAGE_PAID, 0 );
+	        	}	
+	        } catch( NameNotFoundException e ) {
+	        }
+	        
+	        if( pi != null && pi.versionCode >= VERSION_REQUIRED_FLOATING_SIGS_MIN ) {
+	        	supportsFloatingSigs = true;
+	        }
+	        
+    	}
+        
+        return supportsFloatingSigs;
+        
+    }
+    
     public String getName() {
         return NAME;
     }
@@ -699,7 +809,7 @@ public class PGPKeyRing extends CryptoProvider {
                 c.close();
             }
             
-        } catch (SecurityException e) {
+        } catch( SecurityException e ) {
             Toast.makeText( context, context.getResources().getString( R.string.insufficient_pgpkeyring_permissions ), Toast.LENGTH_LONG ).show();
         }
 

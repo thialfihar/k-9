@@ -82,8 +82,13 @@ public class None extends CryptoProvider {
     }
     
     @Override
-    public boolean decryptFile( Fragment fragment, String filename, boolean showFile ) {
+    public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData ) {
     	return false;
+    }
+    
+    @Override
+    public boolean verify( Fragment fragment, byte[] data, String sig, PgpData pgpData ) {
+    	return false;	
     }
 
     @Override
@@ -98,6 +103,11 @@ public class None extends CryptoProvider {
 
     @Override
     public boolean supportsAttachments( Context context ) {
+    	return false;
+    }
+    
+    @Override
+    public boolean supportsPgpMime( Context context ) {
     	return false;
     }
     

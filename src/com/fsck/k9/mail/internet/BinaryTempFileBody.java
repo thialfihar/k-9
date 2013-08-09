@@ -34,6 +34,21 @@ public class BinaryTempFileBody implements Body {
         mFile.deleteOnExit();
         return new FileOutputStream(mFile);
     }
+    
+    public File getFile() {
+    	return mFile;
+    }
+    
+    public int getSize() {
+    	
+    	int size = 0;
+    	if( mFile != null ) {
+    		size = ( int )mFile.length();
+    	}
+    	
+    	return size;
+    	
+    }
 
     public InputStream getInputStream() throws MessagingException {
         try {

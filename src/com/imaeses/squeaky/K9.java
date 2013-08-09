@@ -564,7 +564,7 @@ public class K9 extends Application {
          * We have to give MimeMessage a temp directory because File.createTempFile(String, String)
          * doesn't work in Android and MimeMessage does not have access to a Context.
          */
-        BinaryTempFileBody.setTempDirectory(getCacheDir());
+        BinaryTempFileBody.setTempDirectory(getExternalCacheDir());
 
         /*
          * Enable background sync of messages

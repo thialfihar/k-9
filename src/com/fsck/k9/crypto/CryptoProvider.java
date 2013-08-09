@@ -28,7 +28,8 @@ abstract public class CryptoProvider {
     abstract public boolean selectEncryptionKeys(Activity activity, String emails, PgpData pgpData);
     abstract public boolean encrypt(Activity activity, String data, PgpData pgpData);
     abstract public boolean decrypt(Fragment fragment, String data, PgpData pgpData);
-    abstract public boolean decryptFile( Fragment fragment, String filename, boolean showFile );
+    abstract public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData );
+    abstract public boolean verify( Fragment fragment, byte[] data, String sig, PgpData pgpData );
     abstract public long[] getSecretKeyIdsFromEmail(Context context, String email);
     abstract public long[] getPublicKeyIdsFromEmail(Context context, String email);
     abstract public boolean hasSecretKeyForEmail(Context context, String email);
@@ -37,6 +38,7 @@ abstract public class CryptoProvider {
     abstract public String getName();
     abstract public boolean test(Context context);
     abstract public boolean supportsAttachments( Context context );
+    abstract public boolean supportsPgpMime( Context context );
 
     public static CryptoProvider createInstance(String name) {
         if (Apg.NAME.equals(name)) {

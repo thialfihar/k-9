@@ -51,8 +51,8 @@ public class MimeHeader {
         return header[0];
     }
 
-    public void addHeader(String name, String value) {
-        mFields.add(new Field(name, MimeUtility.foldAndEncode(value)));
+    public void addHeader(String name, String value, byte[] rawByteValue) {
+        mFields.add(new Field(name, MimeUtility.foldAndEncode(value), rawByteValue));
     }
 
     public void setHeader(String name, String value) {
@@ -60,7 +60,7 @@ public class MimeHeader {
             return;
         }
         removeHeader(name);
-        addHeader(name, value);
+        addHeader(name, value, null);
     }
 
     public Set<String> getHeaderNames() {
@@ -108,10 +108,17 @@ public class MimeHeader {
                     }
                     v = EncoderUtil.encodeEncodedWord(field.value, charset);
                 }
-
+                
                 writer.write(field.name);
                 writer.write(": ");
-                writer.write(v);
+                writer.flush();
+                if( field.rawByteValue != null ) {
+                	out.write( field.rawByteValue );
+                	out.flush();
+                } else {
+                	writer.write(v);
+                }
+                
                 writer.write("\r\n");
             }
         }
@@ -133,11 +140,12 @@ public class MimeHeader {
 
     static class Field {
         final String name;
-
+        final byte[] rawByteValue;
         final String value;
 
-        public Field(String name, String value) {
+        public Field(String name, String value, byte[] rawByteValue) {
             this.name = name;
+            this.rawByteValue = rawByteValue;
             this.value = value;
         }
 
@@ -152,7 +160,7 @@ public class MimeHeader {
     public void setCharset(String charset) {
         mCharset = charset;
     }
-
+    
     public MimeHeader clone() {
         MimeHeader header = new MimeHeader();
         header.mCharset = mCharset;

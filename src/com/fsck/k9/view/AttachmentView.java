@@ -37,6 +37,7 @@ import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
+import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.store.LocalStore.LocalAttachmentBodyPart;
@@ -50,7 +51,8 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     public Button viewButton;
     public Button downloadButton;
     public CheckBox decrypt;
-    public LocalAttachmentBodyPart part;
+    //public LocalAttachmentBodyPart part;
+    public Part part;
     private Message mMessage;
     private Account mAccount;
     private MessagingController mController;
@@ -114,11 +116,11 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     public boolean populateFromPart(Part inputPart, Message message, Account account,
             MessagingController controller, MessagingListener listener) throws MessagingException {
         boolean firstClassAttachment = true;
-        part = (LocalAttachmentBodyPart) inputPart;
+        part = inputPart;
 
         contentType = MimeUtility.unfoldAndDecode(part.getContentType());
         String contentDisposition = MimeUtility.unfoldAndDecode(part.getDisposition());
-
+        
         name = MimeUtility.getHeaderParameter(contentType, "name");
         if (name == null) {
             name = MimeUtility.getHeaderParameter(contentDisposition, "filename");
@@ -149,6 +151,8 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             try {
                 size = Integer.parseInt(sizeParam);
             } catch (NumberFormatException e) { /* ignore */ }
+        } else if( part.getBody() instanceof BinaryTempFileBody ) {
+        	size = ( ( BinaryTempFileBody )part.getBody() ).getSize();
         }
 
         contentType = MimeUtility.getMimeTypeForViewing(part.getMimeType(), name);
@@ -156,13 +160,17 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         TextView attachmentInfo = (TextView) findViewById(R.id.attachment_info);
         ImageView attachmentIcon = (ImageView) findViewById(R.id.attachment_icon);
         viewButton = (Button) findViewById(R.id.view);
-        downloadButton = (Button) findViewById(R.id.download);
         decrypt = ( CheckBox )findViewById( R.id.decrypt );
 		decrypt.setChecked( false );
         decrypt.setVisibility( View.GONE );
+        downloadButton = (Button) findViewById(R.id.download);
+        
+        if( !( part instanceof LocalAttachmentBodyPart ) ) {
+        	downloadButton.setVisibility( View.GONE );
+        }
         
         if( ( name.endsWith( ".asc" ) && contentType.equals( "text/plain" ) ) ||
-            ( name.endsWith( ".gpg" ) && contentType.equals( "application/octet-stream" ) ) ) {
+            ( ( name.endsWith( ".gpg" ) || name.endsWith( ".pgp" ) ) && contentType.equals( "application/octet-stream" ) ) ) {
         
         	CryptoProvider crypto = account.getCryptoProvider();
         	if( crypto.supportsAttachments( mContext ) ) {
@@ -226,19 +234,21 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     }
 
     private Bitmap getPreviewIcon() {
-        try {
-            return BitmapFactory.decodeStream(
+    	if( part instanceof LocalAttachmentBodyPart ) {
+    		try {
+    			return BitmapFactory.decodeStream(
                        mContext.getContentResolver().openInputStream(
                            AttachmentProvider.getAttachmentThumbnailUri(mAccount,
-                                   part.getAttachmentId(),
+                                   ( ( LocalAttachmentBodyPart )part ).getAttachmentId(),
                                    62,
                                    62)));
-        } catch (Exception e) {
+    		} catch (Exception e) {
             /*
              * We don't care what happened, we just return null for the preview icon.
              */
-            return null;
-        }
+    		}
+    	}
+        return null;
     }
 
     private void onViewButtonClicked() {
@@ -257,10 +267,14 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
      * @param directory: the base dir where the file should be saved.
      */
     public void writeFile(File directory) {
+    	if( !( part instanceof LocalAttachmentBodyPart ) ) {
+    		return;
+    	}
+    	
         try {
             String filename = Utility.sanitizeFilename(name);
             File file = Utility.createUniqueFile(directory, filename);
-            Uri uri = AttachmentProvider.getAttachmentUri(mAccount, part.getAttachmentId());
+            Uri uri = AttachmentProvider.getAttachmentUri(mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId());
             InputStream in = mContext.getContentResolver().openInputStream(uri);
             OutputStream out = new FileOutputStream(file);
             IOUtils.copy(in, out);
@@ -286,6 +300,9 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     }
 
     public void saveFile() {
+    	if( !( part instanceof LocalAttachmentBodyPart ) ) {
+    		return;
+    	}
         //TODO: Can the user save attachments on the internal filesystem or sd card only?
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             /*
@@ -304,7 +321,15 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
 
 
     public void showFile() {
-        Uri uri = AttachmentProvider.getAttachmentUriForViewing(mAccount, part.getAttachmentId());
+        Uri uri = null;
+        if( part instanceof LocalAttachmentBodyPart ) {
+        	uri = AttachmentProvider.getAttachmentUriForViewing(mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId());
+        } else if( part.getBody() instanceof BinaryTempFileBody ){
+        	uri = Uri.fromFile( ( ( BinaryTempFileBody )part.getBody() ).getFile() );
+        } else {
+        	return;
+        }
+        
         Intent intent = new Intent(Intent.ACTION_VIEW);
         // We explicitly set the ContentType in addition to the URI because some attachment viewers (such as Polaris office 3.0.x) choke on documents without a mime type
         intent.setDataAndType(uri, contentType);
@@ -337,7 +362,15 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             return;
         }
         try {
-            Uri uri = AttachmentProvider.getAttachmentUriForViewing(mAccount, part.getAttachmentId());
+        	Uri uri = null;
+            if( part instanceof LocalAttachmentBodyPart ) {
+            	AttachmentProvider.getAttachmentUriForViewing(mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId());
+            } else if( part.getBody() instanceof BinaryTempFileBody ){
+            	uri = Uri.fromFile( ( ( BinaryTempFileBody )part.getBody() ).getFile() );
+            } else {
+            	return;
+            }
+            //Uri uri = AttachmentProvider.getAttachmentUriForViewing(mAccount, part.getAttachmentId());
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(uri);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);

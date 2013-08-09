@@ -37,9 +37,13 @@ public class MimeBodyPart extends BodyPart {
     protected String getFirstHeader(String name) {
         return mHeader.getFirstHeader(name);
     }
-
+    
     public void addHeader(String name, String value) throws MessagingException {
-        mHeader.addHeader(name, value);
+        mHeader.addHeader(name, value, null);
+    }
+    
+    public void addHeader(String name, String value,byte[] rawByteValue) throws MessagingException {
+        mHeader.addHeader(name, value, rawByteValue);
     }
 
     public void setHeader(String name, String value) throws MessagingException {
@@ -57,7 +61,7 @@ public class MimeBodyPart extends BodyPart {
     public Body getBody() {
         return mBody;
     }
-
+    
     public void setBody(Body body) throws MessagingException {
         this.mBody = body;
         if (body instanceof com.fsck.k9.mail.Multipart) {
@@ -74,7 +78,7 @@ public class MimeBodyPart extends BodyPart {
             setHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING, "quoted-printable");
         }
     }
-
+    
     public String getContentType() throws MessagingException {
         String contentType = getFirstHeader(MimeHeader.HEADER_CONTENT_TYPE);
         return (contentType == null) ? "text/plain" : contentType;
@@ -109,7 +113,11 @@ public class MimeBodyPart extends BodyPart {
     public int getSize() {
         return mSize;
     }
-
+    
+    public void writeHeadersTo( OutputStream out ) throws IOException {
+    	mHeader.writeTo( out );
+    }
+    
     /**
      * Write the MimeMessage out in MIME format.
      */
@@ -122,4 +130,5 @@ public class MimeBodyPart extends BodyPart {
             mBody.writeTo(out);
         }
     }
+    
 }
