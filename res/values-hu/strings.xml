@@ -92,6 +92,8 @@
     <string name="cancel_action">Mégse</string>
     <string name="send_action">Küldés</string>
     <string name="send_again_action">Újraküldés</string>
+    <string name="select_action">Megjelöl</string>
+    <string name="deselect_action">Nem jelöl</string>
     <string name="reply_action">Válasz</string>
     <string name="reply_all_action">Válasz mindenkinek</string>
     <string name="delete_action">Törlés</string>
@@ -99,8 +101,8 @@
     <string name="spam_action">Levélszemét</string>
     <string name="forward_action">Továbbítás</string>
     <string name="move_action">Áthelyez</string>
-    <!-- NEW: <string name="single_message_options_action">Send</string>-->
-    <!-- NEW: <string name="refile_action">Refile</string>-->
+    <!-- NEW: <string name="single_message_options_action">Send…</string>-->
+    <!-- NEW: <string name="refile_action">Refile…</string>-->
     <string name="continue_action">Folytatás</string>
     <string name="back_action">Vissza</string>
     <string name="done_action">Rendben</string> <!--  Used to complete a multi-step process -->
@@ -184,13 +186,13 @@
     <!-- NEW: <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> more on <xliff:g id="account">%s</xliff:g></string>-->
 
     <!-- NEW: <string name="notification_action_reply">Reply</string>-->
-    <!-- NEW: <string name="notification_action_read">Mark Read</string>-->
+    <!-- NEW: <string name="notification_action_mark_as_read">Mark Read</string>-->
     <!-- NEW: <string name="notification_action_delete">Delete</string>-->
     <!-- NEW: <string name="notification_certificate_error_title">Certificate error for <xliff:g id="account">%s</xliff:g></string>-->
     <!-- NEW: <string name="notification_certificate_error_text">Check your server settings</string>-->
 
-    <string name="notification_bg_sync_ticker">Levelek ellenörzése: <xliff:g id="account">%s</xliff:g>:<xliff:g id="folder">%s</xliff:g></string>
-    <string name="notification_bg_sync_title">Levelek ellenörzése</string>
+    <string name="notification_bg_sync_ticker">Levelek ellenőrzése: <xliff:g id="account">%s</xliff:g>:<xliff:g id="folder">%s</xliff:g></string>
+    <string name="notification_bg_sync_title">Levelek ellenőrzése</string>
     <string name="notification_bg_send_ticker">Küldés a <xliff:g id="account">%s</xliff:g> fiókkal</string>
     <string name="notification_bg_send_title">Levél küldése</string>
     <string name="notification_bg_title_separator">:</string>
@@ -271,6 +273,8 @@
     <string name="message_discarded_toast">Levél eldobva</string>
     <string name="message_saved_toast">Levél mentve a piszkozatokba</string>
 
+    <string name="global_settings_flag_label">Csillagok</string>
+    <string name="global_settings_flag_summary">Csillag jelzi a fontos leveleket</string>
     <string name="global_settings_checkbox_label">Többszörös kijelölés</string>
     <string name="global_settings_checkbox_summary">Kijelölő négyzetet a levelek mellet</string>
     <string name="global_settings_preview_lines_label">Előnézeti sorok száma</string>
@@ -288,7 +292,7 @@
     <!-- NEW: <string name="global_settings_folderlist_wrap_folder_names_label">Wrap long folder names</string>-->
     <!-- NEW: <string name="global_settings_folderlist_wrap_folder_names_summary">Use multiple lines to show long folder names</string>-->
 
-    <string name="global_settings_messageview_fixedwidth_label">Fix szélleségű betűk</string>
+    <string name="global_settings_messageview_fixedwidth_label">Fix szélességű betűk</string>
     <string name="global_settings_messageview_fixedwidth_summary">Fix szélességű betűtípus használata a sima szöveges üzeneteknél</string>
     <!-- NEW: <string name="global_settings_messageview_autofit_width_label">Auto-fit messages</string>-->
     <!-- NEW: <string name="global_settings_messageview_autofit_width_summary">Shrink messages to fit the screen</string>-->
@@ -310,9 +314,9 @@
     <string name="global_settings_notification_hide_subject_always">Mindig</string>
 
     <!-- NEW: <string name="global_settings_notification_quick_delete_title">Show \'Delete\' button</string>-->
-    <!-- NEW: <string name="global_settings_notification_quick_delete_never">Never</string>-->
+    <string name="global_settings_notification_quick_delete_never">Soha</string>
     <!-- NEW: <string name="global_settings_notification_quick_delete_when_single_msg">For single message notification</string>-->
-    <!-- NEW: <string name="global_settings_notification_quick_delete_always">Always</string>-->
+    <string name="global_settings_notification_quick_delete_always">Mindig</string>
     <!-- NEW: <string name="global_settings_notification_quick_delete_description">Show a button in the notification that allows quick message deletion</string>-->
 
     <!-- NEW: <string name="global_settings_batch_buttons">Batch buttons</string>-->
@@ -331,7 +335,7 @@
     <string name="quiet_time_ends">Csendes mód vége</string>
 
     <string name="account_setup_basics_title">Új fiók létrehozása</string>
-    <string name="account_setup_basics_email_hint">Email cím</string>
+    <string name="account_setup_basics_email_hint">E-mail cím</string>
     <string name="account_setup_basics_password_hint">Jelszó</string>
     <string name="account_setup_basics_manual_setup_action">Kézi beállítás</string>
 
@@ -363,10 +367,10 @@
     <string name="account_setup_incoming_security_label">Kapcsolat biztonsága</string>
     <string name="account_setup_incoming_auth_type_label">Hitelesítés típus</string>
     <string name="account_setup_incoming_security_none_label">Nincs</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL (ha elérhető)</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL (mindig)</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS (ha elérhető)</string>
-    <string name="account_setup_incoming_security_tls_label">TLS (mindig)</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS (ha elérhető)</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS (mindig)</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS (ha elérhető)</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS (mindig)</string>
 
     <string name="account_setup_incoming_delete_policy_label">Üzenet törlésekor</string>
     <string name="account_setup_incoming_delete_policy_never_label">Ne törlődjön a szerverről</string>
@@ -514,7 +518,7 @@
     <string name="account_settings_message_format_label">Levél formátuma</string>
     <string name="account_settings_message_format_text">Sima szöveg (képek és formázás nélkül)</string>
     <string name="account_settings_message_format_html">HTML (képekkel és formázással)</string>
-    <!-- NEW: <string name="account_settings_message_format_auto">Automatic</string>-->
+    <string name="account_settings_message_format_auto">Automatikus</string>
 
     <!-- NEW: <string name="account_settings_always_show_cc_bcc_label">Always show Cc/Bcc</string>-->
 
@@ -767,7 +771,7 @@
     <string name="folder_list_filter_hint">mappa neve</string>
 
     <string name="folder_list_display_mode_label">Mappák megjelenítése</string>
-    <string name="folder_list_display_mode_all">Minen mappa</string>
+    <string name="folder_list_display_mode_all">Minden mappa</string>
     <string name="folder_list_display_mode_first_class">Csak az Elsődleges</string>
     <string name="folder_list_display_mode_first_and_second_class">Első és Másodlagos</string>
     <string name="folder_list_display_mode_not_second_class">Mind, kivéve a Másodlagost</string>
@@ -1117,4 +1121,9 @@
     <!-- NEW: <string name="preposition_for_date">on <xliff:g id="date">%s</xliff:g></string>-->
 
     <!-- NEW: <string name="mark_all_as_read">Mark all as read</string>-->
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

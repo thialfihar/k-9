@@ -91,6 +91,8 @@
     <string name="cancel_action">Cancelar</string>
     <string name="send_action">Enviar</string>
     <string name="send_again_action">Reenviar</string>
+    <string name="select_action">Selecionar</string>
+    <string name="deselect_action">Desselecionar</string>
     <string name="reply_action">Responder</string>
     <string name="reply_all_action">Responder a todos</string>
     <string name="delete_action">Excluir</string>
@@ -98,8 +100,8 @@
     <string name="spam_action">Spam</string>
     <string name="forward_action">Encaminhar</string>
     <string name="move_action">Mover</string>
-    <string name="single_message_options_action">Opções de Mensagens</string>
-    <string name="refile_action">Rearquivar</string>
+    <string name="single_message_options_action">Opções de Mensagens…</string>
+    <string name="refile_action">Rearquivar…</string>
     <string name="continue_action">Continuar</string>
     <string name="back_action">Voltar</string>
     <string name="done_action">Concluído</string> <!--  Used to complete a multi-step process -->
@@ -180,7 +182,7 @@
     <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> mais em <xliff:g id="account">%s</xliff:g></string>
 
     <string name="notification_action_reply">Responder</string>
-    <string name="notification_action_read">Lido</string>
+    <string name="notification_action_mark_as_read">Lido</string>
     <string name="notification_action_delete">Excluir</string>
     <string name="notification_certificate_error_title">Erro no certificado de <xliff:g id="account">%s</xliff:g></string>
     <string name="notification_certificate_error_text">Verifique suas configurações de servidor</string>
@@ -267,6 +269,8 @@
     <string name="message_discarded_toast">Mensagem descartada</string>
     <string name="message_saved_toast">Mensagem salva como rascunho</string>
 
+    <string name="global_settings_flag_label">Mostrar favoritos</string>
+    <string name="global_settings_flag_summary">Estrelas indicam mensagens favoritas</string>
     <string name="global_settings_checkbox_label">Caixas de multi-seleção</string>
     <string name="global_settings_checkbox_summary">Sempre mostrar caixas de multi-seleção</string>
     <string name="global_settings_preview_lines_label">Linhas de visualização</string>
@@ -359,10 +363,10 @@
     <string name="account_setup_incoming_security_label">Tipo de segurança</string>
     <string name="account_setup_incoming_auth_type_label">Tipo de autenticação</string>
     <string name="account_setup_incoming_security_none_label">Nenhum</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL (se disponível)</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL (sempre)</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS (se disponível)</string>
-    <string name="account_setup_incoming_security_tls_label">TLS (sempre)</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS (se disponível)</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS (sempre)</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS (se disponível)</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS (sempre)</string>
 
     <string name="account_setup_incoming_delete_policy_label">Quando eu excluir uma mensagem</string>
     <string name="account_setup_incoming_delete_policy_never_label">Não excluí-la do servidor</string>
@@ -1112,4 +1116,9 @@
     <string name="preposition_for_date">em <xliff:g id="date">%s</xliff:g></string>
 
     <string name="mark_all_as_read">Marcar todas como lidas</string>
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

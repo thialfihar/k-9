@@ -91,6 +91,8 @@
     <string name="cancel_action">Άκυρο</string>
     <string name="send_action">Αποστολή</string>
     <string name="send_again_action">Αποστολή πάλι</string>
+    <string name="select_action">Επιλογή</string>
+    <string name="deselect_action">Απο-επιλογή</string>
     <string name="reply_action">Απάντηση</string>
     <string name="reply_all_action">Απάντηση σε όλους</string>
     <string name="delete_action">Διαγραφή</string>
@@ -98,8 +100,8 @@
     <string name="spam_action">Σκουπιδοταχυδρομείο</string>
     <string name="forward_action">Προώθηση</string>
     <string name="move_action">Μετακίνηση</string>
-    <string name="single_message_options_action">Επιλογές μηνύματος</string>
-    <string name="refile_action">Επαναρχειοθέτηση</string>
+    <string name="single_message_options_action">Επιλογές μηνύματος…</string>
+    <string name="refile_action">Επαναρχειοθέτηση…</string>
     <string name="continue_action">Συνέχεια</string>
     <string name="back_action">Πίσω</string>
     <string name="done_action">Συμπληρώθηκε</string> <!--  Used to complete a multi-step process -->
@@ -180,7 +182,7 @@
     <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> περισσότερα στον <xliff:g id="account">%s</xliff:g></string>
 
     <string name="notification_action_reply">Απάντηση</string>
-    <string name="notification_action_read">Ανάγνωση</string>
+    <string name="notification_action_mark_as_read">Ανάγνωση</string>
     <string name="notification_action_delete">Διαγραφή</string>
     <string name="notification_certificate_error_title">Σφάλμα πιστοποιητικού για <xliff:g id="account">%s</xliff:g></string>
     <string name="notification_certificate_error_text">Ελέγξτε τις ρυθμίσεις του εξυπηρετητή</string>
@@ -267,6 +269,8 @@
     <string name="message_discarded_toast">Το μήνυμα αγνοήθηκε.</string>
     <string name="message_saved_toast">Το μήνυμα αποθηκεύτηκε στα πρόχειρα.</string>
 
+    <string name="global_settings_flag_label">Προβολή αστεριών</string>
+    <string name="global_settings_flag_summary">Τα αστέρια υποδηλώνουν σημαντικά μηνύματα</string>
     <string name="global_settings_checkbox_label">Κουτιά πολλαπλής επιλογής</string>
     <string name="global_settings_checkbox_summary">Προβολή κουτιών επιλογής πάντοτε</string>
     <string name="global_settings_preview_lines_label">Προεπισκόπηση μηνυμάτων</string>
@@ -359,10 +363,10 @@
     <string name="account_setup_incoming_security_label">Ασφάλεια</string>
     <string name="account_setup_incoming_auth_type_label">Πιστοποίηση</string>
     <string name="account_setup_incoming_security_none_label">Καμιά</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL (αν υπάρχει)</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL (πάντοτε)</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS (αν υπάρχει)</string>
-    <string name="account_setup_incoming_security_tls_label">TLS (πάντοτε)</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS (αν υπάρχει)</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS (πάντοτε)</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS (αν υπάρχει)</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS (πάντοτε)</string>
 
     <string name="account_setup_incoming_delete_policy_label">Κατά τη διαγραφή μηνύματος</string>
     <string name="account_setup_incoming_delete_policy_never_label">Να μη διαγράφεται στο server</string>
@@ -1111,4 +1115,9 @@
     <string name="preposition_for_date">την <xliff:g id="date">%s</xliff:g></string>
 
     <!-- NEW: <string name="mark_all_as_read">Mark all as read</string>-->
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

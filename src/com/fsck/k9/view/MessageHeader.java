@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.fsck.k9.FontSizes;
 import com.fsck.k9.activity.misc.ContactPictureLoader;
+import com.fsck.k9.helper.ContactPicture;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.Account;
 import com.fsck.k9.helper.MessageHelper;
@@ -227,15 +228,15 @@ public class MessageHeader extends ScrollView implements OnClickListener {
         Address[] ccAddrs = message.getRecipients(Message.RecipientType.CC);
         boolean fromMe = mMessageHelper.toMe(account, fromAddrs);
 
-        String counterpartyAddress = null;
+        Address counterpartyAddress = null;
         if (fromMe) {
             if (toAddrs.length > 0) {
-                counterpartyAddress = toAddrs[0].getAddress();
+                counterpartyAddress = toAddrs[0];
             } else if (ccAddrs.length > 0) {
-                counterpartyAddress = ccAddrs[0].getAddress();
+                counterpartyAddress = ccAddrs[0];
             }
         } else if (fromAddrs.length > 0) {
-            counterpartyAddress = fromAddrs[0].getAddress();
+            counterpartyAddress = fromAddrs[0];
         }
 
         /*
@@ -254,7 +255,7 @@ public class MessageHeader extends ScrollView implements OnClickListener {
 
         if (K9.showContactPicture()) {
             mContactBadge.setVisibility(View.VISIBLE);
-            mContactsPictureLoader = new ContactPictureLoader(mContext, R.drawable.ic_contact_picture);
+            mContactsPictureLoader = ContactPicture.getContactPictureLoader(mContext);
         }  else {
             mContactBadge.setVisibility(View.GONE);
         }
@@ -276,7 +277,7 @@ public class MessageHeader extends ScrollView implements OnClickListener {
         mDateView.setText(dateTime);
 
         if (K9.showContactPicture()) {
-            mContactBadge.assignContactFromEmail(counterpartyAddress, true);
+            mContactBadge.assignContactFromEmail(counterpartyAddress.getAddress(), true);
             if (counterpartyAddress != null) {
                 mContactsPictureLoader.loadContactPicture(counterpartyAddress, mContactBadge);
             } else {
@@ -292,10 +293,7 @@ public class MessageHeader extends ScrollView implements OnClickListener {
         mForwardedIcon.setVisibility(message.isSet(Flag.FORWARDED) ? View.VISIBLE : View.GONE);
         mFlagged.setChecked(message.isSet(Flag.FLAGGED));
 
-        int chipColor = mAccount.getChipColor();
-        int chipColorAlpha = (!message.isSet(Flag.SEEN)) ? 255 : 127;
-        mChip.setBackgroundColor(chipColor);
-        mChip.getBackground().setAlpha(chipColorAlpha);
+        mChip.setBackgroundColor(mAccount.getChipColor());
 
         setVisibility(View.VISIBLE);
 

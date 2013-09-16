@@ -91,6 +91,8 @@
     <string name="cancel_action">取消</string>
     <string name="send_action">寄送</string>
     <string name="send_again_action">再次寄送</string>
+    <string name="select_action">選擇</string>
+    <string name="deselect_action">取消選擇</string>
     <string name="reply_action">回覆</string>
     <string name="reply_all_action">全部回覆</string>
     <string name="delete_action">刪除</string>
@@ -98,8 +100,8 @@
     <string name="spam_action">標記為垃圾</string>
     <string name="forward_action">轉寄</string>
     <string name="move_action">移動</string>
-    <string name="single_message_options_action">訊息選項</string>
-    <string name="refile_action">Refile</string>
+    <string name="single_message_options_action">訊息選項…</string>
+    <!-- NEW: <string name="refile_action">Refile…</string>-->
     <string name="continue_action">繼續</string>
     <string name="back_action">返回</string>
     <string name="done_action">完成</string> <!--  Used to complete a multi-step process -->
@@ -178,7 +180,7 @@
     <string name="notification_additional_messages" formatted="false">+ 來自%s已超過%d則訊息 </string>
 
     <string name="notification_action_reply">回覆</string>
-    <string name="notification_action_read">開啟</string>
+    <string name="notification_action_mark_as_read">開啟</string>
     <string name="notification_action_delete">刪除</string>
     <string name="notification_certificate_error_title">驗證失敗</string>
     <string name="notification_certificate_error_text">檢查你的伺服器設定</string>
@@ -267,6 +269,8 @@
     <string name="message_discarded_toast">郵件已忽略</string>
     <string name="message_saved_toast">郵件已儲存為草稿</string>
 
+    <string name="global_settings_flag_label">顯示星號</string>
+    <string name="global_settings_flag_summary">顯示標記過星號的郵件</string>
     <string name="global_settings_checkbox_label">多選核取方塊</string>
     <string name="global_settings_checkbox_summary">預設顯示多選核取方塊</string>
     <string name="global_settings_preview_lines_label">預覽行數</string>
@@ -359,10 +363,10 @@
     <string name="account_setup_incoming_security_label">加密類型</string>
     <string name="account_setup_incoming_auth_type_label">身份驗證類型</string>
     <string name="account_setup_incoming_security_none_label">無</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL（如果可用）</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL（預設）</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS（如果可用）</string>
-    <string name="account_setup_incoming_security_tls_label">TLS（預設）</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS（如果可用）</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS（預設）</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS（如果可用）</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS（預設）</string>
 
     <string name="account_setup_incoming_delete_policy_label">當我刪除郵件時</string>
     <string name="account_setup_incoming_delete_policy_never_label">不要從伺服器上刪除</string>
@@ -1103,4 +1107,9 @@
     <string name="preposition_for_date">於 %s</string>
 
     <string name="mark_all_as_read">標記全部為已讀</string>
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

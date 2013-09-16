@@ -91,6 +91,8 @@
     <string name="cancel_action">Відмінити</string>
     <string name="send_action">Надіслати</string>
     <string name="send_again_action">Надіслати знову</string>
+    <string name="select_action">Вибрати</string>
+    <string name="deselect_action">Скасувати вибір</string>
     <string name="reply_action">Відповісти</string>
     <string name="reply_all_action">Відповісти всім</string>
     <string name="delete_action">Видалити</string>
@@ -98,8 +100,8 @@
     <string name="spam_action">Спам</string>
     <string name="forward_action">Переслати</string>
     <string name="move_action">Перемістити</string>
-    <!-- NEW: <string name="single_message_options_action">Send</string>-->
-    <!-- NEW: <string name="refile_action">Refile</string>-->
+    <!-- NEW: <string name="single_message_options_action">Send…</string>-->
+    <!-- NEW: <string name="refile_action">Refile…</string>-->
     <string name="continue_action">Продовжити</string>
     <string name="back_action">Назад</string>
     <string name="done_action">Готово</string> <!--  Used to complete a multi-step process -->
@@ -184,7 +186,7 @@
     <!-- NEW: <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> more on <xliff:g id="account">%s</xliff:g></string>-->
 
     <!-- NEW: <string name="notification_action_reply">Reply</string>-->
-    <!-- NEW: <string name="notification_action_read">Mark Read</string>-->
+    <!-- NEW: <string name="notification_action_mark_as_read">Mark Read</string>-->
     <!-- NEW: <string name="notification_action_delete">Delete</string>-->
     <!-- NEW: <string name="notification_certificate_error_title">Certificate error for <xliff:g id="account">%s</xliff:g></string>-->
     <!-- NEW: <string name="notification_certificate_error_text">Check your server settings</string>-->
@@ -271,6 +273,8 @@
     <string name="message_discarded_toast">Повідомлення скасовано</string>
     <string name="message_saved_toast">Повідомлення збережено як чернетка</string>
 
+    <string name="global_settings_flag_label">Показувати зірочки</string>
+    <string name="global_settings_flag_summary">Зірочки показують відмічені повідомлення</string>
     <string name="global_settings_checkbox_label">Прапорці для множинного вибору</string>
     <string name="global_settings_checkbox_summary">Завжди показувати прапорці множинного вибору</string>
     <string name="global_settings_preview_lines_label">Рядки попереднього перегляду</string>
@@ -363,10 +367,10 @@
     <string name="account_setup_incoming_security_label">Тип системи захисту</string>
     <string name="account_setup_incoming_auth_type_label">Метод автентифікації</string>
     <string name="account_setup_incoming_security_none_label">Немає</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL (якщо доступно)</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL (завжди)</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS (якщо доступно)</string>
-    <string name="account_setup_incoming_security_tls_label">TLS (завжди)</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS (якщо доступно)</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS (завжди)</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS (якщо доступно)</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS (завжди)</string>
 
     <string name="account_setup_incoming_delete_policy_label">Коли повідомлення видалено</string>
     <string name="account_setup_incoming_delete_policy_never_label">Не видаляти на сервері</string>
@@ -1117,4 +1121,9 @@
     <!-- NEW: <string name="preposition_for_date">on <xliff:g id="date">%s</xliff:g></string>-->
 
     <!-- NEW: <string name="mark_all_as_read">Mark all as read</string>-->
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

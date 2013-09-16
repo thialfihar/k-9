@@ -91,6 +91,8 @@
     <string name="cancel_action">Fortryd</string>
     <string name="send_action">Send</string>
     <string name="send_again_action">Send igen</string>
+    <string name="select_action">Vælg</string>
+    <string name="deselect_action">Fravælg</string>
     <string name="reply_action">Svar</string>
     <string name="reply_all_action">Svar alle</string>
     <string name="delete_action">Slet</string>
@@ -98,8 +100,8 @@
     <string name="spam_action">Spam</string>
     <string name="forward_action">Videresend</string>
     <string name="move_action">Flyt</string>
-    <!-- NEW: <string name="single_message_options_action">Send</string>-->
-    <!-- NEW: <string name="refile_action">Refile</string>-->
+    <!-- NEW: <string name="single_message_options_action">Send…</string>-->
+    <!-- NEW: <string name="refile_action">Refile…</string>-->
     <string name="continue_action">Fortsæt</string>
     <!-- NEW: <string name="back_action">Back</string>-->
     <string name="done_action">Afslut</string> <!--  Used to complete a multi-step process -->
@@ -184,7 +186,7 @@
     <!-- NEW: <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> more on <xliff:g id="account">%s</xliff:g></string>-->
 
     <!-- NEW: <string name="notification_action_reply">Reply</string>-->
-    <!-- NEW: <string name="notification_action_read">Mark Read</string>-->
+    <!-- NEW: <string name="notification_action_mark_as_read">Mark Read</string>-->
     <!-- NEW: <string name="notification_action_delete">Delete</string>-->
     <!-- NEW: <string name="notification_certificate_error_title">Certificate error for <xliff:g id="account">%s</xliff:g></string>-->
     <!-- NEW: <string name="notification_certificate_error_text">Check your server settings</string>-->
@@ -271,6 +273,8 @@
     <string name="message_discarded_toast">Mail kasseret</string>
     <string name="message_saved_toast">Mail gemt som kladde</string>
 
+    <string name="global_settings_flag_label">Vis stjerner</string>
+    <string name="global_settings_flag_summary">Stjerne indikerer mails med flag</string>
     <string name="global_settings_checkbox_label">Checkbokse for multible valg</string>
     <string name="global_settings_checkbox_summary">Vis altid checkbokse for multible valg</string>
     <string name="global_settings_preview_lines_label">Linier i forhåndsvisning</string>
@@ -363,10 +367,10 @@
     <string name="account_setup_incoming_security_label">Sikkerhed</string>
     <string name="account_setup_incoming_auth_type_label">Autentifikations type</string>
     <string name="account_setup_incoming_security_none_label">Ingen</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL (hvis tilgængelig)</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL (altid)</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS (hvis tilgængelig)</string>
-    <string name="account_setup_incoming_security_tls_label">TLS (altid)</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS (hvis tilgængelig)</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS (altid)</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS (hvis tilgængelig)</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS (altid)</string>
 
     <string name="account_setup_incoming_delete_policy_label">Når jeg sletter en mail</string>
     <string name="account_setup_incoming_delete_policy_never_label">Undlad at slette på server</string>
@@ -1116,4 +1120,9 @@
     <!-- NEW: <string name="preposition_for_date">on <xliff:g id="date">%s</xliff:g></string>-->
 
     <!-- NEW: <string name="mark_all_as_read">Mark all as read</string>-->
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

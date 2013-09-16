@@ -234,21 +234,23 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     }
 
     private Bitmap getPreviewIcon() {
+		Bitmap icon = null;
     	if( part instanceof LocalAttachmentBodyPart ) {
     		try {
-    			return BitmapFactory.decodeStream(
-                       mContext.getContentResolver().openInputStream(
+    			InputStream input = mContext.getContentResolver().openInputStream(
                            AttachmentProvider.getAttachmentThumbnailUri(mAccount,
                                    ( ( LocalAttachmentBodyPart )part ).getAttachmentId(),
                                    62,
-                                   62)));
+                                   62));
+    			icon = BitmapFactory.decodeStream(input);
+    			input.close();
     		} catch (Exception e) {
-            /*
-             * We don't care what happened, we just return null for the preview icon.
-             */
+    			/*
+    			 * We don't care what happened, we just return null for the preview icon.
+    			 */
     		}
     	}
-        return null;
+        return icon;
     }
 
     private void onViewButtonClicked() {

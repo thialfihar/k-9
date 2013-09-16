@@ -91,6 +91,8 @@
     <string name="cancel_action">Peruuta</string>
     <string name="send_action">Lähetä</string>
     <string name="send_again_action">Lähetä uudelleen</string>
+    <string name="select_action">Valitse</string>
+    <string name="deselect_action">Poista valinta</string>
     <string name="reply_action">Vastaa</string>
     <string name="reply_all_action">Vastaa kaikille</string>
     <string name="delete_action">Poista</string>
@@ -98,8 +100,8 @@
     <string name="spam_action">Roskaposti</string>
     <string name="forward_action">Välitä</string>
     <string name="move_action">Siirrä</string>
-    <string name="single_message_options_action">Viestin asetukset</string>
-    <string name="refile_action">Arkistoi</string>
+    <string name="single_message_options_action">Viestin asetukset…</string>
+    <string name="refile_action">Arkistoi…</string>
     <string name="continue_action">Jatka</string>
     <string name="back_action">Takaisin</string>
     <string name="done_action">Valmis</string> <!--  Used to complete a multi-step process -->
@@ -184,7 +186,7 @@
     <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> viestiä lisää tilillä <xliff:g id="account">%s</xliff:g></string>
 
     <string name="notification_action_reply">Vastaa</string>
-    <string name="notification_action_read">Lue</string>
+    <string name="notification_action_mark_as_read">Lue</string>
     <string name="notification_action_delete">Poista</string>
     <string name="notification_certificate_error_title">Varmennevirhe tilissä <xliff:g id="account">%s</xliff:g></string>
     <string name="notification_certificate_error_text">Tarkista palvelinasetuksesi</string>
@@ -271,6 +273,8 @@
     <string name="message_discarded_toast">Viesti peruutettu</string>
     <string name="message_saved_toast">Viesti tallennettu luonnoksena</string>
 
+    <string name="global_settings_flag_label">Viestin tähdet</string>
+    <string name="global_settings_flag_summary">Tähdet ilmaisevat merkityt viestit</string>
     <string name="global_settings_checkbox_label">Usean valinnan valintaruudut</string>
     <string name="global_settings_checkbox_summary">Näytä aina usean valinnan valintaruudut</string>
     <string name="global_settings_preview_lines_label">Rivien esikatselu</string>
@@ -290,8 +294,8 @@
 
     <string name="global_settings_messageview_fixedwidth_label">Kiinteä kirjasinleveys</string>
     <string name="global_settings_messageview_fixedwidth_summary">Käytä kiinteää kirjasinleveyttä muotoilemattomille viesteille</string>
-    <!-- NEW: <string name="global_settings_messageview_autofit_width_label">Auto-fit messages</string>-->
-    <!-- NEW: <string name="global_settings_messageview_autofit_width_summary">Shrink messages to fit the screen</string>-->
+    <string name="global_settings_messageview_autofit_width_label">Sovita viestit automaattisesti</string>
+    <string name="global_settings_messageview_autofit_width_summary">Kutista viestit sopimaan ruudulle</string>
     <string name="global_settings_messageview_return_to_list_label">Palaa poiston jälkeen listanäkymään</string>
     <string name="global_settings_messageview_return_to_list_summary">Palaa viestilistaan viestin poiston jälkeen</string>
     <string name="global_settings_messageview_show_next_label">Näytä poiston jälkeen seuraava viesti</string>
@@ -363,10 +367,10 @@
     <string name="account_setup_incoming_security_label">Suojauksen tyyppi</string>
     <string name="account_setup_incoming_auth_type_label">Todennuksen tyyppi</string>
     <string name="account_setup_incoming_security_none_label">Ei mitään</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL (jos käytettävissä)</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL (aina)</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS (jos käytettävissä)</string>
-    <string name="account_setup_incoming_security_tls_label">TLS (aina)</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS (jos käytettävissä)</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS (aina)</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS (jos käytettävissä)</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS (aina)</string>
 
     <string name="account_setup_incoming_delete_policy_label">Kun viesti poistetaan</string>
     <string name="account_setup_incoming_delete_policy_never_label">Älä poista palvelimelta</string>
@@ -701,8 +705,8 @@
     <string name="sort_latest_first">Uusimmat viestit ensin</string>
     <string name="sort_subject_alpha">Aiheen mukaan aakkosjärjestyksessä</string>
     <string name="sort_subject_re_alpha">Aiheen mukaan käänteisessä aakkosjärjestyksessä</string>
-    <!-- NEW: <string name="sort_sender_alpha">Sender alphabetical</string>-->
-    <!-- NEW: <string name="sort_sender_re_alpha">Sender reverse alphabetical</string>-->
+    <string name="sort_sender_alpha">Lähettäjän mukaan aakkosjärjestyksessä</string>
+    <string name="sort_sender_re_alpha">Lähettäjän mukaan käänteisessä aakkosjärjestyksessä</string>
     <string name="sort_flagged_first">Tähdellä merkityt ensin</string>
     <string name="sort_flagged_last">Merkitsemättömät ensin</string>
     <string name="sort_unread_first">Lukemattomat ensin</string>
@@ -714,7 +718,7 @@
     <string name="sort_by_date">Päivämäärän mukaan</string>
     <string name="sort_by_arrival">Saapumisajan mukaan</string>
     <string name="sort_by_subject">Aiheen mukaan</string>
-    <!-- NEW: <string name="sort_by_sender">Sender</string>-->
+    <string name="sort_by_sender">Lähettäjän mukaan</string>
     <string name="sort_by_flag">Tähden mukaan</string>
     <string name="sort_by_unread">Luettujen/lukemattomien mukaan</string>
     <string name="sort_by_attach">Liitteiden mukaan</string>
@@ -1114,5 +1118,10 @@
     <string name="last_refresh_time_format_with_push">Päivitetty <xliff:g id="time_with_preposition">%s</xliff:g> (push-tilassa)</string>
     <string name="preposition_for_date"><xliff:g id="date">%s</xliff:g></string>
 
-    <!-- NEW: <string name="mark_all_as_read">Mark all as read</string>-->
+    <string name="mark_all_as_read">Merkitse kaikki luetuiksi</string>
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

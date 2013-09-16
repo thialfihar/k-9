@@ -60,7 +60,7 @@ import com.fsck.k9.mail.FetchProfile;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Folder.FolderType;
-import com.fsck.k9.mail.Folder.OpenMode;
+
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.mail.CertificateValidationException;
@@ -991,7 +991,7 @@ public class MessagingController implements Runnable {
             final LocalStore localStore = account.getLocalStore();
             tLocalFolder = localStore.getFolder(folder);
             final LocalFolder localFolder = tLocalFolder;
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
             localFolder.updateLastUid();
             Message[] localMessages = localFolder.getMessages(null);
             HashMap<String, Message> localUidMap = new HashMap<String, Message>();
@@ -1039,7 +1039,7 @@ public class MessagingController implements Runnable {
                 if (K9.DEBUG)
                     Log.v(K9.LOG_TAG, "SYNC: About to open remote folder " + folder);
 
-                remoteFolder.open(OpenMode.READ_WRITE);
+                remoteFolder.open(Folder.OPEN_MODE_RW);
                 if (Account.EXPUNGE_ON_POLL.equals(account.getExpungePolicy())) {
                     if (K9.DEBUG)
                         Log.d(K9.LOG_TAG, "SYNC: Expunging folder " + account.getDescription() + ":" + folder);
@@ -2074,8 +2074,8 @@ public class MessagingController implements Runnable {
                     return;
                 }
             }
-            remoteFolder.open(OpenMode.READ_WRITE);
-            if (remoteFolder.getMode() != OpenMode.READ_WRITE) {
+            remoteFolder.open(Folder.OPEN_MODE_RW);
+            if (remoteFolder.getMode() != Folder.OPEN_MODE_RW) {
                 return;
             }
 
@@ -2307,8 +2307,8 @@ public class MessagingController implements Runnable {
             if (!remoteSrcFolder.exists()) {
                 throw new MessagingException("processingPendingMoveOrCopy: remoteFolder " + srcFolder + " does not exist", true);
             }
-            remoteSrcFolder.open(OpenMode.READ_WRITE);
-            if (remoteSrcFolder.getMode() != OpenMode.READ_WRITE) {
+            remoteSrcFolder.open(Folder.OPEN_MODE_RW);
+            if (remoteSrcFolder.getMode() != Folder.OPEN_MODE_RW) {
                 throw new MessagingException("processingPendingMoveOrCopy: could not open remoteSrcFolder " + srcFolder + " read/write", true);
             }
 
@@ -2415,8 +2415,8 @@ public class MessagingController implements Runnable {
         }
 
         try {
-            remoteFolder.open(OpenMode.READ_WRITE);
-            if (remoteFolder.getMode() != OpenMode.READ_WRITE) {
+            remoteFolder.open(Folder.OPEN_MODE_RW);
+            if (remoteFolder.getMode() != Folder.OPEN_MODE_RW) {
                 return;
             }
             List<Message> messages = new ArrayList<Message>();
@@ -2459,8 +2459,8 @@ public class MessagingController implements Runnable {
             if (!remoteFolder.exists()) {
                 return;
             }
-            remoteFolder.open(OpenMode.READ_WRITE);
-            if (remoteFolder.getMode() != OpenMode.READ_WRITE) {
+            remoteFolder.open(Folder.OPEN_MODE_RW);
+            if (remoteFolder.getMode() != Folder.OPEN_MODE_RW) {
                 return;
             }
             Message remoteMessage = null;
@@ -2506,8 +2506,8 @@ public class MessagingController implements Runnable {
             if (!remoteFolder.exists()) {
                 return;
             }
-            remoteFolder.open(OpenMode.READ_WRITE);
-            if (remoteFolder.getMode() != OpenMode.READ_WRITE) {
+            remoteFolder.open(Folder.OPEN_MODE_RW);
+            if (remoteFolder.getMode() != Folder.OPEN_MODE_RW) {
                 return;
             }
             remoteFolder.expunge();
@@ -2544,8 +2544,8 @@ public class MessagingController implements Runnable {
         if (!remoteSrcFolder.exists()) {
             throw new MessagingException("processPendingMoveOrCopyOld: remoteFolder " + srcFolder + " does not exist", true);
         }
-        remoteSrcFolder.open(OpenMode.READ_WRITE);
-        if (remoteSrcFolder.getMode() != OpenMode.READ_WRITE) {
+        remoteSrcFolder.open(Folder.OPEN_MODE_RW);
+        if (remoteSrcFolder.getMode() != Folder.OPEN_MODE_RW) {
             throw new MessagingException("processPendingMoveOrCopyOld: could not open remoteSrcFolder " + srcFolder + " read/write", true);
         }
 
@@ -2570,8 +2570,8 @@ public class MessagingController implements Runnable {
             return;
         }
 
-        remoteDestFolder.open(OpenMode.READ_WRITE);
-        if (remoteDestFolder.getMode() != OpenMode.READ_WRITE) {
+        remoteDestFolder.open(Folder.OPEN_MODE_RW);
+        if (remoteDestFolder.getMode() != Folder.OPEN_MODE_RW) {
             throw new MessagingException("processPendingMoveOrCopyOld: could not open remoteDestFolder " + srcFolder + " read/write", true);
         }
 
@@ -2591,7 +2591,7 @@ public class MessagingController implements Runnable {
         try {
             Store localStore = account.getLocalStore();
             localFolder = (LocalFolder) localStore.getFolder(folder);
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
             Message[] messages = localFolder.getMessages(null, false);
             for (Message message : messages) {
                 if (!message.isSet(Flag.SEEN)) {
@@ -2617,8 +2617,8 @@ public class MessagingController implements Runnable {
             if (!remoteFolder.exists() || !remoteFolder.isFlagSupported(Flag.SEEN)) {
                 return;
             }
-            remoteFolder.open(OpenMode.READ_WRITE);
-            if (remoteFolder.getMode() != OpenMode.READ_WRITE) {
+            remoteFolder.open(Folder.OPEN_MODE_RW);
+            if (remoteFolder.getMode() != Folder.OPEN_MODE_RW) {
                 return;
             }
 
@@ -2883,7 +2883,7 @@ public class MessagingController implements Runnable {
         try {
             Store localStore = account.getLocalStore();
             localFolder = localStore.getFolder(folderName);
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
 
             // Allows for re-allowing sending of messages that could not be sent
             if (flag == Flag.FLAGGED && !newState &&
@@ -2950,7 +2950,7 @@ public class MessagingController implements Runnable {
         try {
             LocalStore localStore = account.getLocalStore();
             localFolder = localStore.getFolder(folderName);
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
 
             Message message = localFolder.getMessage(uid);
             if (message != null) {
@@ -2993,7 +2993,7 @@ public class MessagingController implements Runnable {
         try {
             LocalStore localStore = account.getLocalStore();
             localFolder = localStore.getFolder(folder);
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
 
             Message message = localFolder.getMessage(uid);
 
@@ -3036,7 +3036,7 @@ public class MessagingController implements Runnable {
 
                 Store remoteStore = account.getRemoteStore();
                 remoteFolder = remoteStore.getFolder(folder);
-                remoteFolder.open(OpenMode.READ_WRITE);
+                remoteFolder.open(Folder.OPEN_MODE_RW);
 
                 // Get the remote message and fully download it
                 Message remoteMessage = remoteFolder.getMessage(uid);
@@ -3098,7 +3098,7 @@ public class MessagingController implements Runnable {
                 try {
                     LocalStore localStore = account.getLocalStore();
                     LocalFolder localFolder = localStore.getFolder(folder);
-                    localFolder.open(OpenMode.READ_WRITE);
+                    localFolder.open(Folder.OPEN_MODE_RW);
 
                     LocalMessage message = localFolder.getMessage(uid);
                     if (message == null
@@ -3117,7 +3117,6 @@ public class MessagingController implements Runnable {
                         return;
                     }
 
-                    markMessageAsReadOnView(account, message);
 
                     for (MessagingListener l : getListeners(listener)) {
                         l.loadMessageForViewHeadersAvailable(account, folder, uid, message);
@@ -3138,6 +3137,7 @@ public class MessagingController implements Runnable {
                     for (MessagingListener l : getListeners(listener)) {
                         l.loadMessageForViewFinished(account, folder, uid, message);
                     }
+                    markMessageAsReadOnView(account, message);
 
                 } catch (Exception e) {
                     for (MessagingListener l : getListeners(listener)) {
@@ -3168,8 +3168,7 @@ public class MessagingController implements Runnable {
 
         if (account.isMarkMessageAsReadOnView() && !message.isSet(Flag.SEEN)) {
             List<Long> messageIds = Collections.singletonList(message.getId());
-            setFlagInCache(account, messageIds, Flag.SEEN, true);
-            setFlagSynchronous(account, messageIds, Flag.SEEN, true, false);
+            setFlag(account, messageIds, Flag.SEEN, true);
 
             ((LocalMessage) message).setFlagInternal(Flag.SEEN, true);
         }
@@ -3225,7 +3224,7 @@ public class MessagingController implements Runnable {
                     Store remoteStore = account.getRemoteStore();
                     localFolder = localStore.getFolder(message.getFolder().getName());
                     remoteFolder = remoteStore.getFolder(message.getFolder().getName());
-                    remoteFolder.open(OpenMode.READ_WRITE);
+                    remoteFolder.open(Folder.OPEN_MODE_RW);
 
                     //FIXME: This is an ugly hack that won't be needed once the Message objects have been united.
                     Message remoteMessage = remoteFolder.getMessage(message.getUid());
@@ -3267,7 +3266,7 @@ public class MessagingController implements Runnable {
         try {
             LocalStore localStore = account.getLocalStore();
             LocalFolder localFolder = localStore.getFolder(account.getOutboxFolderName());
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
             localFolder.appendMessages(new Message[] { message });
             Message localMessage = localFolder.getMessage(message.getUid());
             localMessage.setFlag(Flag.X_DOWNLOADED_FULL, true);
@@ -3469,7 +3468,7 @@ public class MessagingController implements Runnable {
                 return false;
             }
 
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
 
             if (localFolder.getMessageCount() > 0) {
                 return true;
@@ -3499,7 +3498,7 @@ public class MessagingController implements Runnable {
             for (MessagingListener l : getListeners()) {
                 l.sendPendingMessagesStarted(account);
             }
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
 
             Message[] localMessages = localFolder.getMessages(null);
             int progress = 0;
@@ -3968,7 +3967,7 @@ public class MessagingController implements Runnable {
         try {
             LocalStore localStore = account.getLocalStore();
             localFolder = localStore.getFolder(account.getDraftsFolderName());
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
             String uid = localFolder.getMessageUidById(id);
             if (uid != null) {
                 Message message = localFolder.getMessage(uid);
@@ -4156,7 +4155,7 @@ public class MessagingController implements Runnable {
         Folder remoteFolder = remoteStore.getFolder(account.getTrashFolderName());
         try {
             if (remoteFolder.exists()) {
-                remoteFolder.open(OpenMode.READ_WRITE);
+                remoteFolder.open(Folder.OPEN_MODE_RW);
                 remoteFolder.setFlags(new Flag [] { Flag.DELETED }, true);
                 if (Account.EXPUNGE_IMMEDIATELY.equals(account.getExpungePolicy())) {
                     remoteFolder.expunge();
@@ -4182,7 +4181,7 @@ public class MessagingController implements Runnable {
                 try {
                     Store localStore = account.getLocalStore();
                     localFolder = (LocalFolder) localStore.getFolder(account.getTrashFolderName());
-                    localFolder.open(OpenMode.READ_WRITE);
+                    localFolder.open(Folder.OPEN_MODE_RW);
 
                     boolean isTrashLocalOnly = isTrashLocalOnly(account);
                     if (isTrashLocalOnly) {
@@ -4400,7 +4399,7 @@ public class MessagingController implements Runnable {
 
             Store localStore = account.getLocalStore();
             for (final Folder folder : localStore.getPersonalNamespaces(false)) {
-                folder.open(Folder.OpenMode.READ_WRITE);
+                folder.open(Folder.OPEN_MODE_RW);
                 folder.refresh(prefs);
 
                 Folder.FolderClass fDisplayClass = folder.getDisplayClass();
@@ -4486,7 +4485,7 @@ public class MessagingController implements Runnable {
                     // once
                     final LocalStore localStore = account.getLocalStore();
                     tLocalFolder = localStore.getFolder(folder.getName());
-                    tLocalFolder.open(Folder.OpenMode.READ_WRITE);
+                    tLocalFolder.open(Folder.OPEN_MODE_RW);
 
                     if (!ignoreLastCheckedTime && tLocalFolder.getLastChecked() >
                     (System.currentTimeMillis() - accountInterval)) {
@@ -4889,7 +4888,7 @@ public class MessagingController implements Runnable {
             }
 
             builder.addAction(R.drawable.ic_action_mark_as_read_dark,
-                    context.getString(R.string.notification_action_read),
+                    context.getString(R.string.notification_action_mark_as_read),
                     NotificationActionService.getReadAllMessagesIntent(context, account, allRefs));
 
             NotificationQuickDelete deleteOption = K9.getNotificationQuickDeleteBehaviour();
@@ -5092,7 +5091,7 @@ public class MessagingController implements Runnable {
         try {
             LocalStore localStore = account.getLocalStore();
             LocalFolder localFolder = localStore.getFolder(account.getDraftsFolderName());
-            localFolder.open(OpenMode.READ_WRITE);
+            localFolder.open(Folder.OPEN_MODE_RW);
 
             if (existingDraftId != INVALID_MESSAGE_ID) {
                 String uid = localFolder.getMessageUidById(existingDraftId);
@@ -5217,7 +5216,7 @@ public class MessagingController implements Runnable {
 
                     continue;
                 }
-                folder.open(Folder.OpenMode.READ_WRITE);
+                folder.open(Folder.OPEN_MODE_RW);
                 folder.refresh(prefs);
 
                 Folder.FolderClass fDisplayClass = folder.getDisplayClass();
@@ -5321,7 +5320,7 @@ public class MessagingController implements Runnable {
                 try {
                     LocalStore localStore = account.getLocalStore();
                     localFolder = localStore.getFolder(remoteFolder.getName());
-                    localFolder.open(OpenMode.READ_WRITE);
+                    localFolder.open(Folder.OPEN_MODE_RW);
 
                     account.setRingNotified(false);
                     int newCount = downloadMessages(account, remoteFolder, localFolder, messages, flagSyncOnly);
@@ -5600,6 +5599,9 @@ public class MessagingController implements Runnable {
         Map<Account, Map<Folder, List<Message>>> accountMap = new HashMap<Account, Map<Folder, List<Message>>>();
 
         for (Message message : messages) {
+            if ( message == null) {
+               continue;
+            }
             Folder folder = message.getFolder();
             Account account = folder.getAccount();
 

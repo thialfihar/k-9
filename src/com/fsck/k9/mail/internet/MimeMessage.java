@@ -23,15 +23,20 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.BodyDescriptor;
 import org.apache.james.mime4j.stream.Field;
 import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.util.MimeUtil;
+
+import android.util.Log;
 
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
+import com.fsck.k9.mail.CompositeBody;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.store.UnavailableStorageException;
+import com.imaeses.squeaky.K9;
 
 /**
  * An implementation of Message that stores all of it's metadata in RFC 822 and
@@ -53,8 +58,10 @@ public class MimeMessage extends Message {
     protected SimpleDateFormat mDateFormat;
 
     protected Body mBody;
-    protected Body mRawData;
     protected int mSize;
+    
+    // this is the content that was originally signed for unencrypted PGP/MIME messages
+    private MimeMultipart signedMultipart;
 
     public MimeMessage() {
     }
@@ -62,16 +69,35 @@ public class MimeMessage extends Message {
 
     /**
      * Parse the given InputStream using Apache Mime4J to build a MimeMessage.
+     * Nested messages will not be recursively parsed.
      *
      * @param in
      * @throws IOException
      * @throws MessagingException
+     *
+     * @see #MimeMessage(InputStream in, boolean recurse)
      */
     public MimeMessage(InputStream in) throws IOException, MessagingException {
         parse(in);
     }
 
-    protected void parse(InputStream in) throws IOException, MessagingException {
+    /**
+     * Parse the given InputStream using Apache Mime4J to build a MimeMessage.
+     *
+     * @param in
+     * @param recurse A boolean indicating to recurse through all nested MimeMessage subparts.
+     * @throws IOException
+     * @throws MessagingException
+     */
+    public MimeMessage(InputStream in, boolean recurse) throws IOException, MessagingException {
+        parse(in, recurse);
+    }
+
+     protected void parse(InputStream in) throws IOException, MessagingException {
+        parse(in, false);
+    }
+
+    protected void parse(InputStream in, boolean recurse) throws IOException, MessagingException {
         mHeader.clear();
         mFrom = null;
         mTo = null;
@@ -94,6 +120,9 @@ public class MimeMessage extends Message {
         parserConfig.setMaxHeaderCount(-1); // Disable the check for header count.
         MimeStreamParser parser = new MimeStreamParser(parserConfig);
         parser.setContentHandler(new MimeMessageBuilder());
+        if (recurse) {
+            parser.setRecurse();
+        }
         try {
             parser.parse(new EOLConvertingInputStream(in));
         } catch (MimeException me) {
@@ -114,6 +143,14 @@ public class MimeMessage extends Message {
             }
         }
         return mSentDate;
+    }
+
+    public void setSignedMultipart( MimeMultipart signedMultipart ) {
+    	this.signedMultipart = signedMultipart;
+    }
+    
+    public MimeMultipart getSignedMultipart() {
+    	return signedMultipart;
     }
 
     /**
@@ -145,7 +182,7 @@ public class MimeMessage extends Message {
     @Override
     public String getContentType() throws MessagingException {
         String contentType = getFirstHeader(MimeHeader.HEADER_CONTENT_TYPE);
-        return (contentType == null) ? "text/plain" : contentType.toLowerCase(Locale.US);
+        return (contentType == null) ? "text/plain" : contentType;
     }
 
     public String getDisposition() throws MessagingException {
@@ -156,6 +193,10 @@ public class MimeMessage extends Message {
     }
     public String getMimeType() throws MessagingException {
         return MimeUtility.getHeaderParameter(getContentType(), null);
+    }
+
+    public boolean isMimeType(String mimeType) throws MessagingException {
+        return getMimeType().equalsIgnoreCase(mimeType);
     }
 
     public int getSize() {
@@ -357,11 +398,17 @@ public class MimeMessage extends Message {
         if (body instanceof Multipart) {
             Multipart multipart = ((Multipart)body);
             multipart.setParent(this);
-            setHeader(MimeHeader.HEADER_CONTENT_TYPE, multipart.getContentType());
+            String type = multipart.getContentType();
+            setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
+            if ("multipart/signed".equalsIgnoreCase(type)) {
+                setEncoding(MimeUtil.ENC_7BIT);
+            } else {
+                setEncoding(MimeUtil.ENC_8BIT);
+            }
         } else if (body instanceof TextBody) {
-            setHeader(MimeHeader.HEADER_CONTENT_TYPE, String.format("%s;\n charset=utf-8",
+            setHeader(MimeHeader.HEADER_CONTENT_TYPE, String.format("%s;\r\n charset=utf-8",
                       getMimeType()));
-            setHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING, "quoted-printable");
+            setEncoding(MimeUtil.ENC_8BIT);
         }
     }
     
@@ -415,13 +462,11 @@ public class MimeMessage extends Message {
     }
 
     @Override
-    public void setEncoding(String encoding) throws UnavailableStorageException {
-        if (mBody instanceof Multipart) {
-            ((Multipart)mBody).setEncoding(encoding);
-        } else if (mBody instanceof TextBody) {
-            setHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING, encoding);
-            ((TextBody)mBody).setEncoding(encoding);
+    public void setEncoding(String encoding) throws MessagingException {
+        if (mBody != null) {
+            mBody.setEncoding(encoding);
         }
+        setHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING, encoding);
     }
 
     @Override
@@ -437,8 +482,7 @@ public class MimeMessage extends Message {
 
     class MimeMessageBuilder implements ContentHandler {
         private final LinkedList<Object> stack = new LinkedList<Object>();
-        private boolean multipartSigned;
-
+        
         public MimeMessageBuilder() {
         }
 
@@ -485,10 +529,11 @@ public class MimeMessage extends Message {
             Part e = (Part)stack.peek();
             try {
             	String contentType = e.getContentType();
-            	if( contentType.contains( "multipart/signed" ) ) {
-            		multipartSigned = true;
+            	MimeMultipart multiPart = new MimeMultipart(contentType);
+            	if( bd.getMimeType().contains( "multipart/signed" ) ) {
+            		signedMultipart = multiPart;
             	}
-                MimeMultipart multiPart = new MimeMultipart(contentType);
+            	
                 e.setBody(multiPart);
                 stack.addFirst(multiPart);
             } catch (MessagingException me) {
@@ -496,26 +541,32 @@ public class MimeMessage extends Message {
             }
         }
 
+        // don't decode body parts that may have been signed using PGP/MIME
         public void body(BodyDescriptor bd, InputStream in) throws IOException {
             expect(Part.class);
-            Body body = null;
-            if( multipartSigned && bd.getMimeType().contains( "text/" ) ) {
-            	
-            	body = new BinaryTempFileBody();
-                OutputStream out = ( ( BinaryTempFileBody )body ).getOutputStream();
-                try {
-                    IOUtils.copy(in, out);
-                } finally {
-                    out.close();
-                }
+            try { 
+            	Body body = null;
+            	if( signedMultipart != null && bd.getMimeType().contains( "text/" ) ) {
+
+            		body = new BinaryTempFileBody();
+            		body.setEncoding( bd.getTransferEncoding() );
+            		( ( BinaryTempFileBody )body ).setDecoded( false );
+            		OutputStream out = ( ( BinaryTempFileBody )body ).getOutputStream();
+            		try {
+            			IOUtils.copy(in, out);
+            		} catch( IOException e ) {
+            			Log.w(K9.LOG_TAG, e );
+            		} finally {
+            			out.close();
+            		}
                 
-            } else {
-            	body = MimeUtility.decodeBody(in, bd.getTransferEncoding());
-            }
-            try {
-                ((Part)stack.peek()).setBody(body);
+            	} else {
+            		body = MimeUtility.decodeBody(in,
+                            bd.getTransferEncoding(), bd.getMimeType());
+            	}
+            	((Part)stack.peek()).setBody(body);
             } catch (MessagingException me) {
-                throw new Error(me);
+            	throw new Error(me);
             }
         }
 
@@ -572,6 +623,7 @@ public class MimeMessage extends Message {
             byte[] rawByteValue = null;
             byte[] rawBytes = parsedField.getRaw().toByteArray();
         	String raw = new String( rawBytes );
+       
         	if( raw.length() > 0 ) {
         		
         		int index = raw.indexOf( ":" );
@@ -633,5 +685,48 @@ public class MimeMessage extends Message {
 
     public boolean hasAttachments() {
         return false;
+    }
+
+
+    @Override
+    public void setUsing7bitTransport() throws MessagingException {
+        String type = getFirstHeader(MimeHeader.HEADER_CONTENT_TYPE);
+        /*
+         * We don't trust that a multipart/* will properly have an 8bit encoding
+         * header if any of its subparts are 8bit, so we automatically recurse
+         * (as long as its not multipart/signed).
+         */
+        if (mBody instanceof CompositeBody
+                && !"multipart/signed".equalsIgnoreCase(type)) {
+            setEncoding(MimeUtil.ENC_7BIT);
+            // recurse
+            ((CompositeBody) mBody).setUsing7bitTransport();
+        } else if (!MimeUtil.ENC_8BIT
+                .equalsIgnoreCase(getFirstHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING))) {
+            return;
+        } else if (type != null
+                && (type.equalsIgnoreCase("multipart/signed") || type
+                        .toLowerCase(Locale.US).startsWith("message/"))) {
+            /*
+             * This shouldn't happen. In any case, it would be wrong to convert
+             * them to some other encoding for 7bit transport.
+             *
+             * RFC 1847 says multipart/signed must be 7bit. It also says their
+             * bodies must be treated as opaque, so we must not change the
+             * encoding.
+             *
+             * We've dealt with (CompositeBody) type message/rfc822 above. Here
+             * we must deal with all other message/* types. RFC 2045 says
+             * message/* can only be 7bit or 8bit. RFC 2046 says unknown
+             * message/* types must be treated as application/octet-stream,
+             * which means we can't recurse into them. It also says that
+             * existing subtypes message/partial and message/external must only
+             * be 7bit, and that future subtypes "should be" 7bit.
+             */
+            throw new MessagingException(
+                    "Unable to convert 8bit body part to 7bit");
+        } else {
+            setEncoding(MimeUtil.ENC_QUOTED_PRINTABLE);
+        }
     }
 }

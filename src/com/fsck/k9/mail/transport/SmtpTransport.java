@@ -477,7 +477,9 @@ public class SmtpTransport extends Transport {
         close();
         open();
 
-        message.setEncoding(m8bitEncodingAllowed ? "8bit" : null);
+        if (!m8bitEncodingAllowed) {
+            message.setUsing7bitTransport();
+        }
         // If the message has attachments and our server has told us about a limit on
         // the size of messages, count the message's size before sending it
         if (mLargestAcceptableMessage > 0 && ((LocalMessage)message).hasAttachments()) {
@@ -490,18 +492,16 @@ public class SmtpTransport extends Transport {
 
         Address[] from = message.getFrom();
         try {
-            //TODO: Add BODY=8BITMIME parameter if appropriate?
-            executeSimpleCommand("MAIL FROM:" + "<" + from[0].getAddress() + ">");
+            executeSimpleCommand("MAIL FROM:" + "<" + from[0].getAddress() + ">"
+                    + (m8bitEncodingAllowed ? " BODY=8BITMIME" : ""));
             for (String address : addresses) {
                 executeSimpleCommand("RCPT TO:" + "<" + address + ">");
             }
             executeSimpleCommand("DATA");
 
             EOLConvertingOutputStream msgOut = new EOLConvertingOutputStream(
-                new SmtpDataStuffing(
-                    new LineWrapOutputStream(
-                        new BufferedOutputStream(mOut, 1024),
-                        1000)));
+                    new LineWrapOutputStream(new SmtpDataStuffing(
+                            new BufferedOutputStream(mOut, 1024)), 1000));
 
             message.writeTo(msgOut);
 

@@ -64,7 +64,6 @@ Android Localizer (aiLocalizer)
     <string name="insufficient_apg_permissions">Squeaky Mail n\'a pas la permission d\'accéder à AGP, veuillez réinstaller Squeaky Mail pour corriger cela.</string>
 
 
-
     <!-- === App Store-specific strings ======================================================= -->
 
     <string name="import_dialog_error_message">Aucune application trouvée pour réaliser l\'importation. Veuillez installer un gestionnaire de fichiers depuis le Google Play Store.</string>
@@ -117,6 +116,8 @@ Android Localizer (aiLocalizer)
     <string name="cancel_action">Annuler</string>
     <string name="send_action">Envoyer</string>
     <string name="send_again_action">Envoyer à nouveau</string>
+    <!-- NEW: <string name="select_action">Select</string>-->
+    <!-- NEW: <string name="deselect_action">Deselect</string>-->
     <string name="reply_action">Répondre</string>
     <string name="reply_all_action">Répondre à tous</string>
     <string name="delete_action">Supprimer</string>
@@ -124,8 +125,8 @@ Android Localizer (aiLocalizer)
     <string name="spam_action">Spam</string>
     <string name="forward_action">Transférer</string>
     <string name="move_action">Déplacer</string>
-    <string name="single_message_options_action">Options de message</string>
-    <string name="refile_action">Déposer</string>
+    <string name="single_message_options_action">Options de message…</string>
+    <string name="refile_action">Déposer…</string>
     <string name="continue_action">Continuer</string>
     <string name="back_action">Retour</string>
     <string name="done_action">Terminé</string> <!--  Used to complete a multi-step process -->
@@ -210,7 +211,7 @@ de plus</string>
     <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> sur <xliff:g id="account">%s</xliff:g></string>
 
     <string name="notification_action_reply">Répondre</string>
-    <string name="notification_action_read">Lire</string>
+    <string name="notification_action_mark_as_read">Lu</string>
     <string name="notification_action_delete">Supprimer</string>
     <string name="notification_certificate_error_title">Erreur de certificat (<xliff:g id="account">%s</xliff:g>)</string>
     <string name="notification_certificate_error_text">Vérifier les paramètres serveur</string>
@@ -297,6 +298,8 @@ de plus</string>
     <string name="message_discarded_toast">Message abandonné</string>
     <string name="message_saved_toast">Message enregistré comme brouillon</string>
 
+    <string name="global_settings_flag_label">Étoiles des messages</string>
+    <string name="global_settings_flag_summary">Les étoiles indiquent des messages suivis</string>
     <string name="global_settings_checkbox_label">Cases à cocher</string>
     <string name="global_settings_checkbox_summary">Toujours afficher les cases à cocher</string>
     <string name="global_settings_preview_lines_label">Lignes dʼaperçu</string>
@@ -389,10 +392,10 @@ de plus</string>
     <string name="account_setup_incoming_security_label">Type de sécurité</string>
     <string name="account_setup_incoming_auth_type_label">Type d\'authentification</string>
     <string name="account_setup_incoming_security_none_label">Aucun</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">SSL (si disponible)</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL (toujours)</string>
-    <string name="account_setup_incoming_security_tls_optional_label">TLS (si disponible)</string>
-    <string name="account_setup_incoming_security_tls_label">TLS (toujours)</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">SSL/TLS (si disponible)</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS (toujours)</string>
+    <string name="account_setup_incoming_security_tls_optional_label">STARTTLS (si disponible)</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS (toujours)</string>
 
     <string name="account_setup_incoming_delete_policy_label">Supprimer les messages du serveur\u00A0:</string>
     <string name="account_setup_incoming_delete_policy_never_label">Jamais</string>
@@ -561,8 +564,8 @@ de plus</string>
     <string name="account_settings_crypto_app_none">Aucun</string>
     <string name="account_settings_crypto_auto_signature">Signature automatique</string>
     <string name="account_settings_crypto_auto_signature_summary">Utiliser l\'adresse e-mail du compte pour déduire la clé de signature</string>
-    <string name="account_settings_crypto_auto_encrypt">Cryptation automatique</string>
-    <string name="account_settings_crypto_auto_encrypt_summary">Cryptation automatique si une clé publique correspond au destinataire.</string>
+    <string name="account_settings_crypto_auto_encrypt">Encryption automatique</string>
+    <string name="account_settings_crypto_auto_encrypt_summary">Encryption automatique si une clé publique correspond au destinataire.</string>
     <string name="account_settings_crypto_apg_not_installed">APG non installé</string>
 
     <string name="account_settings_mail_check_frequency_label">Fréquence de vérification du dossier</string>
@@ -1141,4 +1144,9 @@ de plus</string>
     <string name="preposition_for_date">le <xliff:g id="date">%s</xliff:g></string>
 
     <string name="mark_all_as_read">Marquer tous comme lus</string>
+
+    <string name="global_settings_colorize_missing_contact_pictures">Colorier les images de contact manquantes</string>
+
+    <string name="global_settings_messageview_visible_refile_actions_title">Actions disponibles dans les messages</string>
+    <string name="global_settings_messageview_visible_refile_actions_summary">Afficher les actions séléctionnées dans le menu des messages</string>
 </resources>

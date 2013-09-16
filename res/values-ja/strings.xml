@@ -91,6 +91,8 @@
     <string name="cancel_action">キャンセル</string>
     <string name="send_action">送信</string>
     <string name="send_again_action">再編集</string>
+    <string name="select_action">選択</string>
+    <string name="deselect_action">選択解除</string>
     <string name="reply_action">返信</string>
     <string name="reply_all_action">全員に返信</string>
     <string name="delete_action">削除</string>
@@ -98,8 +100,8 @@
     <string name="spam_action">迷惑メールとみなす</string>
     <string name="forward_action">転送</string>
     <string name="move_action">移動</string>
-    <string name="single_message_options_action">メッセージ操作</string>
-    <string name="refile_action">整理</string>
+    <string name="single_message_options_action">メッセージ操作…</string>
+    <string name="refile_action">整理…</string>
     <string name="continue_action">継続</string>
     <string name="back_action">戻る</string>
     <string name="done_action">完了</string> <!--  Used to complete a multi-step process -->
@@ -183,7 +185,7 @@
     <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%d</xliff:g> more on <xliff:g id="account">%s</xliff:g></string>
 
     <string name="notification_action_reply">返信</string>
-    <string name="notification_action_read">既読</string>
+    <string name="notification_action_mark_as_read">既読</string>
     <string name="notification_action_delete">削除</string>
     <string name="notification_certificate_error_title"><xliff:g id="account">%s</xliff:g>の証明書エラー</string>
     <string name="notification_certificate_error_text">サーバの設定を確認してください</string>
@@ -270,6 +272,8 @@
     <string name="message_discarded_toast">メールを破棄しました</string>
     <string name="message_saved_toast">下書きに保存しました</string>
 
+    <string name="global_settings_flag_label">スターを表示</string>
+    <string name="global_settings_flag_summary">スターは印の付いたメッセージを示す</string>
     <string name="global_settings_checkbox_label">複数選択チェックボックス</string>
     <string name="global_settings_checkbox_summary">複数選択チェックボックス常時表示</string>
     <string name="global_settings_preview_lines_label">メッセージプレビューの行数</string>
@@ -362,10 +366,10 @@
     <string name="account_setup_incoming_security_label">保護された接続</string>
     <string name="account_setup_incoming_auth_type_label">認証タイプ</string>
     <string name="account_setup_incoming_security_none_label">使用しない</string>
-    <string name="account_setup_incoming_security_ssl_optional_label">可能なら SSL を使用する</string>
-    <string name="account_setup_incoming_security_ssl_label">SSL を使用する</string>
-    <string name="account_setup_incoming_security_tls_optional_label">可能なら TLS を使用する</string>
-    <string name="account_setup_incoming_security_tls_label">TLS を使用する</string>
+    <string name="account_setup_incoming_security_ssl_optional_label">可能なら SSL/TLS を使用する</string>
+    <string name="account_setup_incoming_security_ssl_label">SSL/TLS を使用する</string>
+    <string name="account_setup_incoming_security_tls_optional_label">可能なら STARTTLS を使用する</string>
+    <string name="account_setup_incoming_security_tls_label">STARTTLS を使用する</string>
 
     <string name="account_setup_incoming_delete_policy_label">メール削除時の動作</string>
     <string name="account_setup_incoming_delete_policy_never_label">サーバでは削除しない</string>
@@ -1109,4 +1113,9 @@
     <string name="preposition_for_date"><xliff:g id="date">%s</xliff:g></string>
 
     <string name="mark_all_as_read">すべて既読にする</string>
+
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures">Colorize missing contact pictures</string>-->
+
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
 </resources>

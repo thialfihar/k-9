@@ -6,6 +6,7 @@ import android.content.Context;
 import android.util.Log;
 import com.fsck.k9.helper.DomainNameChecker;
 import com.imaeses.squeaky.K9;
+import com.fsck.k9.mail.CertificateChainException;
 
 import org.apache.commons.io.IOUtils;
 
@@ -28,8 +29,6 @@ public final class TrustManagerFactory {
     private static X509TrustManager defaultTrustManager;
     private static X509TrustManager unsecureTrustManager;
     private static X509TrustManager localTrustManager;
-
-    private static X509Certificate[] lastCertChain = null;
 
     private static File keyStoreFile;
     private static KeyStore keyStore;
@@ -78,13 +77,15 @@ public final class TrustManagerFactory {
 
         public void checkServerTrusted(X509Certificate[] chain, String authType)
         throws CertificateException {
-            // FIXME: Using a static field to store the certificate chain is a bad idea. Instead
-            // create a CertificateException subclass and store the chain there.
-            TrustManagerFactory.setLastCertChain(chain);
             try {
                 defaultTrustManager.checkServerTrusted(chain, authType);
             } catch (CertificateException e) {
-                localTrustManager.checkServerTrusted(new X509Certificate[] {chain[0]}, authType);
+                try {
+                    localTrustManager.checkServerTrusted(
+                            new X509Certificate[] { chain[0] }, authType);
+                } catch (CertificateException ce) {
+                    throw new CertificateChainException(ce, chain);
+                }
             }
             if (!DomainNameChecker.match(chain[0], mHost)) {
                 try {
@@ -95,8 +96,9 @@ public final class TrustManagerFactory {
                 } catch (KeyStoreException e) {
                     throw new CertificateException("Certificate cannot be verified; KeyStore Exception: " + e);
                 }
-                throw new CertificateException("Certificate domain name does not match "
-                                               + mHost);
+                throw new CertificateChainException(
+                        "Certificate domain name does not match " + mHost,
+                        chain);
             }
         }
 
@@ -169,13 +171,6 @@ public final class TrustManagerFactory {
 
     public static KeyStore getKeyStore() {
         return keyStore;
-    }
-
-    public static void setLastCertChain(X509Certificate[] chain) {
-        lastCertChain = chain;
-    }
-    public static X509Certificate[] getLastCertChain() {
-        return lastCertChain;
     }
 
     public static void addCertificateChain(String alias, X509Certificate[] chain) throws CertificateException {
