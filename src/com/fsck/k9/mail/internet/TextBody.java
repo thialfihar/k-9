@@ -71,6 +71,10 @@ public class TextBody implements Body {
     public void setEncoding(String encoding) {
         mEncoding = encoding;
     }
+    
+    public String getEncoding() {
+    	return mEncoding;
+    }
 
     public void setCharset(String charset) {
         mCharset = charset;

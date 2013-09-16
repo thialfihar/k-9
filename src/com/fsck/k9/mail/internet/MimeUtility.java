@@ -13,7 +13,6 @@ import org.apache.james.mime4j.codec.Base64InputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
 import org.apache.james.mime4j.util.MimeUtil;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -1094,9 +1093,20 @@ public class MimeUtility {
                     InputStream in = part.getBody().getInputStream();
                     try {
                         String text = readToString(in, charset);
-
+                        
+                        TextBody textBody = new TextBody( text );
+                        if( part instanceof MimeBodyPart ) {
+                        	
+	                        BinaryTempFileBody btfb = ( BinaryTempFileBody )part.getBody();
+	                        ( ( MimeBodyPart )part ).setDecoded( btfb.isDecoded() );
+	                        if( !btfb.isDecoded() ) {
+	                        	textBody.setEncoding( btfb.getEncoding() );
+	                        }
+	                        
+                        }
+                        
                         // Replace the body with a TextBody that already contains the decoded text
-                        part.setBody(new TextBody(text));
+                        part.setBody( textBody );
 
                         return text;
                     } finally {

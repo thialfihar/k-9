@@ -42,7 +42,6 @@ import com.fsck.k9.crypto.CryptoProvider.CryptoDecryptCallback;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
 import com.fsck.k9.helper.FileBrowserHelper;
-import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
@@ -613,36 +612,69 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     	
     	boolean isPgpMime = false;
  
-    	if( !mMessageView.haveHandledPgpMimeSigned() && mp.getCount() >= 2 ) {
+    	if( !mMessageView.haveHandledPgpMimeSigned() ) {
     		
         	try {
         		
-        		Part msgPart = null;
-        		Part sigPart = null;
-        		int count = mp.getCount();
+        		Part msgPart = mp.getBodyPart( 0 );
+        		Part sigPart = mp.getBodyPart( 1 );
         		
-        		for( int i=0; i<count; i++ ) {
+        		if( !sigPart.getContentType().contains( "application/pgp-signature" ) ) {
         			
-        			Part p = mp.getBodyPart( i );
-        			String mimeType = p.getMimeType();
-        			
-        			if( mimeType.contains( "application/pgp-signature" ) ) {
-        				sigPart = p;
-        			} else if( mimeType.contains( "multipart/alternative" ) || mimeType.contains( "multipart/mixed" ) ) {
-        				msgPart = p;
-        			} else if( mimeType.contains( "text/" ) ) {
-        				msgPart = p;
-        			}
+        			Log.w( K9.LOG_TAG, "I have a multipart/signed with more than two parts, or the last part is not of type application/pgp-signature" );
+        			return false;
         			
         		}
         		
         		if( sigPart != null && msgPart != null ) {
         				
-        			Log.e( K9.LOG_TAG, "Using part as signed data: " + msgPart.getMimeType() );
-
         			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        			if( msgPart.getMimeType().contains( "multipart/alternative" ) || msgPart.getMimeType().contains( "multipart/mixed" ) ) {
-        				msgPart.writeTo( baos );
+        			
+        			if( msgPart.getMimeType().contains( "multipart/alternative" ) ) {
+        				
+        				( ( MimeBodyPart )msgPart ).writeHeadersTo( baos );
+        				baos.write( "\r\n".getBytes() );
+        				String boundary = MimeUtility.getHeaderParameter( msgPart.getContentType(), "boundary" );
+        				
+        				mp = ( Multipart )msgPart.getBody();
+        				int count = mp.getCount();
+        				
+        				if( count > 0 ) {
+        					
+        					baos.write( boundary.getBytes() );
+        					baos.write( "\r\n".getBytes() );        				
+        				
+        				}
+        				
+        				for( int i=0; i<count; i++ ) {
+        					
+        					Part p = mp.getBodyPart( i );
+        					String mimeType = p.getMimeType();
+        					( ( MimeBodyPart )p ).writeHeadersTo( baos );
+            				baos.write( "\r\n".getBytes() );
+        					
+                			if( mimeType.contains( "text/" ) ) {
+           
+                				InputStream in = p.getBody().getInputStream();
+                				IOUtils.copy( in, baos );
+                				in.close();
+                				
+                			} else {
+                				Log.w( K9.LOG_TAG, "I've got a signed multipart alternative with non-text parts: " + mimeType );
+                			}
+
+            				baos.write( "\r\n".getBytes() );
+                			baos.write( boundary.getBytes() );
+                		
+                			if( i == count-1 ) {
+            					baos.write( "--".getBytes() );
+            				}
+            				
+                			baos.write( "\r\n".getBytes() );
+                			
+        				}
+        				
+        				
         			} else {
 
         				( ( MimeBodyPart )msgPart ).writeHeadersTo( baos );
@@ -650,8 +682,11 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         				InputStream in = msgPart.getBody().getInputStream();
         				IOUtils.copy( in, baos );
         				in.close();
-            		
+        				
         			}
+        			
+        			String signedData = new String( baos.toByteArray() );
+        			//Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
         			
         			InputStream is = sigPart.getBody().getInputStream();
         			String sig = IOUtils.toString( is, "US-ASCII" );
@@ -673,7 +708,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     	return isPgpMime;
     	
     }
-
+    
     class Listener extends MessagingListener {
         @Override
         public void loadMessageForViewHeadersAvailable(final Account account, String folder, String uid,
@@ -740,6 +775,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     	mFragmentListener.updateMenu();
                     	
                     	boolean isPgpMime = false;
+                    	
                     	if( message.getBody() instanceof MimeMultipart ) {
                     		
                             MimeMultipart mp = ( MimeMultipart )message.getBody();
@@ -749,7 +785,10 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     			isPgpMime = handlePgpMimeEncrypted( account, mp );
                     		} else if( mp.getContentType().contains( "multipart/signed" ) &&
                     				MimeUtility.findFirstPartByMimeType( message, "application/pgp-signature" ) != null ) {
-                    			isPgpMime = handlePgpMimeSigned( account, mp );
+                    			
+                    			MimeMultipart signedMultipart = message.getSignedMultipart();
+                    			isPgpMime = handlePgpMimeSigned( account, signedMultipart != null ? signedMultipart : mp );
+                    			
                     		}
                     		
                     	}
@@ -933,9 +972,13 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             	if( msgPart != null ) {
             		
             		String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding ) ); 
+            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) ); 
 		
             		String text = MimeUtility.getTextFromPart( msgPart );
+                	if( text.trim().startsWith( "<pre class=\"k9mail" ) ) {
+                		text = "<html>" + text + "</html>";
+                	}
+                	
                 	pgpData.setDecryptedData( text );
                 	
             	}
@@ -980,11 +1023,11 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             		if( decryptedMsg != null && decryptedMsg.length() > 0 ) {
 	    		
             			pgpData.setDecryptedData( decryptedMsg );
-            			
+
             			ByteArrayInputStream bais = new ByteArrayInputStream( decryptedMsg.getBytes() );
             			MimeMessage mimeMsg = new MimeMessage( bais );
-	    		
-            			if( handlePgpMimeSigned( mAccount, ( Multipart )mimeMsg.getBody() ) ) {
+            			Multipart mp = ( Multipart )mimeMsg.getBody(); 
+            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp ) ) {
 	    				
             				mPgpSignedMessage = decryptedMsg;
             				return;

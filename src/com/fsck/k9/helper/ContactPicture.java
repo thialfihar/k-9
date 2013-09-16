@@ -3,8 +3,8 @@ package com.fsck.k9.helper;
 import android.content.Context;
 import android.util.TypedValue;
 
-import com.fsck.k9.K9;
-import com.fsck.k9.R;
+import com.imaeses.squeaky.K9;
+import com.imaeses.squeaky.R;
 import com.fsck.k9.activity.misc.ContactPictureLoader;
 
 public class ContactPicture {
