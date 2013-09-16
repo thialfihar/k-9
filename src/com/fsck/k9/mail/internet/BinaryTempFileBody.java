@@ -17,6 +17,7 @@ import java.io.*;
  */
 public class BinaryTempFileBody implements Body {
     private static File mTempDirectory;
+    private boolean decoded = true;
 
     private File mFile;
 
@@ -26,10 +27,22 @@ public class BinaryTempFileBody implements Body {
         mTempDirectory = tempDirectory;
     }
 
+    public void setDecoded( boolean decoded ) {
+    	this.decoded = decoded;
+    }
+    
+    public boolean isDecoded() {
+    	return decoded;
+    }
+    
     public void setEncoding(String encoding) throws MessagingException {
         mEncoding  = encoding;
     }
 
+    public String getEncoding() {
+    	return mEncoding;
+    }
+    
     public BinaryTempFileBody() {
         if (mTempDirectory == null) {
             throw new

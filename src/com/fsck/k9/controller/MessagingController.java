@@ -1,6 +1,9 @@
 package com.fsck.k9.controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +22,11 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.james.mime4j.codec.Base64InputStream;
+import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
+import org.apache.james.mime4j.util.MimeUtil;
 
 import android.app.Application;
 import android.app.KeyguardManager;
@@ -68,6 +76,7 @@ import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Folder.FolderType;
 
+import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.mail.CertificateValidationException;
@@ -77,9 +86,13 @@ import com.fsck.k9.mail.PushReceiver;
 import com.fsck.k9.mail.Pusher;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
+import com.fsck.k9.mail.internet.BinaryTempFileBody;
+import com.fsck.k9.mail.internet.MimeBodyPart;
 import com.fsck.k9.mail.internet.MimeMessage;
+import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.internet.TextBody;
+import com.fsck.k9.mail.store.ImapStore;
 import com.fsck.k9.mail.store.LocalStore;
 import com.fsck.k9.mail.store.LocalStore.LocalFolder;
 import com.fsck.k9.mail.store.LocalStore.LocalMessage;
@@ -1363,6 +1376,9 @@ public class MessagingController implements Runnable {
         //        fp.add(FetchProfile.Item.ENVELOPE);
 
         downloadSmallMessages(account, remoteFolder, localFolder, smallMessages, progress, unreadBeforeStart, newMessages, todo, fp);
+        for( Message message: smallMessages ) {
+        	setSignedMultipart( message, localFolder );
+        }	
         smallMessages.clear();
 
         /*
@@ -1371,6 +1387,9 @@ public class MessagingController implements Runnable {
         fp.clear();
         fp.add(FetchProfile.Item.STRUCTURE);
         downloadLargeMessages(account, remoteFolder, localFolder, largeMessages, progress, unreadBeforeStart,  newMessages, todo, fp);
+        for( Message message: smallMessages ) {
+        	setSignedMultipart( message, localFolder );
+        }	
         largeMessages.clear();
 
         /*
@@ -1410,8 +1429,69 @@ public class MessagingController implements Runnable {
             }
 
         }
+        
         return newMessages.get();
     }
+
+	private void setSignedMultipart( Message message, LocalFolder localFolder ) {
+		
+    	MimeMultipart signedMultipart = message.getSignedMultipart();
+        if( signedMultipart != null ) {
+        	
+        	try {
+    
+    			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    			message.writeTo( baos );
+    			
+    			byte[] content = baos.toByteArray();
+    			Body b = signedMultipart.getBodyPart( 0 ).getBody();
+    			if( b instanceof TextBody ) {
+    				
+	    			TextBody textBody = ( TextBody )b;
+	    			String contentTransferEncoding = textBody.getEncoding();
+	    			
+	    			if( contentTransferEncoding != null ) {
+	    				
+		    			InputStream in = new ByteArrayInputStream( content );
+		    			boolean decode = false;
+		    			if( contentTransferEncoding.equalsIgnoreCase( MimeUtil.ENC_QUOTED_PRINTABLE ) ) {
+		    				
+		    				decode = true;
+		    				in = new QuotedPrintableInputStream( in );
+		    			
+		    			} else if( contentTransferEncoding.equalsIgnoreCase( MimeUtil.ENC_BASE64 ) ) {
+		    				
+		    				decode = true;
+		    				in = new Base64InputStream( in );
+		    			}
+		    			
+		    			if( decode ) {
+		    				
+			    			baos = new ByteArrayOutputStream();
+			    			IOUtils.copy( in, baos );
+			    			
+		    			}
+		    			
+	    			}
+	    			
+	    			String signedContent = new String( baos.toByteArray() );
+	    			
+	    			//Log.w( K9.LOG_TAG, "Signed content:\n" + signedContent );
+	    			LocalMessage localMessage = localFolder.getMessage(message.getUid());
+	    			localMessage.setSignedMultipart( signedContent );
+    			
+    			} else {
+    				Log.i( K9.LOG_TAG, "Signed part is not a simple TextBody; won't handle" );
+    			}
+    		
+    		} catch( Exception e ) {
+    			Log.e( K9.LOG_TAG, e.getMessage(), e );
+    		}
+        	
+        }
+        
+	}
+	
     private void evaluateMessageForDownload(final Message message, final String folder,
                                             final LocalFolder localFolder,
                                             final Folder remoteFolder,

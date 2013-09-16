@@ -12,6 +12,7 @@ import com.fsck.k9.K9;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.mail.filter.CountingOutputStream;
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
+import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.store.UnavailableStorageException;
 
 
@@ -31,6 +32,17 @@ public abstract class Message implements Part, CompositeBody {
     protected Date mInternalDate;
 
     protected Folder mFolder;
+    
+    // this is the content that was originally signed for unencrypted PGP/MIME messages
+    protected MimeMultipart signedMultipart;
+    
+    public void setSignedMultipart( MimeMultipart signedMultipart ) {
+    	this.signedMultipart = signedMultipart;
+    }
+    
+    public MimeMultipart getSignedMultipart() {
+    	return signedMultipart;
+    }
 
     public boolean olderThan(Date earliestDate) {
         if (earliestDate == null) {

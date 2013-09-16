@@ -37,7 +37,7 @@ public class MimeMultipart extends Multipart {
                 + contentType + ")", e);
         }
     }
-
+    
     public String generateBoundary() {
         Random random = new Random();
         StringBuilder sb = new StringBuilder();

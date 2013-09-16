@@ -2,6 +2,7 @@
 package com.fsck.k9.mail.store;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -146,7 +147,7 @@ public class LocalStore extends Store implements Serializable {
      */
     private static final int THREAD_FLAG_UPDATE_BATCH_SIZE = 500;
 
-    public static final int DB_VERSION = 49;
+    public static final int DB_VERSION = 50;
 
 
     public static String getColumnNameForFlag(Flag flag) {
@@ -263,6 +264,7 @@ public class LocalStore extends Store implements Serializable {
                             "message_id TEXT, " +
                             "preview TEXT, " +
                             "mime_type TEXT, "+
+                            "signed_multipart TEXT, " +
                             "normalized_subject_hash INTEGER, " +
                             "empty INTEGER, " +
                             "read INTEGER default 0, " +
@@ -702,6 +704,13 @@ public class LocalStore extends Store implements Serializable {
                     if (db.getVersion() < 49) {
                         db.execSQL("CREATE INDEX IF NOT EXISTS msg_composite ON messages (deleted, empty,folder_id,flagged,read)");
 
+                    }
+                    if (db.getVersion() < 50 ) {
+                    	 try {
+                             db.execSQL("ALTER TABLE messages ADD signed_multipart TEXT");
+                         } catch (SQLiteException e) {
+                             Log.e(K9.LOG_TAG, "Unable to add signed_multipart column to messages");
+                         }
                     }
                 }
 
@@ -1841,7 +1850,7 @@ public class LocalStore extends Store implements Serializable {
                                     MimeMultipart mp = new MimeMultipart();
                                     mp.setSubType("mixed");
                                     try {
-                                        cursor = db.rawQuery("SELECT html_content, text_content, mime_type FROM messages "
+                                        cursor = db.rawQuery("SELECT html_content, text_content, mime_type, signed_multipart FROM messages "
                                                              + "WHERE id = ?",
                                                              new String[] { Long.toString(localMessage.mId) });
                                         cursor.moveToNext();
@@ -1859,24 +1868,45 @@ public class LocalStore extends Store implements Serializable {
                                             }
 
                                             if (mAccount.getMessageFormat() != MessageFormat.TEXT) {
-                                                if (htmlContent != null) {
-                                                    TextBody body = new TextBody(htmlContent);
-                                                    MimeBodyPart bp = new MimeBodyPart(body, "text/html");
-                                                    mp.addBodyPart(bp);
-                                                }
-
-                                                // If we have both text and html content and our MIME type
-                                                // isn't multipart/alternative, then corral them into a new
-                                                // multipart/alternative part and put that into the parent.
-                                                // If it turns out that this is the only part in the parent
-                                                // MimeMultipart, it'll get fixed below before we attach to
-                                                // the message.
-                                                if (textContent != null && htmlContent != null && !mimeType.equalsIgnoreCase("multipart/alternative")) {
-                                                    MimeMultipart alternativeParts = mp;
-                                                    alternativeParts.setSubType("alternative");
-                                                    mp = new MimeMultipart();
-                                                    mp.addBodyPart(new MimeBodyPart(alternativeParts));
-                                                }
+                                            	
+                                            	if( mimeType.equals( "multipart/signed" ) ) {
+                                            		
+                                            		String multipartSignedText = cursor.getString( 3 );
+                                            		if( multipartSignedText != null ) {
+                                            			
+                                            			//Log.w( K9.LOG_TAG, "Stored multipart signed text:\n" + multipartSignedText );
+                                            			ByteArrayInputStream bais = new ByteArrayInputStream( multipartSignedText.getBytes() );
+                                            			MimeMessage m = new MimeMessage( bais );
+                                            			MimeMultipart signed = ( MimeMultipart )m.getBody();
+                                            			
+                                            			message.setSignedMultipart( signed );
+                                            			
+                                            		} else { 
+                                            			Log.w( K9.LOG_TAG, "I don't have the original signed data; signature verification will fail" );
+                                            		}
+                                            		
+                                            	} else {
+                                            		
+	                                                if (htmlContent != null) {
+	                                                    TextBody body = new TextBody(htmlContent);
+	                                                    MimeBodyPart bp = new MimeBodyPart(body, "text/html");
+	                                                    mp.addBodyPart(bp);
+	                                                }
+	
+	                                                // If we have both text and html content and our MIME type
+	                                                // isn't multipart/alternative, then corral them into a new
+	                                                // multipart/alternative part and put that into the parent.
+	                                                // If it turns out that this is the only part in the parent
+	                                                // MimeMultipart, it'll get fixed below before we attach to
+	                                                // the message.
+	                                                if (textContent != null && htmlContent != null && !mimeType.equalsIgnoreCase("multipart/alternative")) {
+	                                                    MimeMultipart alternativeParts = mp;
+	                                                    alternativeParts.setSubType("alternative");
+	                                                    mp = new MimeMultipart();
+	                                                    mp.addBodyPart(new MimeBodyPart(alternativeParts));
+	                                                }
+	                                                
+                                            	}
                                             }
                                         } else if (mimeType != null && mimeType.equalsIgnoreCase("text/plain")) {
                                             // If it's text, add only the plain part. The MIME
@@ -2558,7 +2588,7 @@ public class LocalStore extends Store implements Serializable {
                                            ? System.currentTimeMillis() : message.getInternalDate().getTime());
                                     cv.put("mime_type", message.getMimeType());
                                     cv.put("empty", 0);
-
+                                    
                                     String messageId = message.getMessageId();
                                     if (messageId != null) {
                                         cv.put("message_id", messageId);
@@ -3470,7 +3500,7 @@ public class LocalStore extends Store implements Serializable {
             this.mUid = uid;
             this.mFolder = folder;
         }
-
+        
         private void populateFromGetMessageCursor(Cursor cursor)
         throws MessagingException {
             final String subject = cursor.getString(0);
@@ -3540,6 +3570,7 @@ public class LocalStore extends Store implements Serializable {
          * @throws MessagingException
          */
         public String getTextForDisplay() throws MessagingException {
+        	Log.w( K9.LOG_TAG, "getTextForDisplay()" );
             String text = null;    // First try and fetch an HTML part.
             Part part = MimeUtility.findFirstPartByMimeType(this, "text/html");
             if (part == null) {
@@ -3770,7 +3801,31 @@ public class LocalStore extends Store implements Serializable {
 
             notifyChange();
         }
+        
+        public void setSignedMultipart( final String signedMultipart ) throws MessagingException {
+        	
+        	try {
+                database.execute(true, new DbCallback<Void>() {
+                    @Override
+                    public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
+                    	
+                    	String[] idArg = new String[] { Long.toString(mId) };
 
+                    	ContentValues cv = new ContentValues();
+                    	cv.put( "signed_multipart", signedMultipart );
+                    	
+                    	db.update("messages", cv, "id = ?", idArg);
+                    	
+                    	return null;
+                    	
+                    }     
+                });
+            } catch (WrappedException e) {
+                throw(MessagingException) e.getCause();
+            }   	
+                    	
+        }
+        
         /*
          * Completely remove a message from the local database
          *
@@ -4358,7 +4413,7 @@ public class LocalStore extends Store implements Serializable {
             }
         }, FLAG_UPDATE_BATCH_SIZE);
     }
-
+    
     /**
      * Change the state of a flag for a list of threads.
      *

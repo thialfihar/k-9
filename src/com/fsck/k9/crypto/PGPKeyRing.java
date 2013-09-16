@@ -546,11 +546,14 @@ public class PGPKeyRing extends CryptoProvider {
             }
 
             ContentValues values = ( ContentValues )data.getParcelableExtra( EXTRAS_CHOSEN_KEY );
+            if( values != null ) {
 
-            pgpData.setSignatureKeyId( new BigInteger( values.getAsString( PROVIDER_KEYID ), 16 ).longValue() );
-            pgpData.setSignatureUserId( values.getAsString( PROVIDER_IDENTITY ) );
+            	pgpData.setSignatureKeyId( new BigInteger( values.getAsString( PROVIDER_KEYID ), 16 ).longValue() );
+            	pgpData.setSignatureUserId( values.getAsString( PROVIDER_IDENTITY ) );
 
-            ( ( MessageCompose )activity ).updateEncryptLayout();
+            }
+
+        	( ( MessageCompose )activity ).updateEncryptLayout();
 
             break;
 
@@ -600,7 +603,7 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setSignatureSuccess( data.getBooleanExtra( EXTRAS_SIGNATURE_SUCCESS, false ) );
                 pgpData.setSignatureUnknown( data.getBooleanExtra( EXTRAS_SIGNATURE_UNKNOWN, false ) );
 
-                Log.w( NAME, "signature identity: " + pgpData.getSignatureUserId() + ", keyid: " + pgpData.getSignatureKeyId() + ", success: " + pgpData.getSignatureSuccess() + ", sigs unknown: " + pgpData.getSignatureUnknown() );
+                //Log.w( NAME, "signature identity: " + pgpData.getSignatureUserId() + ", keyid: " + pgpData.getSignatureKeyId() + ", success: " + pgpData.getSignatureSuccess() + ", sigs unknown: " + pgpData.getSignatureUnknown() );
                 callback.onDecryptDone( pgpData );
 
             }

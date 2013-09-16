@@ -28,6 +28,10 @@ import android.os.StrictMode;
 import android.text.format.Time;
 import android.util.Log;
 
+import com.fsck.k9.Account;
+import com.fsck.k9.FontSizes;
+import com.fsck.k9.PRNGFixes;
+import com.fsck.k9.Preferences;
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.activity.UpgradeDatabases;
@@ -593,7 +597,14 @@ public class K9 extends Application {
          * We have to give MimeMessage a temp directory because File.createTempFile(String, String)
          * doesn't work in Android and MimeMessage does not have access to a Context.
          */
-        BinaryTempFileBody.setTempDirectory(getExternalCacheDir());
+        File cacheDir = getExternalCacheDir();
+        BinaryTempFileBody.setTempDirectory(cacheDir);
+        File[] files = cacheDir.listFiles();
+        for (File file : files){
+        	if( System.currentTimeMillis() - file.lastModified() > 3600000L ) {
+        		file.delete();
+        	}
+        }
 
         LocalKeyStore.setKeyStoreLocation(getDir("KeyStore", MODE_PRIVATE).toString());
 
