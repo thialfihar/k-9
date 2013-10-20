@@ -1,5 +1,6 @@
 package com.fsck.k9.fragment;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -406,7 +407,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
     private boolean mSingleFolderMode;
     private boolean mAllAccounts;
 
-    private MessageListHandler mHandler = new MessageListHandler();
+    private MessageListHandler mHandler = new MessageListHandler(this);
 
     private SortType mSortType = SortType.SORT_DATE;
     private boolean mSortAscending = true;
@@ -458,7 +459,6 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
     private boolean mInitialized = false;
 
     private ContactPictureLoader mContactsPictureLoader;
-    private float mScreenDensity;
 
     private LocalBroadcastManager mLocalBroadcastManager;
     private BroadcastReceiver mCacheBroadcastReceiver;
@@ -486,7 +486,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
      * <p><strong>Note:</strong> If you add a method to this class make sure you don't accidentally
      * perform the operation in the calling thread.</p>
      */
-    class MessageListHandler extends Handler {
+    static class MessageListHandler extends Handler {
         private static final int ACTION_FOLDER_LOADING = 1;
         private static final int ACTION_REFRESH_TITLE = 2;
         private static final int ACTION_PROGRESS = 3;
@@ -495,7 +495,11 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         private static final int ACTION_RESTORE_LIST_POSITION = 6;
         private static final int ACTION_OPEN_MESSAGE = 7;
 
+        private WeakReference<MessageListFragment> mFragment;
 
+        public MessageListHandler(MessageListFragment fragment) {
+            mFragment = new WeakReference<MessageListFragment>(fragment);
+        }
         public void folderLoading(String folder, boolean loading) {
             android.os.Message msg = android.os.Message.obtain(this, ACTION_FOLDER_LOADING,
                     (loading) ? 1 : 0, 0, folder);
@@ -522,7 +526,10 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             post(new Runnable() {
                 @Override
                 public void run() {
-                    MessageListFragment.this.updateFooter(message);
+                    MessageListFragment fragment = mFragment.get();
+                    if (fragment != null) {
+                        fragment.updateFooter(message);
+                    }
                 }
             });
         }
@@ -533,10 +540,13 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         }
 
         public void restoreListPosition() {
-            android.os.Message msg = android.os.Message.obtain(this, ACTION_RESTORE_LIST_POSITION,
-                    mSavedListState);
-            mSavedListState = null;
-            sendMessage(msg);
+            MessageListFragment fragment = mFragment.get();
+            if (fragment != null) {
+                android.os.Message msg = android.os.Message.obtain(this, ACTION_RESTORE_LIST_POSITION,
+                        fragment.mSavedListState);
+                fragment.mSavedListState = null;
+                sendMessage(msg);
+            }
         }
 
         public void openMessage(MessageReference messageReference) {
@@ -547,16 +557,21 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
 
         @Override
         public void handleMessage(android.os.Message msg) {
+            MessageListFragment fragment = mFragment.get();
+            if (fragment == null) {
+                return;
+            }
+
             // The following messages don't need an attached activity.
             switch (msg.what) {
                 case ACTION_REMOTE_SEARCH_FINISHED: {
-                    MessageListFragment.this.remoteSearchFinished();
+                    fragment.remoteSearchFinished();
                     return;
                 }
             }
 
             // Discard messages if the fragment isn't attached to an activity anymore.
-            Activity activity = getActivity();
+            Activity activity = fragment.getActivity();
             if (activity == null) {
                 return;
             }
@@ -565,29 +580,29 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
                 case ACTION_FOLDER_LOADING: {
                     String folder = (String) msg.obj;
                     boolean loading = (msg.arg1 == 1);
-                    MessageListFragment.this.folderLoading(folder, loading);
+                    fragment.folderLoading(folder, loading);
                     break;
                 }
                 case ACTION_REFRESH_TITLE: {
-                    updateTitle();
+                    fragment.updateTitle();
                     break;
                 }
                 case ACTION_PROGRESS: {
                     boolean progress = (msg.arg1 == 1);
-                    MessageListFragment.this.progress(progress);
+                    fragment.progress(progress);
                     break;
                 }
                 case ACTION_GO_BACK: {
-                    mFragmentListener.goBack();
+                    fragment.mFragmentListener.goBack();
                     break;
                 }
                 case ACTION_RESTORE_LIST_POSITION: {
-                    mListView.onRestoreInstanceState((Parcelable) msg.obj);
+                    fragment.mListView.onRestoreInstanceState((Parcelable) msg.obj);
                     break;
                 }
                 case ACTION_OPEN_MESSAGE: {
                     MessageReference messageReference = (MessageReference) msg.obj;
-                    mFragmentListener.openMessage(messageReference);
+                    fragment.mFragmentListener.openMessage(messageReference);
                     break;
                 }
             }
@@ -783,7 +798,6 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
 
         Context appContext = getActivity().getApplicationContext();
 
-        mScreenDensity = appContext.getResources().getDisplayMetrics().density;
         mPreferences = Preferences.getPreferences(appContext);
         mController = MessagingController.getInstance(getActivity().getApplication());
 
@@ -1395,7 +1409,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
     }
 
     private String getDialogTag(int dialogId) {
-        return String.format("dialog-%d", dialogId);
+        return "dialog-" + dialogId;
     }
 
     @Override
@@ -1724,7 +1738,8 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         public void remoteSearchServerQueryComplete(Account account, String folderName, int numResults) {
             mHandler.progress(true);
             if (account != null &&  account.getRemoteSearchNumResults() != 0 && numResults > account.getRemoteSearchNumResults()) {
-                mHandler.updateFooter(mContext.getString(R.string.remote_search_downloading_limited, account.getRemoteSearchNumResults(), numResults));
+                mHandler.updateFooter(mContext.getString(R.string.remote_search_downloading_limited,
+                        account.getRemoteSearchNumResults(), numResults));
             } else {
                 mHandler.updateFooter(mContext.getString(R.string.remote_search_downloading, numResults));
             }

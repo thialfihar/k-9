@@ -92,16 +92,16 @@
     <string name="send_action">Отправить</string>
     <string name="send_again_action">Редактировать</string>
     <string name="select_action">Выбрать</string>
-    <string name="deselect_action">Сброс выбора</string>
+    <string name="deselect_action">Снять выбор</string>
     <string name="reply_action">Ответить</string>
     <string name="reply_all_action">Ответить всем</string>
     <string name="delete_action">Удалить</string>
-    <string name="archive_action">Архив</string>
-    <string name="spam_action">Спам</string>
+    <string name="archive_action">В архив</string>
+    <string name="spam_action">В спам</string>
     <string name="forward_action">Переслать</string>
     <string name="move_action">Переместить</string>
-    <string name="single_message_options_action">Отправить…</string>
-    <string name="refile_action">Смена папки…</string>
+    <string name="single_message_options_action">Отправить</string>
+    <string name="refile_action">Смена папки</string>
     <string name="continue_action">Далее</string>
     <string name="back_action">Назад</string>
     <string name="done_action">Готово</string> <!--  Used to complete a multi-step process -->
@@ -109,7 +109,7 @@
     <string name="save_draft_action">Черновик</string>
     <string name="check_mail_action">Обновить</string>
     <string name="send_messages_action">Отправить почту</string>
-    <string name="refresh_folders_action">Обновить список</string>
+    <string name="refresh_folders_action">Перестроить список</string>
     <string name="filter_folders_action">Поиск папки</string>
     <string name="add_account_action">Добавить</string>
     <string name="compose_action">Создать</string>
@@ -126,8 +126,8 @@
     <string name="send_alternate_action">Передать</string>
     <string name="send_alternate_chooser_title">Способ передачи</string>
 
-    <string name="flag_action">Метка</string>
-    <string name="unflag_action">Без метки</string>
+    <string name="flag_action">Важное</string>
+    <string name="unflag_action">Обычное</string>
     <string name="copy_action">Копировать</string>
     <string name="select_text_action">Выбрать текст</string>
     <string name="show_headers_action">Все заголовки</string>
@@ -144,7 +144,7 @@
     <string name="add_attachment_action">Вложение</string>
     <string name="add_attachment_action_image">Изображение</string>
     <string name="add_attachment_action_video">Видео</string>
-    <string name="empty_trash_action">Очистить Корзину</string>
+    <string name="empty_trash_action">Очистить корзину</string>
     <string name="expunge_action">Стереть</string>
     <string name="clear_local_folder_action">Стереть локальные</string>
     <string name="about_action">О программе</string>
@@ -268,7 +268,7 @@
     <string name="message_saved_toast">Черновик сохранён</string>
 
     <string name="global_settings_flag_label">Показать звёзды</string>
-    <string name="global_settings_flag_summary">Для метки сообщений</string>
+    <string name="global_settings_flag_summary">Для управления важностью сообщений</string>
     <string name="global_settings_checkbox_label">Выбор элементов</string>
     <string name="global_settings_checkbox_summary">Показать поля выбора элементов</string>
     <string name="global_settings_preview_lines_label">Строки предпросмотра</string>
@@ -296,10 +296,10 @@
     <string name="global_settings_messageview_show_next_summary">Открыть следующее сообщение после удаления сообщения</string>
 
     <string name="global_settings_confirm_actions_title">Подтверждать действия</string>
-    <string name="global_settings_confirm_actions_summary">Запросить подтверждение указанных действий</string>
+    <string name="global_settings_confirm_actions_summary">Запросить подтверждение действий</string>
     <string name="global_settings_confirm_action_delete">Удаление (в просмотре)</string>
-    <string name="global_settings_confirm_action_delete_starred">Удаление отмеченного (в просмотре)</string>
-    <string name="global_settings_confirm_action_spam">Перемещение в Спам</string>
+    <string name="global_settings_confirm_action_delete_starred">Удаление важного (в просмотре)</string>
+    <string name="global_settings_confirm_action_spam">Перемещение в спам</string>
     <string name="global_settings_confirm_action_delete_notif">Удаление (в уведомлении)</string>
 
     <string name="global_settings_notification_hide_subject_title">Скрыть тему в уведомлении</string>
@@ -317,11 +317,11 @@
     <string name="global_settings_batch_buttons_summary">Настройка кнопок пакетных операций</string>
     <string name="global_settings_mark_read">Прочитано</string>
     <string name="global_settings_delete">Удалить</string>
-    <string name="global_settings_archive">Архив</string>
+    <string name="global_settings_archive">В архив</string>
     <string name="global_settings_archive_disabled_reason">Нет архивной папки</string>
     <string name="global_settings_move">Перенести</string>
-    <string name="global_settings_flag">Метка</string>
-    <string name="global_settings_unselect">Убрать</string>
+    <string name="global_settings_flag">Важное</string>
+    <string name="global_settings_unselect">Снять выбор</string>
 
     <string name="quiet_time">Период тишины</string>
     <string name="quiet_time_description">Отключить мелодию, вибрацию и индикатор на ночь</string>
@@ -545,7 +545,7 @@
     <string name="account_settings_color_summary">Метка в списке ящиков и папок</string>
 
     <string name="account_settings_led_color_label">Цвет LED-индикатора</string>
-    <string name="account_settings_led_color_summary">Цвет LED-индикатора устройства для оповещений этого ящика</string>
+    <string name="account_settings_led_color_summary">Цвет LED-индикатора для оповещений этого ящика</string>
 
     <string name="account_settings_mail_display_count_label">Отображать сообщений</string>
 
@@ -580,7 +580,7 @@
     <string name="account_settings_message_age_6_months">6 месяцев</string>
     <string name="account_settings_message_age_1_year">1 год</string>
 
-    <string name="account_settings_folder_display_mode_label">Видимость</string>
+    <string name="account_settings_folder_display_mode_label">Видимость папок</string>
     <string name="account_settings_folder_display_mode_all">Все</string>
     <string name="account_settings_folder_display_mode_first_class">1 класс</string>
     <string name="account_settings_folder_display_mode_first_and_second_class">1 и 2 классы</string>
@@ -701,8 +701,8 @@
     <string name="sort_subject_re_alpha">Тема Я — А</string>
     <string name="sort_sender_alpha">Отправитель А — Я</string>
     <string name="sort_sender_re_alpha">Отправитель Я — А</string>
-    <string name="sort_flagged_first">С меткой — без метки</string>
-    <string name="sort_flagged_last">Без метки — с меткой</string>
+    <string name="sort_flagged_first">Важные — обычные</string>
+    <string name="sort_flagged_last">Обычные — важные</string>
     <string name="sort_unread_first">Не прочитано — прочитано</string>
     <string name="sort_unread_last">Прочитано — не прочитано</string>
     <string name="sort_attach_first">С вложениями — без вложений</string>
@@ -713,7 +713,7 @@
     <string name="sort_by_arrival">Получено</string>
     <string name="sort_by_subject">Тема</string>
     <string name="sort_by_sender">Отправитель</string>
-    <string name="sort_by_flag">Метка</string>
+    <string name="sort_by_flag">Важность</string>
     <string name="sort_by_unread">Прочитано</string>
     <string name="sort_by_attach">Вложение</string>
 
@@ -741,14 +741,14 @@
     <string name="message_list_help_key">
     Del, D - Удалить\n
     R - Ответить\n
-    A - Ответить Всем\n
+    A - Ответить всем\n
     C - Новое\n
     F - Переслать\n
     M - Переместить\n
-    V - Архив\n
+    V - В архив\n
     Y - Копия\n
     Z - Прочитано\n
-    G - Метка\n
+    G - Важность\n
     O - Признак сортировки\n
     I - Порядок сортировки\n
     Q - Папки\n
@@ -767,7 +767,7 @@
 
     <string name="folder_list_filter_hint">Поиск папки</string>
 
-    <string name="folder_list_display_mode_label">Видимость</string>
+    <string name="folder_list_display_mode_label">Видимость папок</string>
     <string name="folder_list_display_mode_all">Все папки</string>
     <string name="folder_list_display_mode_first_class">1 класс</string>
     <string name="folder_list_display_mode_first_and_second_class">1 и 2 класс</string>
@@ -830,7 +830,7 @@
     <string name="volume_navigation_message">В сообщении</string>
     <string name="volume_navigation_list">В списке</string>
 
-    <string name="start_integrated_inbox_title">Во \"Входящие\" при запуске</string>
+    <string name="start_integrated_inbox_title">Запуск в общих \"Входящих\"</string>
 
     <string name="measure_accounts_title">Размер ящика</string>
     <string name="measure_accounts_summary">Отключите для ускорения работы</string>
@@ -842,7 +842,7 @@
     <string name="hide_special_accounts_summary">Скрыть общие \"Входящие\" и \"Вся почта\"</string>
 
     <string name="search_title"><xliff:g id="search_name">%s</xliff:g> <xliff:g id="modifier">%s</xliff:g></string>
-    <string name="flagged_modifier">- отмечено</string>
+    <string name="flagged_modifier">- важные</string>
     <string name="unread_modifier">- не прочитано</string>
 
     <string name="search_all_messages_title">Вся почта</string>
@@ -851,10 +851,10 @@
     <string name="integrated_inbox_title">Входящие</string>
     <string name="integrated_inbox_detail">из всех ящиков</string>
 
-    <string name="tap_hint">Нажмите звёздочку или кружок для отображения только отмеченных или непрочитанных</string>
+    <string name="tap_hint">Нажмите звезду или кружок для фильтрации важных или непрочитанных</string>
 
-    <string name="folder_settings_include_in_integrated_inbox_label">Общие Входящие</string>
-    <string name="folder_settings_include_in_integrated_inbox_summary">Показать почту в общих Входящих</string>
+    <string name="folder_settings_include_in_integrated_inbox_label">Общие \"Входящие\"</string>
+    <string name="folder_settings_include_in_integrated_inbox_summary">Показать почту в общих \"Входящих\"</string>
 
     <string name="account_settings_searchable_label">Папки для поиска</string>
     <string name="account_settings_searchable_all">Все</string>
@@ -1090,8 +1090,8 @@
     <string name="global_settings_background_as_unread_indicator_label">Затемнить прочитанные</string>
     <string name="global_settings_background_as_unread_indicator_summary">Выделять прочитанные сообщения менее ярким фоном</string>
 
-    <string name="global_settings_threaded_view_label">Сообщения в беседы</string>
-    <string name="global_settings_threaded_view_summary">Объединить, показав счётчик</string>
+    <string name="global_settings_threaded_view_label">Цепочки сообщений</string>
+    <string name="global_settings_threaded_view_summary">Объединить сообщения, показав счётчик</string>
 
     <string name="upgrade_databases_title">Обновление данных</string>
     <string name="upgrade_databases_unspecified">Обновление данных…</string>
@@ -1115,8 +1115,8 @@
 
     <string name="mark_all_as_read">Прочитаны все</string>
 
-    <string name="global_settings_colorize_missing_contact_pictures">Цветные места для фото</string>
+    <string name="global_settings_colorize_missing_contact_pictures_label">Цветные места для фото</string>
 
-    <string name="global_settings_messageview_visible_refile_actions_title">Действия для сообщений</string>
-    <string name="global_settings_messageview_visible_refile_actions_summary">Видимость пунктов меню в списке сообщений</string>
+    <string name="global_settings_messageview_visible_refile_actions_title">Действия для сообщения</string>
+    <string name="global_settings_messageview_visible_refile_actions_summary">Видимость действий для открытого сообщения</string>
 </resources>

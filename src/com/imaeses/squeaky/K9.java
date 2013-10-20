@@ -587,11 +587,15 @@ public class K9 extends Application {
          */
         File cacheDir = getExternalCacheDir();
         BinaryTempFileBody.setTempDirectory(cacheDir);
-        File[] files = cacheDir.listFiles();
-        for (File file : files){
-        	if( System.currentTimeMillis() - file.lastModified() > 3600000L ) {
-        		file.delete();
+        if( cacheDir != null ) {
+        	
+        	File[] files = cacheDir.listFiles();
+        	for (File file : files){
+        		if( System.currentTimeMillis() - file.lastModified() > 3600000L ) {
+        			file.delete();
+        		}
         	}
+        	
         }
 
         /*

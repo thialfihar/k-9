@@ -116,8 +116,8 @@ Android Localizer (aiLocalizer)
     <string name="cancel_action">Annuler</string>
     <string name="send_action">Envoyer</string>
     <string name="send_again_action">Envoyer à nouveau</string>
-    <!-- NEW: <string name="select_action">Select</string>-->
-    <!-- NEW: <string name="deselect_action">Deselect</string>-->
+    <string name="select_action">Sélectionner</string>
+    <string name="deselect_action">Désélectionner</string>
     <string name="reply_action">Répondre</string>
     <string name="reply_all_action">Répondre à tous</string>
     <string name="delete_action">Supprimer</string>
@@ -1145,7 +1145,7 @@ de plus</string>
 
     <string name="mark_all_as_read">Marquer tous comme lus</string>
 
-    <string name="global_settings_colorize_missing_contact_pictures">Colorier les images de contact manquantes</string>
+    <string name="global_settings_colorize_missing_contact_pictures_label">Colorier les images de contact manquantes</string>
 
     <string name="global_settings_messageview_visible_refile_actions_title">Actions disponibles dans les messages</string>
     <string name="global_settings_messageview_visible_refile_actions_summary">Afficher les actions séléctionnées dans le menu des messages</string>
