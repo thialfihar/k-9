@@ -933,6 +933,11 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     // This REALLY should be in MessageCryptoView
     @Override
     public void onDecryptDone(PgpData pgpData) {
+    	
+    	if( mMessage == null ) {
+    		return;
+    	}
+    	
         Account account = mAccount;
         LocalMessage message = (LocalMessage) mMessage;
         MessagingController controller = mController;
@@ -1001,6 +1006,11 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     
     @Override
     public void onDecryptFileDone(PgpData pgpData) {
+    	
+    	if( mMessage == null ) {
+    		return;
+    	}
+    	
     	Account account = mAccount;
         LocalMessage message = (LocalMessage) mMessage;
         MessagingController controller = mController;

@@ -22,38 +22,8 @@
 
 
     <!-- Welcome message -->
-    <string name="welcome_message_title">Välkommen till K-9 E-post</string>
+    <string name="welcome_message_title">Välkommen till Squeaky E-post</string>
     <string name="accounts_welcome"><![CDATA[
-<<<<<<< HEAD
-=======
-<p>
-K-9 Mail är en e-postklient med öppen källkod för Android, ursprungligen baserad på standard-e-postklienten i Android.
-</p><p>
-K-9\'s förbättrade funktioner inkluderar:
-</p>
-<ul>
-  <li>Push-mail med hjälp av IMAP IDLE</li>
-  <li>Bättre prestanda</li>
-  <li>Omarkivering av e-post</li>
-  <li>E-postsignaturer</li>
-  <li>Bcc till dig själv</li>
-  <li>Mapp-prenumerationer</li>
-  <li>Synkronisera alla mappar</li>
-  <li>Inställning av avsändaradress</li>
-  <li>Tangentbordsgenvägar</li>
-  <li>Bättre support för IMAP</li>
-  <li>Spara bilagor till SD-kort</li>
-  <li>Töm papperskorgen</li>
-  <li>Meddelandesortering</li>
-  <li>…och mer</li>
-</ul>
-<p>
-Vänligen notera att K-9 inte har någon support för gratis Hotmail-konton och liksom många andra e-postklienter har vissa problem vid kommunikation med Microsoft Exchange.
-</p><p>
-Vänligen skicka felrapporter, hjälp till med nya funktioner och ställ frågor på
-<a href="http://k9mail.googlecode.com/">http://k9mail.googlecode.com/</a>.
-</p>
->>>>>>> upstream/master
     ]]></string>
 
 
@@ -266,7 +236,7 @@ Vänligen skicka felrapporter, hjälp till med nya funktioner och ställ frågor
     <string name="message_compose_quote_header_from">Från:</string>
     <string name="message_compose_quote_header_to">Till:</string>
     <string name="message_compose_quote_header_cc">CC:</string>
-    <string name="message_compose_reply_header_fmt"><xliff:g id="sender">%s</xliff:g> skrev:\n</string>
+    <string name="message_compose_reply_header_fmt"><xliff:g id="sender">%s</xliff:g> skrev:</string>
     <string name="message_compose_error_no_recipients">Du måste ange åtminstone en mottagare.</string>
     <string name="error_contact_address_not_found">Kan inte hitta e-postadress för denna kontakt.</string>
     <string name="message_compose_attachments_skipped_toast">Några bilagor kan inte vidarebefordras eftersom de inte har hämtats.</string>
@@ -759,10 +729,6 @@ Vänligen skicka felrapporter, hjälp till med nya funktioner och ställ frågor
 
     <string name="account_clear_dlg_title">Rensa konto</string>
 
-    <string name="provider_note_live">Bara vissa \"Plus\"-konton inkluderar POP-tillgång
-        vilket krävs för detta program för att ansluta. Om du misslyckas med att logga in
-        med din korrekta adress och lösenord så kanske du inte har ett betalt
-        \"Plus\"-konto. Vänligen starta webbläsaren för att komma åt dessa konton.</string>
     <string name="provider_note_yahoojp">Om du vill använda POP3 med denna leverantör måste du välja att tillåta POP3 på inställningssidan för Yahoo!.</string>
     <string name="provider_note_auonejp">Försäkra dig om att du har aktiverat IMAP eller POP3 på e-postinställningarna för au one.</string>
     <string name="provider_note_naver">Försäkra dig om att du har aktiverat IMAP eller POP3 på e-postinställningarna för Naver.</string>
@@ -1147,8 +1113,14 @@ Vänligen skicka felrapporter, hjälp till med nya funktioner och ställ frågor
 
     <string name="mark_all_as_read">Markera alla som lästa</string>
 
-    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures_label">Colorize missing contact pictures</string>-->
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures_label">Colorize contact pictures</string>-->
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures_summary">Colorize missing contact pictures</string>-->
 
-    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visible message actions</string>-->
     <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
+
+    <!-- NEW: <string name="loading_attachment">Loading attachment…</string>-->
+    <!-- NEW: <string name="fetching_attachment_dialog_title_send">Sending message</string>-->
+    <!-- NEW: <string name="fetching_attachment_dialog_title_save">Saving draft</string>-->
+    <!-- NEW: <string name="fetching_attachment_dialog_message">Fetching attachment…</string>-->
 </resources>

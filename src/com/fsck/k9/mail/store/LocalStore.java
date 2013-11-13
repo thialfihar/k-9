@@ -1995,18 +1995,18 @@ public class LocalStore extends Store implements Serializable {
                                             bp.setEncoding(encoding);
                                             if (name != null) {
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_TYPE,
-                                                             String.format("%s;\n name=\"%s\"",
+                                                             String.format("%s;\r\n name=\"%s\"",
                                                                            type,
                                                                            name));
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_DISPOSITION,
-                                                             String.format("%s;\n filename=\"%s\";\n size=%d",
+                                                             String.format("%s;\r\n filename=\"%s\";\r\n size=%d",
                                                                            contentDisposition,
                                                                            name, // TODO: Should use encoded word defined in RFC 2231.
                                                                            size));
                                             } else {
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_DISPOSITION,
-                                                        String.format("%s;\n size=%d",
+                                                        String.format("%s;\r\n size=%d",
                                                                       contentDisposition,
                                                                       size));
                                             }
@@ -3569,7 +3569,6 @@ public class LocalStore extends Store implements Serializable {
          * @throws MessagingException
          */
         public String getTextForDisplay() throws MessagingException {
-        	Log.w( K9.LOG_TAG, "getTextForDisplay()" );
             String text = null;    // First try and fetch an HTML part.
             Part part = MimeUtility.findFirstPartByMimeType(this, "text/html");
             if (part == null) {
@@ -4137,31 +4136,6 @@ public class LocalStore extends Store implements Serializable {
                  * have been blown away, we just return an empty stream.
                  */
                 return new ByteArrayInputStream(EMPTY_BYTE_ARRAY);
-            }
-        }
-
-        @Override
-        public void writeTo(OutputStream out) throws IOException, MessagingException {
-            InputStream in = getInputStream();
-            try {
-                boolean closeStream = false;
-                if (MimeUtil.isBase64Encoding(mEncoding)) {
-                    out = new Base64OutputStream(out);
-                    closeStream = true;
-                } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
-                    out = new QuotedPrintableOutputStream(out, false);
-                    closeStream = true;
-                }
-
-                try {
-                    IOUtils.copy(in, out);
-                } finally {
-                    if (closeStream) {
-                        out.close();
-                    }
-                }
-            } finally {
-                in.close();
             }
         }
 

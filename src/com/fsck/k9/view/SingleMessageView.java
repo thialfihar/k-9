@@ -567,7 +567,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     	setMessage( account, message, pgpData, controller, listener, null );
     }
     
-    // The replacement message is one derived by decrypted the contents of the original message. We only care about its
+    // The replacement message is one derived by decrypting the contents of the original message. We only care about its
     // attachments.
     public void setMessage(Account account, LocalMessage message, PgpData pgpData,
             MessagingController controller, MessagingListener listener, Message replacement ) throws MessagingException {

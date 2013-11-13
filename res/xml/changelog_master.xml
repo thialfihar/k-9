@@ -8,6 +8,13 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.700" versioncode="19001" >
+        <change>Code cleanups</change>
+        <change>Fixed a bug that could have caused message drafts to be sent before they were ready</change>
+        <change>Updates to German, Japanese, Russian, Slovak translations</change>
+        <change>Fix some small bugs in contact picture generation</change>
+        <change>Fetch attachments while MessageCompose activity is running</change>
+    </release>
     <release version="4.512" versioncode="18012" >
         <change>Updated auto-configuration settings to use IMAP for outlook.com</change>
         <change>Updated auto-configuration settings for gmx.de</change>
@@ -145,8 +152,8 @@
     <release version="4.327" versioncode="17028" >
         <change>Fix dialog message when deleting multiple messages from a notification</change>
         <change>Message view / list: fix NPE when list is empty</change>
-        <change>If there is no message when resuming, K-9 should return to a MessageList.</change>
-        <change>Add a caching layer to EmailProvider.  Database updates can be surprisingly slow. This lead to slow updates of the user interface which in turn made working with K-9 Mail not as fun as it should be. This commit hopefully changes that.</change>
+        <change>If there is no message when resuming, Squeaky should return to a MessageList.</change>
+        <change>Add a caching layer to EmailProvider.  Database updates can be surprisingly slow. This lead to slow updates of the user interface which in turn made working with Squeaky Mail not as fun as it should be. This commit hopefully changes that.</change>
         <change>Updated Japanese translation</change>
         <change>Updated French translation</change>
         <change>Updated Czech localization</change>

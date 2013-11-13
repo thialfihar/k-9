@@ -236,7 +236,7 @@
     <string name="message_compose_quote_header_from">Lähettäjä:</string>
     <string name="message_compose_quote_header_to">Vastaanottaja:</string>
     <string name="message_compose_quote_header_cc">Kopio:</string>
-    <string name="message_compose_reply_header_fmt"><xliff:g id="sender">%s</xliff:g> kirjoitti:\n</string>
+    <string name="message_compose_reply_header_fmt"><xliff:g id="sender">%s</xliff:g> kirjoitti:</string>
     <string name="message_compose_error_no_recipients">Valitse vähintään yksi vastaanottaja.</string>
     <string name="error_contact_address_not_found">Tämän henkilön sähköpostiosoitetta ei löytynyt.</string>
     <string name="message_compose_attachments_skipped_toast">Joitakin liitteitä ei voida lähettää edelleen, koska niitä ei ole ladattu.</string>
@@ -729,11 +729,6 @@
 
     <string name="account_clear_dlg_title">Tyhjennä tili</string>
 
-    <string name="provider_note_live">Vain jotkin Plus-tilit sisältävät POP-yhteyden,
-        joka mahdollistaa yhdistämisen tällä ohjelmalla. Jos et voi kirjautua
-        oikealla sähköpostiosoitteella ja salasanalla, sinulla ei ehkä ole maksullista
-        Plus-tiliä. Ole hyvä ja käynnistä www-selain käyttääksesi
-  näitä sähköpostitilejä.</string>
     <string name="provider_note_yahoojp">Jos haluat käyttää POP3:a tällä palveluntarjoajalla, sinun tulee sallia POP3:n käyttäminen Yahoo-sähköpostiasetukset-sivulla.</string>
     <string name="provider_note_auonejp">Jos haluat käyttää IMAP:ia tai POP3:a tällä palveluntarjoajalla, sinun tulee sallia IMAP:in tai POP3:n käyttäminen au one -sähköpostiasetukset-sivulla.</string>
     <string name="provider_note_naver">If you would like to use IMAP or POP3 for this provider, You should permit to use IMAP or POP3 on Naver mail settings page.</string>
@@ -1120,8 +1115,14 @@
 
     <string name="mark_all_as_read">Merkitse kaikki luetuiksi</string>
 
-    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures_label">Colorize missing contact pictures</string>-->
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures_label">Colorize contact pictures</string>-->
+    <!-- NEW: <string name="global_settings_colorize_missing_contact_pictures_summary">Colorize missing contact pictures</string>-->
 
-    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visisble message actions</string>-->
+    <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_title">Visible message actions</string>-->
     <!-- NEW: <string name="global_settings_messageview_visible_refile_actions_summary">Show selected actions in the message view menu</string>-->
+
+    <!-- NEW: <string name="loading_attachment">Loading attachment…</string>-->
+    <!-- NEW: <string name="fetching_attachment_dialog_title_send">Sending message</string>-->
+    <!-- NEW: <string name="fetching_attachment_dialog_title_save">Saving draft</string>-->
+    <!-- NEW: <string name="fetching_attachment_dialog_message">Fetching attachment…</string>-->
 </resources>

@@ -230,7 +230,7 @@
     <string name="message_compose_quote_header_from">От:</string>
     <string name="message_compose_quote_header_to">Кому:</string>
     <string name="message_compose_quote_header_cc">Копия:</string>
-    <string name="message_compose_reply_header_fmt"><xliff:g id="sender">%s</xliff:g> пишет:\n</string>
+    <string name="message_compose_reply_header_fmt"><xliff:g id="sender">%s</xliff:g> пишет:</string>
     <string name="message_compose_error_no_recipients">Укажите адресата</string>
     <string name="error_contact_address_not_found">Контакт не содержит сведений о email</string>
     <string name="message_compose_attachments_skipped_toast">Некоторые вложения не были загружены и не могут быть отправлены</string>
@@ -723,10 +723,6 @@
 
     <string name="account_clear_dlg_title">Очистка ящика</string>
 
-    <string name="provider_note_live">Доступ по POP-протоколу доступен только для \"Plus\"-аккаунтов.
-        Если подключение с правильными настройками не удаётся, требуется
-        переход на версию \"Plus\". Воспользуйтесь мобильной версией
-        Yahoo! Mail или зайдите в аккаунт через браузер</string>
     <string name="provider_note_yahoojp">Убедитесь, что разрешён доступ по IMAP или POP3 в настройках аккаунта Yahoo</string>
     <string name="provider_note_auonejp">Убедитесь, что разрешён доступ по IMAP или POP3 в настройках аккаунта au one</string>
     <string name="provider_note_naver">Убедитесь, что разрешён доступ по IMAP или POP3 в настройках аккаунта Naver</string>
@@ -1116,7 +1112,13 @@
     <string name="mark_all_as_read">Прочитаны все</string>
 
     <string name="global_settings_colorize_missing_contact_pictures_label">Цветные места для фото</string>
+    <string name="global_settings_colorize_missing_contact_pictures_summary">Инициалы контактов на цветном фоне при отсутствии фото</string>
 
     <string name="global_settings_messageview_visible_refile_actions_title">Действия для сообщения</string>
     <string name="global_settings_messageview_visible_refile_actions_summary">Видимость действий для открытого сообщения</string>
+
+    <string name="loading_attachment">Загрузка вложений…</string>
+    <string name="fetching_attachment_dialog_title_send">Отправка сообщения</string>
+    <string name="fetching_attachment_dialog_title_save">Сохранение черновика</string>
+    <string name="fetching_attachment_dialog_message">Получение вложений…</string>
 </resources>
