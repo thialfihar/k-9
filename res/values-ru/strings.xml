@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Translation of RU version (06.07.2013): Igor Nedoboy (k9russian<AT>gmail<DOT>com) -->
+<!-- Translation of RU version (2013): Igor Nedoboy (k9russian<AT>gmail<DOT>com) -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- === App-specific strings ============================================================= -->
 
@@ -49,7 +49,7 @@
     <!-- === General strings ================================================================== -->
 
     <string name="app_authors_fmt">Авторы: <xliff:g id="app_authors">%s</xliff:g></string>
-    <string name="app_revision_fmt">Новое в версии: <xliff:g id="app_revision_url">%s</xliff:g></string>
+    <string name="app_revision_fmt">Изменения: <xliff:g id="app_revision_url">%s</xliff:g></string>
     <string name="app_libraries">Сторонние компоненты: <xliff:g id="app_libraries_list">%s</xliff:g></string>
     <string name="app_emoji_icons">Значки настроения: <xliff:g id="app_emoji_icons_link">%s</xliff:g></string>
 
@@ -172,7 +172,7 @@
 
     <string name="compacting_account">Сжатие ящика \"<xliff:g id="account">%s</xliff:g>\"</string>
     <string name="clearing_account">Очистка ящика \"<xliff:g id="account">%s</xliff:g>\"</string>
-    <string name="recreating_account">Пересоздание ящика\"<xliff:g id="account">%s</xliff:g>\"</string>
+    <string name="recreating_account">Пересоздание ящика \"<xliff:g id="account">%s</xliff:g>\"</string>
 
     <string name="notification_new_title">Новая почта</string>
     <string name="notification_new_messages_title"><xliff:g id="new_message_count">%d</xliff:g> новых</string>
@@ -185,9 +185,9 @@
     <string name="notification_certificate_error_title">Ошибка сертификата <xliff:g id="account">%s</xliff:g></string>
     <string name="notification_certificate_error_text">Проверьте настройки сервера</string>
 
-    <string name="notification_bg_sync_ticker">Проверка: <xliff:g id="account">%s</xliff:g>:<xliff:g id="folder">%s</xliff:g></string>
+    <string name="notification_bg_sync_ticker">Проверка — <xliff:g id="account">%s</xliff:g>:<xliff:g id="folder">%s</xliff:g></string>
     <string name="notification_bg_sync_title">Проверка почты</string>
-    <string name="notification_bg_send_ticker">Отправка: <xliff:g id="account">%s</xliff:g></string>
+    <string name="notification_bg_send_ticker">Отправка — <xliff:g id="account">%s</xliff:g></string>
     <string name="notification_bg_send_title">Отправка почты</string>
     <string name="notification_bg_title_separator">:</string>
 

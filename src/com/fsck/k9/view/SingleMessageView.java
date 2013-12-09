@@ -105,10 +105,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     private LayoutInflater mInflater;
     private Contacts mContacts;
     private AttachmentView.AttachmentFileDownloadCallback attachmentCallback;
-    private LinearLayout mHeaderPlaceHolder;
-    private LinearLayout mTitleBarHeaderContainer;
     private View mAttachmentsContainer;
-    private LinearLayout mInsideAttachmentsContainer;
     private SavedState mSavedState;
     private ClipboardManager mClipboardManager;
     private String mText;
@@ -122,13 +119,10 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         activity.registerForContextMenu(mMessageContentView);
         mMessageContentView.setOnCreateContextMenuListener(this);
 
-        mHeaderPlaceHolder = (LinearLayout) findViewById(R.id.message_view_header_container);
-
         mHeaderContainer = (MessageHeader) findViewById(R.id.header_container);
         mHeaderContainer.setOnLayoutChangedListener(this);
 
         mAttachmentsContainer = findViewById(R.id.attachments_container);
-        mInsideAttachmentsContainer = (LinearLayout) findViewById(R.id.inside_attachments_container);
         mAttachments = (LinearLayout) findViewById(R.id.attachments);
         mHiddenAttachments = (LinearLayout) findViewById(R.id.hidden_attachments);
         mHiddenAttachments.setVisibility(View.GONE);
@@ -163,7 +157,6 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
             mMessageContentView.setVisibility(View.VISIBLE);
             mScreenReaderEnabled = false;
 
-            mHeaderPlaceHolder.removeView(mHeaderContainer);
             // the HTC version of WebView tries to force the background of the
             // titlebar, which is really unfair.
             TypedValue outValue = new TypedValue();
@@ -171,10 +164,6 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
             mHeaderContainer.setBackgroundColor(outValue.data);
             // also set background of the whole view (including the attachments view)
             setBackgroundColor(outValue.data);
-
-            mTitleBarHeaderContainer = new LinearLayout(activity);
-            mMessageContentView.setEmbeddedTitleBarCompat(mTitleBarHeaderContainer);
-            mTitleBarHeaderContainer.addView(mHeaderContainer);
         }
 
         mShowHiddenAttachments.setOnClickListener(this);
@@ -702,12 +691,6 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         boolean showHidden = (show && mHiddenAttachments.getVisibility() == View.GONE &&
                 mHiddenAttachments.getChildCount() > 0);
         mShowHiddenAttachments.setVisibility(showHidden ? View.VISIBLE : View.GONE);
-
-        if (show) {
-            moveHeaderToLayout();
-        } else {
-            moveHeaderToWebViewTitleBar();
-        }
     }
 
     public void showMessageWebView(boolean show) {
@@ -831,20 +814,6 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     public void setAttachmentCallback(
         AttachmentView.AttachmentFileDownloadCallback attachmentCallback) {
         this.attachmentCallback = attachmentCallback;
-    }
-
-    private void moveHeaderToLayout() {
-        if (mTitleBarHeaderContainer != null && mTitleBarHeaderContainer.getChildCount() != 0) {
-            mTitleBarHeaderContainer.removeView(mHeaderContainer);
-            mInsideAttachmentsContainer.addView(mHeaderContainer, 0);
-        }
-    }
-
-    private void moveHeaderToWebViewTitleBar() {
-        if (mTitleBarHeaderContainer != null && mTitleBarHeaderContainer.getChildCount() == 0) {
-            mInsideAttachmentsContainer.removeView(mHeaderContainer);
-            mTitleBarHeaderContainer.addView(mHeaderContainer);
-        }
     }
 
     @Override

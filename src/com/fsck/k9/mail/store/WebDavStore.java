@@ -9,7 +9,6 @@ import com.fsck.k9.mail.*;
 
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
 import com.fsck.k9.mail.internet.MimeMessage;
-import com.fsck.k9.mail.transport.TrustedSocketFactory;
 import com.imaeses.squeaky.K9;
 
 import org.apache.commons.io.IOUtils;
@@ -1081,7 +1080,7 @@ public class WebDavStore extends Store {
 
             SchemeRegistry reg = mHttpClient.getConnectionManager().getSchemeRegistry();
             try {
-                Scheme s = new Scheme("https", new TrustedSocketFactory(mHost, mSecure), 443);
+                Scheme s = new Scheme("https", new WebDavSocketFactory(mHost, 443, mSecure), 443);
                 reg.register(s);
             } catch (NoSuchAlgorithmException nsa) {
                 Log.e(K9.LOG_TAG, "NoSuchAlgorithmException in getHttpClient: " + nsa);

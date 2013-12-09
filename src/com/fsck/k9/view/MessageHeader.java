@@ -16,8 +16,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 
+import android.widget.LinearLayout;
 import android.widget.QuickContactBadge;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.fsck.k9.FontSizes;
@@ -41,7 +41,8 @@ import java.util.Set;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
-public class MessageHeader extends ScrollView implements OnClickListener {
+public class MessageHeader extends LinearLayout implements OnClickListener {
+
     private Context mContext;
     private TextView mFromView;
     private TextView mDateView;

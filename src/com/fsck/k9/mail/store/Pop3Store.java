@@ -11,6 +11,9 @@ import com.fsck.k9.mail.*;
 import com.fsck.k9.mail.internet.MimeMessage;
 import com.imaeses.squeaky.K9;
 
+import com.fsck.k9.net.ssl.TrustManagerFactory;
+import com.fsck.k9.net.ssl.TrustedSocketFactory;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
@@ -327,10 +330,10 @@ public class Pop3Store extends Store {
                         mConnectionSecurity == CONNECTION_SECURITY_SSL_OPTIONAL) {
                     SSLContext sslContext = SSLContext.getInstance("TLS");
                     final boolean secure = mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED;
-                    sslContext.init(null, new TrustManager[] {
-                                        TrustManagerFactory.get(mHost, secure)
-                                    }, new SecureRandom());
-                    mSocket = sslContext.getSocketFactory().createSocket();
+                    sslContext.init(null,
+                            new TrustManager[] { TrustManagerFactory.get(mHost,
+                                    mPort, secure) }, new SecureRandom());
+                    mSocket = TrustedSocketFactory.createSocket(sslContext);
                 } else {
                     mSocket = new Socket();
                 }
@@ -356,11 +359,12 @@ public class Pop3Store extends Store {
 
                         SSLContext sslContext = SSLContext.getInstance("TLS");
                         boolean secure = mConnectionSecurity == CONNECTION_SECURITY_TLS_REQUIRED;
-                        sslContext.init(null, new TrustManager[] {
-                                            TrustManagerFactory.get(mHost, secure)
-                                        }, new SecureRandom());
-                        mSocket = sslContext.getSocketFactory().createSocket(mSocket, mHost, mPort,
-                                  true);
+                        sslContext.init(null,
+                                new TrustManager[] { TrustManagerFactory.get(
+                                        mHost, mPort, secure) },
+                                new SecureRandom());
+                        mSocket = TrustedSocketFactory.createSocket(sslContext, mSocket, mHost,
+                                mPort, true);
                         mSocket.setSoTimeout(Store.SOCKET_READ_TIMEOUT);
                         mIn = new BufferedInputStream(mSocket.getInputStream(), 1024);
                         mOut = new BufferedOutputStream(mSocket.getOutputStream(), 512);
