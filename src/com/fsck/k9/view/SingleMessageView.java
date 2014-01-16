@@ -53,9 +53,12 @@ import com.fsck.k9.provider.AttachmentProvider.AttachmentProviderColumns;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -673,7 +676,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     public boolean handlePgpEncrypted( Fragment fragment, Account account, File inputFile, PgpData pgpData ) {
     	
     	CryptoProvider cryptoProvider = account.getCryptoProvider();
-    	if( !cryptoProvider.supportsPgpMime( fragment.getActivity() ) || mHandledPgpMimeEncrypted ) {
+    	if( !cryptoProvider.supportsPgpMimeReceive( fragment.getActivity() ) || mHandledPgpMimeEncrypted ) {
     		return false;
     	}
     	
@@ -686,13 +689,38 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     public boolean handlePgpSigned( Fragment fragment, Account account, byte[] data, String sig, PgpData pgpData ) {
     	
     	CryptoProvider cryptoProvider = account.getCryptoProvider();
-    	if( !cryptoProvider.supportsPgpMime( fragment.getActivity() ) || mHandledPgpMimeSigned ) {
+    	if( !cryptoProvider.supportsPgpMimeReceive( fragment.getActivity() ) || mHandledPgpMimeSigned ) {
     		return false;
     	}
     	
     	mHandledPgpMimeSigned = true;
     	
-    	return cryptoProvider.verify( fragment, data, sig, pgpData );
+    	File f = null;
+    	OutputStream os = null;
+    	try {
+    		
+    		f = File.createTempFile("verify", "bin" );
+        	ByteArrayInputStream bais = new ByteArrayInputStream( data );
+    		os = new BufferedOutputStream( new FileOutputStream( f ) );
+    		
+    		IOUtils.copy( bais, os );
+    		
+    	} catch( Exception e ) {
+    		
+    		Log.e( K9.LOG_TAG, e.getMessage(), e );
+    		return false;
+    		
+    	} finally {
+    		if( os != null ) {
+    			try {
+    				os.close();
+    			} catch( Exception e ) {
+    				Log.w( K9.LOG_TAG, "Error closing temp file", e );
+    			}
+    		}
+    	}
+    	
+    	return cryptoProvider.verify( fragment, f.getAbsolutePath(), sig, pgpData );
     	
     }
 
