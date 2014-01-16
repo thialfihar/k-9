@@ -48,6 +48,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int VERSION_REQUIRED_MIN = 22;
     public static final int VERSION_REQUIRED_ATTACHMENTS_MIN = 29;
     public static final int VERSION_REQUIRED_FLOATING_SIGS_MIN = 30;
+    public static final int VERSION_REQUIRED_PGP_MIME_SEND = 38;
 
     public static final String AUTHORITY_PAID = "com.imaeses.KeyRing";
     public static final String AUTHORITY_TRIAL = "com.imaeses.trial.KeyRing";
@@ -62,6 +63,8 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int SELECT_SECRET_KEY = 4;
     public static final int DECRYPT_FILE = 5;
     public static final int VERIFY = 6;
+    public static final int ENCRYPT_FILE = 7;
+    public static final int SIGN = 8;
 
     private Uri uriSelectPrivateSigningKey;
     private Uri uriSelectPublicSigningKey;
@@ -92,9 +95,11 @@ public class PGPKeyRing extends CryptoProvider {
     public static class PGPKeyRingIntent {
         
         public static final String ENCRYPT_MSG_AND_RETURN = "com.imaeses.keyring.ENCRYPT_MSG_AND_RETURN";
+        public static final String ENCRYPT_FILE_AND_RETURN = "com.imaeses.keyring.ENCRYPT_FILE_AND_RETURN";
         public static final String DECRYPT_MSG_AND_RETURN = "com.imaeses.keyring.DECRYPT_MSG_AND_RETURN";
         public static final String DECRYPT_FILE_AND_RETURN = "com.imaeses.keyring.DECRYPT_FILE_AND_RETURN";
         public static final String VERIFY_AND_RETURN = "com.imaeses.keyring.VERIFY_AND_RETURN";
+        public static final String SIGN_AND_RETURN = "com.imaeses.keyring.SIGN_AND_RETURN";
         
     }
     
@@ -427,6 +432,59 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    @Override
+    public boolean encryptFile( Activity activity, String filename, PgpData pgpData ) {
+    	
+        boolean success = false;
+        
+        Intent i = new Intent( PGPKeyRingIntent.ENCRYPT_FILE_AND_RETURN );
+        i.addCategory( Intent.CATEGORY_DEFAULT );
+        i.setType( "text/plain" );
+        i.putExtra( EXTRAS_FILENAME, filename );
+        i.putExtra( EXTRAS_ENCRYPTION_KEYIDS, pgpData.getEncryptionKeys() );
+        i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
+        
+        try {
+            
+            activity.startActivityForResult( i, ENCRYPT_FILE );
+            success = true;
+            
+        } catch( ActivityNotFoundException e ) {
+            Toast.makeText( activity, R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
+        }
+        
+        return success;
+        
+    }
+    
+    @Override
+    public boolean sign( Activity activity, String filename, PgpData pgpData ) {
+    	
+    	boolean success = false;
+    	
+    	if( filename != null ) {
+    		
+    		Intent i = new Intent( PGPKeyRingIntent.SIGN_AND_RETURN );
+    		i.addCategory( Intent.CATEGORY_DEFAULT );
+            i.setType( "text/plain" );
+            i.putExtra( EXTRAS_FILENAME, filename );
+            i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
+            
+            try {
+                
+                activity.startActivityForResult( i, SIGN );
+                success = true;
+            
+            } catch( ActivityNotFoundException e ) {
+                Toast.makeText(activity, R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
+            }
+            
+    	}
+    	
+    	return success;
+    	
+    }
+    
     /**
      * Start the decrypt activity.
      *
@@ -496,16 +554,16 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean verify( Fragment fragment, byte[] data, String sig, PgpData pgpData ) {
+    public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData ) {
     	
     	boolean success = false;
     	
-    	if( data != null && sig != null ) {
+    	if( filename != null && sig != null ) {
     		
     		Intent i = new Intent( PGPKeyRingIntent.VERIFY_AND_RETURN );
     		i.addCategory( Intent.CATEGORY_DEFAULT );
             i.setType( "text/plain" );
-            i.putExtra( EXTRAS_MSG, data );
+            i.putExtra( EXTRAS_FILENAME, filename );
             i.putExtra( EXTRAS_SIGNATURE, sig );
             
             try {
@@ -522,7 +580,6 @@ public class PGPKeyRing extends CryptoProvider {
     	return success;
     	
     }
-    
     
     /**
      * Handle the activity results that concern us.
@@ -610,6 +667,17 @@ public class PGPKeyRing extends CryptoProvider {
 
             break;
             
+        case SIGN:
+        	
+        	if( resultCode == Activity.RESULT_OK && data != null ) {
+            	
+        		pgpData.setSignature( data.getByteArrayExtra( EXTRAS_SIGNATURE ) );
+        		//callback.onEncryptDone( pgpData );
+        		
+        	}
+        	
+        	break;
+        		
         	
         case DECRYPT_MESSAGE:
             
@@ -656,7 +724,11 @@ public class PGPKeyRing extends CryptoProvider {
         		pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
         		pgpData.setShowFile( data.getBooleanExtra( EXTRAS_SHOW_FILE, false ) );
         		
-        		callback.onDecryptFileDone( pgpData );
+        		if( pgpData.showFile() ) {
+        			callback.onDecryptFileDone( pgpData );
+        		} else {
+        			callback.onDecryptDone( pgpData );
+        		}
         		
         	}
         	
@@ -757,7 +829,7 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean supportsPgpMime( Context context ) {
+    public boolean supportsPgpMimeReceive( Context context ) {
     	
     	boolean supportsFloatingSigs = false;
     	
@@ -782,6 +854,35 @@ public class PGPKeyRing extends CryptoProvider {
     	}
         
         return supportsFloatingSigs;
+        
+    }
+    
+    @Override
+    public boolean supportsPgpMimeSend( Context context ) {
+    	
+    	boolean supportsPgpMimeSend = false;
+    	
+    	if( isAvailable( context ) ) { 
+    	
+	    	PackageInfo pi = null;
+	        PackageManager packageManager = context.getPackageManager();
+	        
+	        try {
+	        	if( isTrialVersion ) {
+	        		pi = packageManager.getPackageInfo( PACKAGE_TRIAL, 0 );
+	        	} else {
+	        		pi = packageManager.getPackageInfo( PACKAGE_PAID, 0 );
+	        	}	
+	        } catch( NameNotFoundException e ) {
+	        }
+	        
+	        if( pi != null && pi.versionCode >= VERSION_REQUIRED_PGP_MIME_SEND ) {
+	        	supportsPgpMimeSend = true;
+	        }
+	        
+    	}
+        
+        return supportsPgpMimeSend;
         
     }
     

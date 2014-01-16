@@ -75,7 +75,17 @@ public class None extends CryptoProvider {
     public boolean encrypt(Activity activity, String data, PgpData pgpData) {
         return false;
     }
-
+    
+    @Override
+    public boolean encryptFile( Activity activity, String filename, PgpData pgpData ) {
+    	return false;
+    }
+    
+    @Override
+    public boolean sign( Activity activity, String filename, PgpData pgpData ) {
+    	return false;
+    }
+    
     @Override
     public boolean decrypt(Fragment fragment, String data, PgpData pgpData) {
         return false;
@@ -87,7 +97,7 @@ public class None extends CryptoProvider {
     }
     
     @Override
-    public boolean verify( Fragment fragment, byte[] data, String sig, PgpData pgpData ) {
+    public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData ) {
     	return false;	
     }
 
@@ -99,16 +109,6 @@ public class None extends CryptoProvider {
     @Override
     public boolean isSigned(Message message) {
         return false;
-    }
-
-    @Override
-    public boolean supportsAttachments( Context context ) {
-    	return false;
-    }
-    
-    @Override
-    public boolean supportsPgpMime( Context context ) {
-    	return false;
     }
     
     @Override

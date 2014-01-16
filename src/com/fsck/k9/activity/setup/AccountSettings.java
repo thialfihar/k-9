@@ -110,6 +110,7 @@ public class AccountSettings extends K9PreferenceActivity {
     private static final String PREFERENCE_CRYPTO_APP = "crypto_app";
     private static final String PREFERENCE_CRYPTO_AUTO_SIGNATURE = "crypto_auto_signature";
     private static final String PREFERENCE_CRYPTO_AUTO_ENCRYPT = "crypto_auto_encrypt";
+    private static final String PREFERENCE_CRYPTO_USE_PGP_MIME = "crypto_use_pgp_mime";
     private static final String PREFERENCE_CLOUD_SEARCH_ENABLED = "remote_search_enabled";
     private static final String PREFERENCE_REMOTE_SEARCH_NUM_RESULTS = "account_remote_search_num_results";
     private static final String PREFERENCE_REMOTE_SEARCH_FULL_TEXT = "account_remote_search_full_text";
@@ -177,6 +178,7 @@ public class AccountSettings extends K9PreferenceActivity {
     private ListPreference mCryptoApp;
     private CheckBoxPreference mCryptoAutoSignature;
     private CheckBoxPreference mCryptoAutoEncrypt;
+    private CheckBoxPreference mCryptoUsePgpMime;
 
     private PreferenceScreen mSearchScreen;
     private CheckBoxPreference mCloudSearchEnabled;
@@ -717,6 +719,9 @@ public class AccountSettings extends K9PreferenceActivity {
 
             mCryptoAutoEncrypt = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_AUTO_ENCRYPT);
             mCryptoAutoEncrypt.setChecked(mAccount.isCryptoAutoEncrypt());
+            
+            mCryptoUsePgpMime = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_USE_PGP_MIME);
+            mCryptoUsePgpMime.setChecked(mAccount.isCryptoUsePgpMime());
 
             handleCryptoAppDependencies();
         } else {
@@ -750,9 +755,11 @@ public class AccountSettings extends K9PreferenceActivity {
         if ("".equals(mCryptoApp.getValue())) {
             mCryptoAutoSignature.setEnabled(false);
             mCryptoAutoEncrypt.setEnabled(false);
+            mCryptoUsePgpMime.setEnabled(false);
         } else {
             mCryptoAutoSignature.setEnabled(true);
             mCryptoAutoEncrypt.setEnabled(true);
+            mCryptoUsePgpMime.setEnabled(true);
         }
     }
 
@@ -799,6 +806,7 @@ public class AccountSettings extends K9PreferenceActivity {
             mAccount.setCryptoApp(mCryptoApp.getValue());
             mAccount.setCryptoAutoSignature(mCryptoAutoSignature.isChecked());
             mAccount.setCryptoAutoEncrypt(mCryptoAutoEncrypt.isChecked());
+            mAccount.setCryptoUsePgpMime(mCryptoUsePgpMime.isChecked());
         }
 
         // In webdav account we use the exact folder name also for inbox,

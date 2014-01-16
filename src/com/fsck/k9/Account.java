@@ -215,6 +215,7 @@ public class Account implements BaseAccount {
     private String mCryptoApp;
     private boolean mCryptoAutoSignature;
     private boolean mCryptoAutoEncrypt;
+    private boolean mCryptoUsePgpMime;
     private boolean mMarkMessageAsReadOnView;
     private boolean mAlwaysShowCcBcc;
     private boolean mAllowRemoteSearch;
@@ -314,6 +315,7 @@ public class Account implements BaseAccount {
         mCryptoApp = PGPKeyRing.NAME;
         mCryptoAutoSignature = false;
         mCryptoAutoEncrypt = false;
+        mCryptoUsePgpMime = true;
         mAllowRemoteSearch = false;
         mRemoteSearchFullText = false;
         mRemoteSearchNumResults = DEFAULT_REMOTE_SEARCH_NUM_RESULTS;
@@ -498,6 +500,7 @@ public class Account implements BaseAccount {
         mCryptoApp = prefs.getString(mUuid + ".cryptoApp", PGPKeyRing.NAME);
         mCryptoAutoSignature = prefs.getBoolean(mUuid + ".cryptoAutoSignature", false);
         mCryptoAutoEncrypt = prefs.getBoolean(mUuid + ".cryptoAutoEncrypt", false);
+        mCryptoUsePgpMime = prefs.getBoolean(mUuid + ".cryptoUsePgpMime", true);
         mAllowRemoteSearch = prefs.getBoolean(mUuid + ".allowRemoteSearch", false);
         mRemoteSearchFullText = prefs.getBoolean(mUuid + ".remoteSearchFullText", false);
         mRemoteSearchNumResults = prefs.getInt(mUuid + ".remoteSearchNumResults", DEFAULT_REMOTE_SEARCH_NUM_RESULTS);
@@ -754,6 +757,7 @@ public class Account implements BaseAccount {
         editor.putString(mUuid + ".cryptoApp", mCryptoApp);
         editor.putBoolean(mUuid + ".cryptoAutoSignature", mCryptoAutoSignature);
         editor.putBoolean(mUuid + ".cryptoAutoEncrypt", mCryptoAutoEncrypt);
+        editor.putBoolean(mUuid + ".cryptoUsePgpMime", mCryptoUsePgpMime);
         editor.putBoolean(mUuid + ".allowRemoteSearch", mAllowRemoteSearch);
         editor.putBoolean(mUuid + ".remoteSearchFullText", mRemoteSearchFullText);
         editor.putInt(mUuid + ".remoteSearchNumResults", mRemoteSearchNumResults);
@@ -1669,6 +1673,14 @@ public class Account implements BaseAccount {
 
     public void setCryptoAutoEncrypt(boolean cryptoAutoEncrypt) {
         mCryptoAutoEncrypt = cryptoAutoEncrypt;
+    }
+    
+    public boolean isCryptoUsePgpMime() {
+        return mCryptoUsePgpMime;
+    }
+
+    public void setCryptoUsePgpMime(boolean usePgpMime) {
+        mCryptoUsePgpMime = usePgpMime;
     }
 
     public boolean allowRemoteSearch() {

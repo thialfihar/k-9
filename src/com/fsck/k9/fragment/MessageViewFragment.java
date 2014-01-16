@@ -43,11 +43,13 @@ import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
 import com.fsck.k9.helper.FileBrowserHelper;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
+import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
+import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeMultipart;
@@ -930,7 +932,6 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         }
     }
 
-    // This REALLY should be in MessageCryptoView
     @Override
     public void onDecryptDone(PgpData pgpData) {
     	
@@ -944,7 +945,81 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         Listener listener = mListener;
        
         MimeMessage replacement = null;
-        if( pgpData.isPgpSigned() ) {
+        
+    	if( pgpData.isPgpEncrypted() ) {
+    	
+            String filename = pgpData.getFilename();
+            if( filename != null && filename.length() > 0 ) {
+            	
+            	try {
+            		
+            		File f = new File( filename );
+            		InputStream is = new BufferedInputStream( new FileInputStream( f ) );
+            		String decryptedMsg = IOUtils.toString( is );
+            		is.close();
+            		f.delete();
+            		
+            		//Log.w( K9.LOG_TAG, "Decrypted msg: " + decryptedMsg );
+            		
+            		if( decryptedMsg != null && decryptedMsg.length() > 0 ) {
+	    		
+            			pgpData.setDecryptedData( decryptedMsg );
+
+            			ByteArrayInputStream bais = new ByteArrayInputStream( decryptedMsg.getBytes() );
+            			MimeMessage mimeMsg = new MimeMessage( bais );
+            			Body body = mimeMsg.getBody();
+            			if( body instanceof BinaryTempFileBody ) {
+            				
+            				Log.d( K9.LOG_TAG, "Decrypted data is a BinaryTempFileBody" );
+            				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            				BinaryTempFileBody btfb = ( BinaryTempFileBody )body;
+            				btfb.writeTo( baos );
+            				
+            				pgpData.setDecryptedData( baos.toString() );
+            				
+            			} else {
+            				
+            				Log.d( K9.LOG_TAG, "Decrypted data is a mime multipart" );
+            				
+	            			Multipart mp = ( Multipart )mimeMsg.getBody();
+	            			
+	            			// in case a decrypted PGP/MIME message revealed a signed message
+	            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp ) ) {
+		    				
+	            				mPgpSignedMessage = decryptedMsg;
+	            				return;
+		    				
+	            			}
+		    			
+	            			Part p = MimeUtility.findFirstPartByMimeType( mimeMsg, "text/html" );
+	            			if( p == null ) {
+	            				p = MimeUtility.findFirstPartByMimeType( mimeMsg, "text/plain" );
+	            			}
+		    			
+	            			if( p != null ) {
+	            				
+	            				//String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
+	                    		//p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) ); 
+	        		
+	                    		//String text = MimeUtility.getTextFromPart( p );
+	            				pgpData.setDecryptedData( MimeUtility.getTextFromPart( p ) );
+	            				
+	            			}
+		    			
+	            			replacement = mimeMsg;
+	            			mMessageView.setFilterPgpAttachments( true );
+	            			
+            			}
+            			
+            		}
+	    			
+            	} catch( Throwable e ) {
+            		Log.i( K9.LOG_TAG, "Decrypted PGP/MIME message is not signed or encountered a problem parsing signed message", e );
+            	}
+            		
+            }
+            
+    	} else if( pgpData.isPgpSigned() ) {
 
         	Message m = mMessage;
             
@@ -1004,6 +1079,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         
     }
     
+    // Handles decryption of file attachments
     @Override
     public void onDecryptFileDone(PgpData pgpData) {
     	
@@ -1011,66 +1087,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     		return;
     	}
     	
-    	Account account = mAccount;
-        LocalMessage message = (LocalMessage) mMessage;
-        MessagingController controller = mController;
-        Listener listener = mListener;
-       
-    	if( pgpData.isPgpEncrypted() ) {
-    	
-            MimeMessage replacement = null;
-            String filename = pgpData.getFilename();
-            if( filename != null && filename.length() > 0 ) {
-            	
-            	try {
-            		
-            		File f = new File( filename );
-            		InputStream is = new BufferedInputStream( new FileInputStream( f ) );
-            		String decryptedMsg = IOUtils.toString( is );
-            		is.close();
-            		f.delete();
-            		
-            		if( decryptedMsg != null && decryptedMsg.length() > 0 ) {
-	    		
-            			pgpData.setDecryptedData( decryptedMsg );
-
-            			ByteArrayInputStream bais = new ByteArrayInputStream( decryptedMsg.getBytes() );
-            			MimeMessage mimeMsg = new MimeMessage( bais );
-            			Multipart mp = ( Multipart )mimeMsg.getBody(); 
-            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp ) ) {
-	    				
-            				mPgpSignedMessage = decryptedMsg;
-            				return;
-	    				
-            			}
-	    			
-            			Part p = MimeUtility.findFirstPartByMimeType( mimeMsg, "text/html" );
-            			if( p == null ) {
-            				p = MimeUtility.findFirstPartByMimeType( mimeMsg, "text/plain" );
-            			}
-	    			
-            			if( p != null ) {
-            				pgpData.setDecryptedData( MimeUtility.getTextFromPart( p ) );
-            			}
-	    			
-            			replacement = mimeMsg;
-            			mMessageView.setFilterPgpAttachments( true );
-            			
-            		}
-	    			
-            	} catch( Throwable e ) {
-            		Log.i( K9.LOG_TAG, "Decrypted PGP/MIME message is not signed or encountered a problem parsing signed message", e );
-            	}
-            		
-            }
-	    
-	    	try {
-	    		mMessageView.setMessage(account, message, pgpData, controller, listener, replacement);
-	    	} catch (MessagingException e) {
-	    		Log.e(K9.LOG_TAG, "displayMessageBody failed", e);
-	    	}
-	    	
-    	} else if( pgpData.showFile() ) {
+        if( pgpData.showFile() ) {
     		
     		String filename = pgpData.getFilename();
     		String extension = MimeTypeMap.getFileExtensionFromUrl( filename );

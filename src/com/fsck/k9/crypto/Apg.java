@@ -469,6 +469,14 @@ public class Apg extends CryptoProvider {
             return false;
         }
     }
+    
+    public boolean encryptFile( Activity activity, String filename, PgpData pgpData ) {
+    	return false;
+    }
+    
+    public boolean sign( Activity activity, String filename, PgpData pgpData ) {
+    	return false;
+    }
 
     /**
      * Start the decrypt activity.
@@ -502,7 +510,7 @@ public class Apg extends CryptoProvider {
     }
     
     @Override
-    public boolean verify( Fragment fragment, byte[] data, String sig, PgpData pgpData ) {
+    public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData ) {
     	return false;	
     }
     
@@ -530,16 +538,6 @@ public class Apg extends CryptoProvider {
         return matcher.matches();
     }
     
-    @Override
-    public boolean supportsAttachments( Context context ) {
-    	return false;
-    }
-    
-    @Override
-    public boolean supportsPgpMime( Context context ) {
-    	return false;
-    }
-
     @Override
     public boolean isSigned(Message message) {
         String data = null;

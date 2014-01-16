@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:versionCode="19002"
-    android:versionName="4.701" package="com.imaeses.squeaky"
+    android:versionCode="19004"
+    android:versionName="4.701.02" package="com.imaeses.squeaky"
     >
     <uses-sdk
-       android:minSdkVersion="15"
+       android:minSdkVersion="8"
        android:targetSdkVersion="17"
     />
     <supports-screens
