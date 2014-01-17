@@ -939,7 +939,57 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
         MimeMessage replacement = null;
 
-    	if( pgpData.isPgpEncrypted() ) {
+    	if( pgpData.isPgpSigned() ) {
+
+        	Message m = mMessage;
+
+            // Did we just verify a signed message that was also decrypted?
+            if( mPgpSignedMessage != null ) {
+
+        		try {
+
+        			ByteArrayInputStream bais = new ByteArrayInputStream( mPgpSignedMessage.getBytes() );
+        			replacement = new MimeMessage( bais );
+        			m = replacement;
+
+        		} catch( Throwable e ) {
+
+        			Log.e( K9.LOG_TAG, "Cannot parse previously saved PGP/MIME signed message???", e );
+        			return;
+
+        		}
+
+            }
+
+            Part msgPart = null;
+            try {
+
+            	msgPart = MimeUtility.findFirstPartByMimeType( m, "text/html" );
+            	if( msgPart == null ) {
+            		msgPart = MimeUtility.findFirstPartByMimeType( m, "text/plain" );
+            	}
+
+            	if( msgPart != null ) {
+
+            		String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
+            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) );
+
+            		String text = MimeUtility.getTextFromPart( msgPart );
+                	if( text.trim().startsWith( "<pre class=\"k9mail" ) ) {
+                		text = "<html>" + text + "</html>";
+                	}
+
+                	pgpData.setDecryptedData( text );
+
+            	}
+
+            } catch( Exception e ) {
+            	Log.e( K9.LOG_TAG, "Unable to decode plain text now that PGP/MIME signature has been checked", e );
+            }
+
+            mMessageView.setFilterPgpAttachments( true );
+
+        } else if( pgpData.isPgpEncrypted() ) {
 
             String filename = pgpData.getFilename();
             if( filename != null && filename.length() > 0 ) {
@@ -990,9 +1040,8 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 	            			}
 
 	            			if( p != null ) {
-
-	            				//String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-	                    		//p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) );
+	            				String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
+	                    		p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) );
 
 	                    		//String text = MimeUtility.getTextFromPart( p );
 	            				pgpData.setDecryptedData( MimeUtility.getTextFromPart( p ) );
@@ -1012,56 +1061,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
             }
 
-    	} else if( pgpData.isPgpSigned() ) {
-
-        	Message m = mMessage;
-
-            // Did we just verify a signed message that was also decrypted?
-            if( mPgpSignedMessage != null ) {
-
-        		try {
-
-        			ByteArrayInputStream bais = new ByteArrayInputStream( mPgpSignedMessage.getBytes() );
-        			replacement = new MimeMessage( bais );
-        			m = replacement;
-
-        		} catch( Throwable e ) {
-
-        			Log.e( K9.LOG_TAG, "Cannot parse previously saved PGP/MIME signed message???", e );
-        			return;
-
-        		}
-
-            }
-
-            Part msgPart = null;
-            try {
-
-            	msgPart = MimeUtility.findFirstPartByMimeType( m, "text/html" );
-            	if( msgPart == null ) {
-            		msgPart = MimeUtility.findFirstPartByMimeType( m, "text/plain" );
-            	}
-
-            	if( msgPart != null ) {
-
-            		String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) );
-            		String text = MimeUtility.getTextFromPart( msgPart );
-                	if( text.trim().startsWith( "<pre class=\"k9mail" ) ) {
-                		text = "<html>" + text + "</html>";
-                	}
-
-                	pgpData.setDecryptedData( text );
-
-            	}
-
-            } catch( Exception e ) {
-            	Log.e( K9.LOG_TAG, "Unable to decode plain text now that PGP/MIME signature has been checked", e );
-            }
-
-            mMessageView.setFilterPgpAttachments( true );
-
-        }
+    	}
 
         try {
         	mMessageView.setMessage(account, message, pgpData, controller, listener, replacement);

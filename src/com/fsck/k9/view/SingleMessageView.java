@@ -699,7 +699,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     	OutputStream os = null;
     	try {
     		
-    		f = File.createTempFile("verify", "bin" );
+    		f = File.createTempFile("verify", ".bin", fragment.getActivity().getExternalCacheDir() );
         	ByteArrayInputStream bais = new ByteArrayInputStream( data );
     		os = new BufferedOutputStream( new FileOutputStream( f ) );
     		
@@ -720,7 +720,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     		}
     	}
     	
-    	return cryptoProvider.verify( fragment, f.getAbsolutePath(), sig, pgpData );
+    	return cryptoProvider.verify( fragment, Uri.fromFile( f ).toString(), sig, pgpData );
     	
     }
 
