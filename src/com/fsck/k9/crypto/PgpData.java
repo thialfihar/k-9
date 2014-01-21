@@ -15,7 +15,8 @@ public class PgpData implements Serializable {
     protected boolean showFile = false;
     protected boolean pgpEncrypted = false;
     protected boolean pgpSigned = false;
-    protected byte[] signature = null;
+    protected String signature = null;
+    protected boolean forceArmored = false;
     
     public void setSignatureKeyId(long keyId) {
         mSignatureKeyId = keyId;
@@ -113,12 +114,20 @@ public class PgpData implements Serializable {
     	this.pgpSigned = pgpSigned;
     }
 
-	public byte[] getSignature() {
+	public String getSignature() {
 		return signature;
 	}
 
-	public void setSignature(byte[] signature) {
+	public void setSignature(String signature) {
 		this.signature = signature;
+	}
+
+	public boolean isForceArmored() {
+		return forceArmored;
+	}
+
+	public void setForceArmored(boolean forceArmored) {
+		this.forceArmored = forceArmored;
 	}
     
 }

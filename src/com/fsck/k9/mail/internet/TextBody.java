@@ -18,7 +18,7 @@ public class TextBody implements Body {
 
     private String mBody;
     private String mEncoding;
-    private String mCharset = "UTF-8";
+    private String mCharset = "utf-8";
     // Length of the message composed (as opposed to quoted). I don't like the name of this variable and am open to
     // suggestions as to what it should otherwise be. -achen 20101207
     private Integer mComposedMessageLength;
@@ -32,7 +32,7 @@ public class TextBody implements Body {
     public void writeTo(OutputStream out) throws IOException, MessagingException {
         if (mBody != null) {
             byte[] bytes = mBody.getBytes(mCharset);
-            if (MimeUtil.ENC_8BIT.equalsIgnoreCase(mEncoding)) {
+            if (MimeUtil.ENC_8BIT.equalsIgnoreCase(mEncoding) || MimeUtil.ENC_7BIT.equalsIgnoreCase(mEncoding)) {
                 out.write(bytes);
             } else {
                 QuotedPrintableOutputStream qp = new QuotedPrintableOutputStream(out, false);

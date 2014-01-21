@@ -74,19 +74,27 @@ public class MimeBodyPart extends BodyPart {
             multipart.setParent(this);
             String type = multipart.getContentType();
             setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
-            if ("multipart/signed".equalsIgnoreCase(type)) {
-                setEncoding(MimeUtil.ENC_7BIT);
-            } else {
+            if (!type.contains("multipart/signed") && !type.contains( "multipart/encrypted")) {
                 setEncoding(MimeUtil.ENC_8BIT);
             }
         } else if (body instanceof TextBody) {
-            String contentType = String.format("%s;\r\n charset=utf-8", getMimeType());
-            String name = MimeUtility.getHeaderParameter(getContentType(), "name");
-            if (name != null) {
-                contentType += String.format(";\r\n name=\"%s\"", name);
-            }
-            setHeader(MimeHeader.HEADER_CONTENT_TYPE, contentType);
-            setEncoding(MimeUtil.ENC_8BIT);
+        	if( decoded ) {
+
+	            String contentType = null;
+	            String mimeType = getMimeType();
+	            if( mimeType.contains( "application/pgp-signature" ) || mimeType.contains( "application/pgp-encrypted" ) || mimeType.contains( "application/octet-stream" ) ) {
+	            	contentType = mimeType;
+		            setEncoding(MimeUtil.ENC_7BIT);
+	            } else {
+	            	contentType = String.format("%s; charset=utf-8", mimeType);
+		            setEncoding(MimeUtil.ENC_8BIT);
+	            }
+	            String name = MimeUtility.getHeaderParameter(getContentType(), "name");
+	            if (name != null) {
+	                contentType += String.format("; name=\"%s\"", name);
+	            }
+	            setHeader(MimeHeader.HEADER_CONTENT_TYPE, contentType);
+        	}
         }
     }
 
@@ -159,7 +167,7 @@ public class MimeBodyPart extends BodyPart {
          * (as long as its not multipart/signed).
          */
         if (mBody instanceof CompositeBody
-                && !"multipart/signed".equalsIgnoreCase(type)) {
+                && !type.contains("multipart/signed")) {
             setEncoding(MimeUtil.ENC_7BIT);
             // recurse
             ((CompositeBody) mBody).setUsing7bitTransport();
@@ -167,7 +175,7 @@ public class MimeBodyPart extends BodyPart {
                 .equalsIgnoreCase(getFirstHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING))) {
             return;
         } else if (type != null
-                && (type.equalsIgnoreCase("multipart/signed") || type
+                && (type.contains("multipart/signed") || type
                         .toLowerCase(Locale.US).startsWith("message/"))) {
             /*
              * This shouldn't happen. In any case, it would be wrong to convert
@@ -191,4 +199,5 @@ public class MimeBodyPart extends BodyPart {
             setEncoding(MimeUtil.ENC_QUOTED_PRINTABLE);
         }
     }
+
 }

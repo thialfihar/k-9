@@ -2100,7 +2100,7 @@ public class MimeUtility {
                 return charset;
         }
 
-        return "UTF-8";
+        return "utf-8";
     }
 
     public static String getMimeTypeByExtension(String filename) {
@@ -2203,7 +2203,7 @@ public class MimeUtility {
             return (MimeUtil.ENC_BASE64);
         } else if (MimeUtil.isMessage(type)) {
             return (MimeUtil.ENC_8BIT);
-        } else if ("multipart/signed".equalsIgnoreCase(type) || type.toLowerCase(Locale.US).startsWith("message/")) {
+        } else if (type.contains("application/pgp-signature") || type.contains("application/pgp-encrypted") || type.toLowerCase(Locale.US).startsWith("message/")) {
             return (MimeUtil.ENC_7BIT);
         } else if (type.toLowerCase(Locale.US).startsWith("multipart/")) {
             return (MimeUtil.ENC_8BIT);
@@ -3378,7 +3378,7 @@ public class MimeUtility {
 
     public static void setCharset(String charset, Part part) throws MessagingException {
         part.setHeader(MimeHeader.HEADER_CONTENT_TYPE,
-                       part.getMimeType() + ";\r\n charset=" + getExternalCharset(charset));
+                       part.getMimeType() + "; charset=" + getExternalCharset(charset));
     }
 
     public static String getExternalCharset(String charset) {

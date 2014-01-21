@@ -1868,31 +1868,31 @@ public class LocalStore extends Store implements Serializable {
                                             }
 
                                             if (mAccount.getMessageFormat() != MessageFormat.TEXT) {
-                                            	
+
                                             	if( mimeType.equals( "multipart/signed" ) ) {
-                                            		
+
                                             		String multipartSignedText = cursor.getString( 3 );
                                             		if( multipartSignedText != null ) {
-                                            			
+
                                             			//Log.w( K9.LOG_TAG, "Stored multipart signed text:\n" + multipartSignedText );
                                             			ByteArrayInputStream bais = new ByteArrayInputStream( multipartSignedText.getBytes() );
                                             			MimeMessage m = new MimeMessage( bais );
                                             			MimeMultipart signed = ( MimeMultipart )m.getBody();
-                                            			
+
                                             			message.setSignedMultipart( signed );
-                                            			
-                                            		} else { 
+
+                                            		} else {
                                             			Log.w( K9.LOG_TAG, "I don't have the original signed data; signature verification will fail" );
                                             		}
-                                            		
+
                                             	} else {
-                                            		
+
 	                                                if (htmlContent != null) {
 	                                                    TextBody body = new TextBody(htmlContent);
 	                                                    MimeBodyPart bp = new MimeBodyPart(body, "text/html");
 	                                                    mp.addBodyPart(bp);
 	                                                }
-	
+
 	                                                // If we have both text and html content and our MIME type
 	                                                // isn't multipart/alternative, then corral them into a new
 	                                                // multipart/alternative part and put that into the parent.
@@ -1905,7 +1905,7 @@ public class LocalStore extends Store implements Serializable {
 	                                                    mp = new MimeMultipart();
 	                                                    mp.addBodyPart(new MimeBodyPart(alternativeParts));
 	                                                }
-	                                                
+
                                             	}
                                             }
                                         } else if (mimeType != null && mimeType.equalsIgnoreCase("text/plain")) {
@@ -1996,18 +1996,19 @@ public class LocalStore extends Store implements Serializable {
                                             bp.setEncoding(encoding);
                                             if (name != null) {
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_TYPE,
-                                                             String.format("%s;\r\n name=\"%s\"",
+                                                             String.format("%s; name=\"%s\"",
                                                                            type,
                                                                            name));
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_DISPOSITION,
-                                                             String.format(Locale.US, "%s;\r\n filename=\"%s\";\r\n size=%d",
+                                                             String.format(Locale.US, "%s; filename=\"%s\"; size=%d",
                                                                            contentDisposition,
                                                                            name, // TODO: Should use encoded word defined in RFC 2231.
                                                                            size));
                                             } else {
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_DISPOSITION,
-                                                        String.format(Locale.US, "%s;\r\n size=%d",
+                                                        String.format(Locale.US, "%s; size=%d",
+                                                        String.format("%s; size=%d",
                                                                       contentDisposition,
                                                                       size));
                                             }
@@ -2588,7 +2589,7 @@ public class LocalStore extends Store implements Serializable {
                                            ? System.currentTimeMillis() : message.getInternalDate().getTime());
                                     cv.put("mime_type", message.getMimeType());
                                     cv.put("empty", 0);
-                                    
+
                                     String messageId = message.getMessageId();
                                     if (messageId != null) {
                                         cv.put("message_id", messageId);
@@ -3500,7 +3501,7 @@ public class LocalStore extends Store implements Serializable {
             this.mUid = uid;
             this.mFolder = folder;
         }
-        
+
         private void populateFromGetMessageCursor(Cursor cursor)
         throws MessagingException {
             final String subject = cursor.getString(0);
@@ -3801,31 +3802,31 @@ public class LocalStore extends Store implements Serializable {
 
             notifyChange();
         }
-        
+
         public void setSignedMultipart( final String signedMultipart ) throws MessagingException {
-        	
+
         	try {
                 database.execute(true, new DbCallback<Void>() {
                     @Override
                     public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
-                    	
+
                     	String[] idArg = new String[] { Long.toString(mId) };
 
                     	ContentValues cv = new ContentValues();
                     	cv.put( "signed_multipart", signedMultipart );
-                    	
+
                     	db.update("messages", cv, "id = ?", idArg);
-                    	
+
                     	return null;
-                    	
-                    }     
+
+                    }
                 });
             } catch (WrappedException e) {
                 throw(MessagingException) e.getCause();
-            }   	
-                    	
+            }
+
         }
-        
+
         /*
          * Completely remove a message from the local database
          *
@@ -4413,7 +4414,7 @@ public class LocalStore extends Store implements Serializable {
             }
         }, FLAG_UPDATE_BATCH_SIZE);
     }
-    
+
     /**
      * Change the state of a flag for a list of threads.
      *

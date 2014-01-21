@@ -1893,7 +1893,7 @@ public class ImapStore extends Store {
                      * of them.
                      */
                     for (int i = 0, count = bodyParams.size(); i < count; i += 2) {
-                        contentType.append(String.format(";\r\n %s=\"%s\"",
+                        contentType.append(String.format("; %s=\"%s\"",
                                            bodyParams.getString(i),
                                            bodyParams.getString(i + 1)));
                     }
@@ -1928,7 +1928,7 @@ public class ImapStore extends Store {
                          * about the attachment out.
                          */
                         for (int i = 0, count = bodyDispositionParams.size(); i < count; i += 2) {
-                            contentDisposition.append(String.format(";\r\n %s=\"%s\"",
+                            contentDisposition.append(String.format("; %s=\"%s\"",
                                                       bodyDispositionParams.getString(i).toLowerCase(Locale.US),
                                                       bodyDispositionParams.getString(i + 1)));
                         }
@@ -1936,7 +1936,7 @@ public class ImapStore extends Store {
                 }
 
                 if (MimeUtility.getHeaderParameter(contentDisposition.toString(), "size") == null) {
-                    contentDisposition.append(String.format(Locale.US, ";\r\n size=%d", size));
+                    contentDisposition.append(String.format(Locale.US, "; size=%d", size));
                 }
 
                 /*

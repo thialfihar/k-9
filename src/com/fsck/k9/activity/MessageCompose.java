@@ -89,6 +89,8 @@ import com.fsck.k9.mail.store.LocalStore.LocalAttachmentBody;
 import com.fsck.k9.mail.store.LocalStore.TempFileBody;
 import com.fsck.k9.mail.store.LocalStore.TempFileMessageBody;
 import com.fsck.k9.view.MessageWebView;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.codec.EncoderUtil;
 import org.apache.james.mime4j.util.MimeUtil;
 import org.htmlcleaner.CleanerProperties;
@@ -97,6 +99,16 @@ import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 
 import java.text.DateFormat;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -229,6 +241,11 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      * </p>
      */
     private String mSourceMessageBody;
+
+    /**
+     * When sending PGP/MIME signed messages, this is the body part including headers that was actually signed.
+     */
+    private MimeBodyPart mSignedTextBodyPart;
 
     /**
      * Indicates that the source message has been processed at least once and should not
@@ -1455,12 +1472,14 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // Build the body.
         // TODO FIXME - body can be either an HTML or Text part, depending on whether we're in
         // HTML mode or not.  Should probably fix this so we don't mix up html and text parts.
-        TextBody body = null;
-        if (mPgpData.getEncryptedData() != null) {
+        TextBody textBody = null;
+        Body msgBody = null;
+        boolean usePgpMime = mAccount.isCryptoUsePgpMime();
+        if (mPgpData.getEncryptedData() != null && !usePgpMime ) {
             String text = mPgpData.getEncryptedData();
-            body = new TextBody(text);
+            textBody = new TextBody(text);
         } else {
-            body = buildText(isDraft);
+            textBody = buildText(isDraft);
         }
 
         // text/plain part when mMessageFormat == MessageFormat.HTML
@@ -1468,13 +1487,19 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         final boolean hasAttachments = mAttachments.getChildCount() > 0;
 
-        if (mMessageFormat == SimpleMessageFormat.HTML) {
+        if( usePgpMime && ( mPgpData.getEncryptedData() != null || mPgpData.getSignature() != null ) ) {
+        	if (mPgpData.getEncryptedData() != null ) {
+        		msgBody = buildPgpMimeEncrypted( mPgpData.getEncryptedData() );
+        	} else {
+        		msgBody = buildPgpMimeSigned( mPgpData.getSignature() );
+        	}
+        } else if (mMessageFormat == SimpleMessageFormat.HTML) {
             // HTML message (with alternative text part)
 
             // This is the compiled MIME part for an HTML message.
             MimeMultipart composedMimeMessage = new MimeMultipart();
             composedMimeMessage.setSubType("alternative");   // Let the receiver select either the text or the HTML part.
-            composedMimeMessage.addBodyPart(new MimeBodyPart(body, "text/html"));
+            composedMimeMessage.addBodyPart(new MimeBodyPart(textBody, "text/html"));
             bodyPlain = buildText(isDraft, SimpleMessageFormat.TEXT);
             composedMimeMessage.addBodyPart(new MimeBodyPart(bodyPlain, "text/plain"));
 
@@ -1486,28 +1511,44 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 MimeMultipart mp = new MimeMultipart();
                 mp.addBodyPart(new MimeBodyPart(composedMimeMessage));
                 addAttachmentsToMessage(mp);
-                message.setBody(mp);
+                msgBody = mp;
+                //message.setBody(mp);
             } else {
                 // If no attachments, our multipart/alternative part is the only one we need.
-                message.setBody(composedMimeMessage);
+                //message.setBody(composedMimeMessage);
+            	msgBody = composedMimeMessage;
             }
         } else if (mMessageFormat == SimpleMessageFormat.TEXT) {
             // Text-only message.
             if (hasAttachments) {
                 MimeMultipart mp = new MimeMultipart();
-                mp.addBodyPart(new MimeBodyPart(body, "text/plain"));
+                mp.addBodyPart(new MimeBodyPart(textBody, "text/plain"));
                 addAttachmentsToMessage(mp);
-                message.setBody(mp);
+                msgBody = mp;
+                //message.setBody(mp);
             } else {
                 // No attachments to include, just stick the text body in the message and call it good.
-                message.setBody(body);
+                //message.setBody(body);
+            	msgBody = textBody;
             }
+        }
+
+        message.setBody( msgBody );
+
+        try {
+
+	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			message.writeTo( baos );
+			Log.e( K9.LOG_TAG, new String( baos.toByteArray() ) );
+
+        } catch( IOException e ) {
+        	Log.w( K9.LOG_TAG, "Can't write out message body", e );
         }
 
         // If this is a draft, add metadata for thawing.
         if (isDraft) {
             // Add the identity to the message.
-            message.addHeader(K9.IDENTITY_HEADER, buildIdentityHeader(body, bodyPlain));
+            message.addHeader(K9.IDENTITY_HEADER, buildIdentityHeader(textBody, bodyPlain));
         }
 
         return message;
@@ -1540,7 +1581,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
              * header value (all parameters at once) will be encoded by
              * MimeHeader.writeTo().
              */
-            bp.addHeader(MimeHeader.HEADER_CONTENT_TYPE, String.format("%s;\r\n name=\"%s\"",
+            bp.addHeader(MimeHeader.HEADER_CONTENT_TYPE, String.format("%s; name=\"%s\"",
                          contentType,
                          EncoderUtil.encodeIfNecessary(attachment.name,
                                  EncoderUtil.Usage.WORD_ENTITY, 7)));
@@ -1562,8 +1603,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
              *  title*2*=%2A%2A%2Afun%2A%2A%2A%20
              *  title*3="isn't it!"
              */
-            bp.addHeader(MimeHeader.HEADER_CONTENT_DISPOSITION, String.format(Locale.US,
-                             "attachment;\r\n filename=\"%s\";\r\n size=%d",
+            bp.addHeader(MimeHeader.HEADER_CONTENT_DISPOSITION, String.format(
+                             "attachment; filename=\"%s\"; size=%d",
                              attachment.name, attachment.size));
 
             mp.addBodyPart(bp);
@@ -1818,7 +1859,40 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     public void onEncryptDone() {
-        if (mPgpData.getEncryptedData() != null) {
+
+    	if(mPgpData.getFilename() != null ) {
+
+    		File f = new File( mPgpData.getFilename() );
+    		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    		InputStream is = null;
+    		try {
+
+    			is = new BufferedInputStream( new FileInputStream( f ) );
+    			IOUtils.copy( is, baos );
+
+    			mPgpData.setEncryptedData( new String( baos.toByteArray() ) );
+    			mPgpData.setFilename( null );
+
+    		} catch( IOException e ) {
+    			Log.e( K9.LOG_TAG, "Error reading encrypted data from file", e );
+    		} finally {
+
+    			if( is != null ) {
+    				try {
+    					is.close();
+    				} catch( IOException e ) {
+    					Log.e( K9.LOG_TAG, "Unable to close file", e );
+    				}
+    			}
+
+    			if( f != null && f.exists() ) {
+    				f.delete();
+    			}
+
+    		}
+    	}
+
+        if (mPgpData.getEncryptedData() != null || ( mPgpData.getSignature() != null && mAccount.isCryptoUsePgpMime() ) ) {
             onSend();
         } else {
             Toast.makeText(this, R.string.send_aborted, Toast.LENGTH_SHORT).show();
@@ -1871,14 +1945,116 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             }
             return;
         }
-        if (mPgpData.hasEncryptionKeys() || mPgpData.hasSignatureKey()) {
-            if (mPgpData.getEncryptedData() == null) {
-                String text = buildText(false).getText();
-                mPreventDraftSaving = true;
-                crypto.encrypt(this, text, mPgpData);
-                return;
-            }
+
+        // When encrypting non-PGP/MIME text messages, we can sign and encrypt in a single operation
+        // (so we can simply refer to mPgpData.getEncryptedData() regardless).
+        // When using PGP/MIME, however, we must first package the signature in MIME format before
+        // then applying the encryption, which is subsequently packaged in its own MIME format.
+        // In this case, we must keep track of the signature data and the encrypted data separately.
+    	boolean usePgpMime = mAccount.isCryptoUsePgpMime();
+
+    	try {
+	        if( mPgpData.hasSignatureKey() && (  usePgpMime && mPgpData.getSignature() == null ) ||
+	        		                          ( !usePgpMime && mPgpData.getEncryptedData() == null ) ) {
+
+	        	Log.i( K9.LOG_TAG, "I have a signature to calculate" );
+
+	            mPreventDraftSaving = true;
+
+	        	boolean success = false;
+	            TextBody textBody = buildText(false);
+	        	if( usePgpMime ) {
+
+	        		mSignedTextBodyPart = new MimeBodyPart( textBody, "text/plain" );
+	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        		mSignedTextBodyPart.writeTo( baos );
+
+	        		byte[] payload = baos.toByteArray();
+	        		Log.w( K9.LOG_TAG, "Text body part to sign:\n" + new String( payload ) );
+
+	        		String filename = writeToTempFile( payload );
+	        		if( filename != null ) {
+	        			success = crypto.sign(this, Uri.fromFile( new File( filename) ).toString(), mPgpData);
+	        		}
+
+	        	} else {
+	                success = crypto.encrypt(this, textBody.getText(), mPgpData);
+	        	}
+
+	        	if( !success ) {
+	                mPreventDraftSaving = false;
+	            }
+
+	            return;
+
+	        } else if( mPgpData.hasEncryptionKeys() && mPgpData.getEncryptedData() == null ) {
+
+	        	Log.i( K9.LOG_TAG, "I am going to encrypt the message" );
+
+	            mPreventDraftSaving = true;
+
+	    		TextBody textBody = buildText( false );
+	            Body body = textBody;
+	        	boolean success = false;
+	        	if( usePgpMime ) {
+
+	        		MimeMultipart mp = null;
+	        		if( mPgpData.hasSignatureKey() ) {
+	        			mp = buildPgpMimeSigned( mPgpData.getSignature() );
+	        		} else if( mAttachments.getChildCount() > 0 ) {
+
+	        			if (mMessageFormat == SimpleMessageFormat.HTML) {
+	        	            // HTML message (with alternative text part)
+
+	        	            // This is the compiled MIME part for an HTML message.
+	        	            mp = new MimeMultipart();
+	        	            mp.setSubType("alternative");   // Let the receiver select either the text or the HTML part.
+	        	            mp.addBodyPart( new MimeBodyPart( textBody, "text/html" ) );
+	        	            Body bodyPlain = buildText( false, SimpleMessageFormat.TEXT );
+	        	            mp.addBodyPart( new MimeBodyPart(bodyPlain, "text/plain" ) );
+
+	        			} else if (mMessageFormat == SimpleMessageFormat.TEXT ) {
+
+	        				mp = new MimeMultipart();
+	                        mp.addBodyPart( new MimeBodyPart( textBody, "text/plain" ));
+
+	        			}
+
+	        		}
+
+	        		if( mp != null ) {
+
+	        			addAttachmentsToMessage( mp );
+	        			body = mp;
+
+	        		}
+
+	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        		body.writeTo( baos );
+	        		String filename = writeToTempFile( baos.toByteArray() );
+
+	        		if( filename != null ) {
+	        			success = crypto.encryptFile(this, Uri.fromFile( new File( filename ) ).toString(), mPgpData);
+	        		}
+
+	        	} else {
+	        		success = crypto.encrypt(this, textBody.getText(), mPgpData);
+	        	}
+
+	        	if( !success ) {
+	                mPreventDraftSaving = false;
+	            }
+
+	        	return;
+
+	        }
+    	} catch( Exception e ) {
+
+        	Log.e( K9.LOG_TAG, "Unable to send message", e );
+        	return;
+
         }
+
         sendMessage();
 
         if (mMessageReference != null && mMessageReference.flag != null) {
@@ -1893,6 +2069,100 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         mDraftNeedsSaving = false;
         finish();
+    }
+
+    private MimeMultipart buildPgpMimeSigned( String signature ) {
+
+    	Log.e(K9.LOG_TAG, "signature: " + signature );
+
+    	MimeMultipart signedMultipart = null;
+    	try {
+
+    		signedMultipart = new MimeMultipart();
+    		String boundary = signedMultipart.generateBoundary();
+    		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-md5; protocol=\"application/pgp-signature\"; boundary=" + boundary );
+
+    		signedMultipart.addBodyPart( mSignedTextBodyPart );
+
+    		MimeBodyPart sigBodyPart = new MimeBodyPart();
+    		sigBodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, String.format( "application/pgp-signature; name=\"%s\"", "signature.asc" ) );
+    		sigBodyPart.addHeader( MimeHeader.HEADER_CONTENT_DISPOSITION, String.format(
+                    "attachment; filename=\"%s\"", "signature.asc"));
+    		TextBody sigBody = new TextBody( signature );
+    		sigBodyPart.setBody( sigBody );
+
+    		signedMultipart.addBodyPart( sigBodyPart );
+
+    	} catch( MessagingException e ) {
+    		Log.e( K9.LOG_TAG, "Error creating signed multipart", e );
+    	}
+
+    	return signedMultipart;
+
+    }
+
+    private MimeMultipart buildPgpMimeEncrypted( String encrypted ) {
+
+    	MimeMultipart encryptedMultipart = null;
+    	try {
+
+    		encryptedMultipart = new MimeMultipart();
+    		String boundary = encryptedMultipart.generateBoundary();
+    		encryptedMultipart = new MimeMultipart( "multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=" + boundary );
+
+    		MimeBodyPart bodyPart = new MimeBodyPart();
+    		bodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, "application/pgp-encrypted" );
+    		bodyPart.setBody( new TextBody( "Version: 1" ) );
+
+    		encryptedMultipart.addBodyPart( bodyPart );
+
+    		bodyPart = new MimeBodyPart();
+    		bodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, "application/octet-stream" );
+    		bodyPart.setUsing7bitTransport();
+    		bodyPart.setBody( new TextBody( encrypted ) );
+
+    		encryptedMultipart.addBodyPart( bodyPart );
+
+    	} catch( MessagingException e ) {
+    		Log.e( K9.LOG_TAG, "Error creating encrypted multipart", e );
+    	}
+
+    	return encryptedMultipart;
+
+    }
+
+    private String writeToTempFile( byte[] contents ) {
+
+    	File f = null;
+    	OutputStream os = null;
+
+    	try {
+
+    		f = File.createTempFile( "body", ".tmp", getExternalCacheDir() );
+    		f.deleteOnExit();
+
+    		os = new BufferedOutputStream( new FileOutputStream( f ) );
+    		os.write( contents );
+
+    	} catch( Exception e ) {
+    		Log.e( K9.LOG_TAG, "Error writing body to temp file", e );
+    	} finally {
+    		if( os != null ) {
+    			try {
+    				os.close();
+    			} catch( IOException e ) {
+    				Log.w( K9.LOG_TAG, "Error closing temp file for body", e );
+    			}
+    		}
+    	}
+
+    	String filename = null;
+    	if( f != null && f.exists() ) {
+    		filename = f.getAbsolutePath();
+    	}
+
+    	return filename;
+
     }
 
     private void onDiscard() {
