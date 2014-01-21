@@ -688,7 +688,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         			}
         			
         			String signedData = new String( baos.toByteArray() );
-        			//Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
+        			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
         			
         			InputStream is = sigPart.getBody().getInputStream();
         			String sig = IOUtils.toString( is, "US-ASCII" );
@@ -787,6 +787,10 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     			isPgpMime = handlePgpMimeEncrypted( account, mp );
                     		} else if( mp.getContentType().contains( "multipart/signed" ) &&
                     				MimeUtility.findFirstPartByMimeType( message, "application/pgp-signature" ) != null ) {
+                    			
+                    			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    			mMessage.writeTo(baos);
+                    			Log.e( K9.LOG_TAG, new String(baos.toByteArray()));
                     			
                     			MimeMultipart signedMultipart = message.getSignedMultipart();
                     			isPgpMime = handlePgpMimeSigned( account, signedMultipart != null ? signedMultipart : mp );
