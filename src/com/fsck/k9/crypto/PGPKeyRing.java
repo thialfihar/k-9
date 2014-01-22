@@ -74,8 +74,7 @@ public class PGPKeyRing extends CryptoProvider {
     private Uri uriSelectPrivateKeysByEmail;
     private Uri uriSelectPrimaryUserIdByKeyid;
     private boolean isTrialVersion;
-    
-    public static final String EXTRAS_ARMORED = "armored";
+
     public static final String EXTRAS_MSG = "msg";
     public static final String EXTRAS_FILENAME = "file.name";
     public static final String EXTRAS_DEST_FILENAME = "file.dest.name";
@@ -643,12 +642,7 @@ public class PGPKeyRing extends CryptoProvider {
         	if( resultCode != Activity.RESULT_OK || data == null ) {       
                 pgpData.setEncryptionKeys( null );
             } else {   
-            	
                 pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
-                if( pgpData.isForceArmored() ) {
-                	data.putExtra( EXTRAS_ARMORED, true );
-                }
-                
             }
             
             ( ( MessageCompose )activity ).onEncryptDone();

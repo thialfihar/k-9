@@ -92,7 +92,7 @@ public class MimeBodyPart extends BodyPart {
 		            setEncoding(MimeUtil.ENC_7BIT);
 	            } else {	
 	            	contentType = String.format("%s; charset=utf-8", mimeType);
-		            setEncoding(MimeUtil.ENC_8BIT);
+	            	setEncoding(MimeUtil.ENC_8BIT);
 	            }
 	            String name = MimeUtility.getHeaderParameter(getContentType(), "name");
 	            if (name != null) {

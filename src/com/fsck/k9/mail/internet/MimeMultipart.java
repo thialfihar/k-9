@@ -60,6 +60,25 @@ public class MimeMultipart extends Multipart {
     public String getContentType() {
         return mContentType;
     }
+    
+    public void setContentType( String contentType ) throws MessagingException {
+    	try {
+	    	mBoundary = MimeUtility.getHeaderParameter(contentType, "boundary");
+	    	if( mBoundary == null ) {
+	    		throw new IllegalArgumentException( "contentType does not contain a boundary: " + contentType );
+	    	}
+	    	mSubType = MimeUtility.getHeaderParameter(contentType, null).split("/")[1];
+	    	mContentType = contentType;
+    	} catch (Exception e) {
+            throw new MessagingException(
+                    "Invalid MultiPart Content-Type; must contain subtype and boundary. ("
+                    + contentType + ")", e);
+        }
+    }
+    
+    public String getBoundary() {
+    	return mBoundary;
+    }
 
     public void setSubType(String subType) {
         this.mSubType = subType;

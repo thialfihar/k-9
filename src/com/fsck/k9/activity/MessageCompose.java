@@ -1539,16 +1539,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         
         message.setBody( msgBody );
 
-        try {
-        	
-	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			message.writeTo( baos );
-			Log.e( K9.LOG_TAG, new String( baos.toByteArray() ) );
-        
-        } catch( IOException e ) {
-        	Log.w( K9.LOG_TAG, "Can't write out message body", e );
-        }
-
         // If this is a draft, add metadata for thawing.
         if (isDraft) {
             // Add the identity to the message.
@@ -1970,6 +1960,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	        	if( usePgpMime ) {
 	      		
 	        		mSignedTextBodyPart = new MimeBodyPart( textBody, "text/plain" );
+	        		//mSignedTextBodyPart.setEncoding( MimeUtil.ENC_QUOTED_PRINTABLE );
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        		mSignedTextBodyPart.writeTo( baos );
 	        		
@@ -1998,43 +1989,58 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	            mPreventDraftSaving = true;
 	
 	    		TextBody textBody = buildText( false );
-	            Body body = textBody;
 	        	boolean success = false;
 	        	if( usePgpMime ) {
-	
+
 	        		MimeMultipart mp = null;
-	        		if( mPgpData.hasSignatureKey() ) {
-	        			mp = buildPgpMimeSigned( mPgpData.getSignature() );
-	        		} else if( mAttachments.getChildCount() > 0 ) {
-	        			
-	        			if (mMessageFormat == SimpleMessageFormat.HTML) {
-	        	            // HTML message (with alternative text part)
-	
-	        	            // This is the compiled MIME part for an HTML message.
-	        	            mp = new MimeMultipart();
-	        	            mp.setSubType("alternative");   // Let the receiver select either the text or the HTML part.
-	        	            mp.addBodyPart( new MimeBodyPart( textBody, "text/html" ) );
-	        	            Body bodyPlain = buildText( false, SimpleMessageFormat.TEXT );
-	        	            mp.addBodyPart( new MimeBodyPart(bodyPlain, "text/plain" ) );
-	        	            
-	        			} else if (mMessageFormat == SimpleMessageFormat.TEXT ) {
-	        				
-	        				mp = new MimeMultipart();
-	                        mp.addBodyPart( new MimeBodyPart( textBody, "text/plain" ));
-	                        
-	        			}
-	        			
-	        		}
-	        		
-	        		if( mp != null ) {
-	        			
-	        			addAttachmentsToMessage( mp );
-	        			body = mp;
-	        			
-	        		}
-	        		
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        		body.writeTo( baos );
+
+	        		if( mPgpData.hasSignatureKey() ) {
+	        			
+	        			mp = buildPgpMimeSigned( mPgpData.getSignature() );
+	        			baos.writeTo( baos );
+	        			
+	        		} else if (mMessageFormat == SimpleMessageFormat.HTML) {
+	        	        // HTML message (with alternative text part)
+	
+	        	        // This is the compiled MIME part for an HTML message.
+	        	        mp = new MimeMultipart();
+	        	        mp.setSubType("alternative");   // Let the receiver select either the text or the HTML part.
+	        	        mp.addBodyPart( new MimeBodyPart( textBody, "text/html" ) );
+	        	        Body bodyPlain = buildText( false, SimpleMessageFormat.TEXT );
+	        	        mp.addBodyPart( new MimeBodyPart(bodyPlain, "text/plain" ) );
+	        	        
+	        	        if( mAttachments.getChildCount() > 0 ) {
+		        			addAttachmentsToMessage( mp );
+		        		}
+		        		
+	        	        MimeMessage m = new MimeMessage();
+	        	        m.setBody( mp );
+	        	        m.writeTo( baos );
+	        	               
+	        		} else if (mMessageFormat == SimpleMessageFormat.TEXT ) {
+	        				
+	        			if( mAttachments.getChildCount() > 0 ) {
+	        				
+		        			mp = new MimeMultipart();
+		                    mp.addBodyPart( new MimeBodyPart( textBody, "text/plain" ));
+		                    addAttachmentsToMessage( mp );
+		                    
+		                    MimeMessage m = new MimeMessage();
+		        	        m.setBody( mp );
+		        	        m.writeTo( baos );
+		        	               
+	        			} else {
+	        				
+	        				MimeMessage m = new MimeMessage();
+	        				m.setBody( textBody );
+	        				m.writeTo( baos );
+	        				
+	        			}
+		                    
+	                        
+	        		}
+	        			
 	        		String filename = writeToTempFile( baos.toByteArray() );
 	        		
 	        		if( filename != null ) {
