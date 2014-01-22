@@ -1007,7 +1007,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
             		is.close();
             		f.delete();
 
-            		//Log.w( K9.LOG_TAG, "Decrypted msg: " + decryptedMsg );
+            		Log.w( K9.LOG_TAG, "Decrypted msg: " + decryptedMsg );
 
             		if( decryptedMsg != null && decryptedMsg.length() > 0 ) {
 
@@ -1017,13 +1017,15 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
             			MimeMessage mimeMsg = new MimeMessage( bais );
             			Body body = mimeMsg.getBody();
             			if( body instanceof BinaryTempFileBody ) {
-
             				Log.d( K9.LOG_TAG, "Decrypted data is a BinaryTempFileBody" );
             				ByteArrayOutputStream baos = new ByteArrayOutputStream();
             				BinaryTempFileBody btfb = ( BinaryTempFileBody )body;
             				btfb.writeTo( baos );
 
-            				pgpData.setDecryptedData( baos.toString() );
+            				String contents = baos.toString();
+            				if( contents != null && contents.length() > 0 ) {
+            					pgpData.setDecryptedData( baos.toString() );
+            				}
 
             			} else {
 

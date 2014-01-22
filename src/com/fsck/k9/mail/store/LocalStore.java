@@ -1860,7 +1860,12 @@ public class LocalStore extends Store implements Serializable {
                                         if (mimeType != null && mimeType.toLowerCase(Locale.US).startsWith("multipart/")) {
                                             // If this is a multipart message, preserve both text
                                             // and html parts, as well as the subtype.
-                                            mp.setSubType(mimeType.toLowerCase(Locale.US).replaceFirst("^multipart/", ""));
+                                        	if( ( mimeType.contains( "multipart/signed" ) && mimeType.length() > "multipart/signed".length() ) || ( mimeType.contains( "multipart/encrypted") && mimeType.length() > "multipart/encrypted".length() ) ) {
+                                        		mp.setContentType( mimeType );
+                                        	} else {
+                                        		mp.setSubType(mimeType.toLowerCase(Locale.US).replaceFirst("^multipart/", ""));
+                                        	}
+
                                             if (textContent != null) {
                                                 LocalTextBody body = new LocalTextBody(textContent, htmlContent);
                                                 MimeBodyPart bp = new MimeBodyPart(body, "text/plain");
@@ -1869,8 +1874,7 @@ public class LocalStore extends Store implements Serializable {
 
                                             if (mAccount.getMessageFormat() != MessageFormat.TEXT) {
 
-                                            	if( mimeType.equals( "multipart/signed" ) ) {
-
+                                            	if( mimeType.contains( "multipart/signed" ) ) {
                                             		String multipartSignedText = cursor.getString( 3 );
                                             		if( multipartSignedText != null ) {
 
@@ -1885,7 +1889,7 @@ public class LocalStore extends Store implements Serializable {
                                             			Log.w( K9.LOG_TAG, "I don't have the original signed data; signature verification will fail" );
                                             		}
 
-                                            	} else {
+                                            	} else if( !mimeType.contains( "multipart/encrypted" ) ) {
 
 	                                                if (htmlContent != null) {
 	                                                    TextBody body = new TextBody(htmlContent);
@@ -2562,6 +2566,7 @@ public class LocalStore extends Store implements Serializable {
                                 }
 
                                 String preview = Message.calculateContentPreview(text);
+                                String mimeType = message.getMimeType();
 
                                 try {
                                     ContentValues cv = new ContentValues();
@@ -2587,7 +2592,11 @@ public class LocalStore extends Store implements Serializable {
                                     cv.put("attachment_count", attachments.size());
                                     cv.put("internal_date",  message.getInternalDate() == null
                                            ? System.currentTimeMillis() : message.getInternalDate().getTime());
-                                    cv.put("mime_type", message.getMimeType());
+                                    if( mimeType.contains( "multipart/signed") || mimeType.contains( "multipart/encrypted" ) ) {
+                                    	cv.put("mime_type", message.getContentType() );
+                                    } else {
+                                    	cv.put("mime_type", mimeType);
+                                    }
                                     cv.put("empty", 0);
 
                                     String messageId = message.getMessageId();

@@ -645,12 +645,7 @@ public class PGPKeyRing extends CryptoProvider {
         	if( resultCode != Activity.RESULT_OK || data == null ) {
                 pgpData.setEncryptionKeys( null );
             } else {
-
                 pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
-                if( pgpData.isForceArmored() ) {
-                	data.putExtra( EXTRAS_ARMORED, true );
-                }
-
             }
 
             ( ( MessageCompose )activity ).onEncryptDone();
