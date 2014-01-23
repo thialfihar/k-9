@@ -618,12 +618,23 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     		
         	try {
         		
-        		Part msgPart = mp.getBodyPart( 0 );
-        		Part sigPart = mp.getBodyPart( 1 );
+        		Part msgPart = null;
+        		Part sigPart = null;
         		
-        		if( !sigPart.getContentType().contains( "application/pgp-signature" ) ) {
+    			msgPart = mp.getBodyPart( 0 );
+    			sigPart = MimeUtility.findFirstPartByMimeType( mMessage, "application/pgp-signature" );
+    			
+    			/*
+        		if( mp.getContentType().contains( "multipart/signed" ) ) {
+        			sigPart = mp.getBodyPart( 1 );
+        		} else if( mp.getContentType().contains( "multipart/mixed" ) ) {
+        			sigPart = MimeUtility.findFirstPartByMimeType( mMessage, "application/pgp-signature" );
+        		}
+        		*/
+    			
+        		if( sigPart == null ) {
         			
-        			Log.w( K9.LOG_TAG, "I have a multipart/signed with more than two parts, or the last part is not of type application/pgp-signature" );
+        			Log.w( K9.LOG_TAG, "I have a multipart/signed with more than two parts, or I cannot locate the signature of a MIME message with a signed multipart/mixed" );
         			return false;
         			
         		}
@@ -778,7 +789,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     	
                     	boolean isPgpMime = false;
                     	
-                    	if( message.getBody() instanceof MimeMultipart ) {
+                    	if( message.getBody() instanceof MimeMultipart && mMessage.isSet(Flag.X_DOWNLOADED_FULL) ) {
                     		
                             MimeMultipart mp = ( MimeMultipart )message.getBody();
                             
@@ -787,7 +798,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     			isPgpMime = handlePgpMimeEncrypted( account, mp );
                     		} else if( mp.getContentType().contains( "multipart/signed" ) &&
                     				MimeUtility.findFirstPartByMimeType( message, "application/pgp-signature" ) != null ) {
-                    			
+                    	      
                     			ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     			mMessage.writeTo(baos);
                     			Log.e( K9.LOG_TAG, new String(baos.toByteArray()));

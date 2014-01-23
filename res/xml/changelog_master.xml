@@ -8,7 +8,7 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
-    <release version="4.701.02" versionCode="19004">
+    <release version="4.701.02" versioncode="19004">
         <change>Support for sending PGP/MIME messages (go to Settings to disable)</change>
     </release>
     <release version="4.701.01" versioncode="19003" >

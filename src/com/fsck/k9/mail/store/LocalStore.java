@@ -3826,7 +3826,7 @@ public class LocalStore extends Store implements Serializable {
                     public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
                     	
                     	String[] idArg = new String[] { Long.toString(mId) };
-
+                    	
                     	ContentValues cv = new ContentValues();
                     	cv.put( "signed_multipart", signedMultipart );
                     	

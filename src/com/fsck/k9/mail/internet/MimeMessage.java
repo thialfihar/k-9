@@ -62,6 +62,7 @@ public class MimeMessage extends Message {
     
     // this is the content that was originally signed for unencrypted PGP/MIME messages
     private MimeMultipart signedMultipart;
+    private boolean savedSignedMultipart;
 
     public MimeMessage() {
     }
@@ -544,7 +545,7 @@ public class MimeMessage extends Message {
             expect(Part.class);
             try { 
             	Body body = null;
-            	if( signedMultipart != null && bd.getMimeType().contains( "text/" ) ) {
+            	if( signedMultipart != null && !savedSignedMultipart ) {
 
             		body = new BinaryTempFileBody();
             		body.setEncoding( bd.getTransferEncoding() );
@@ -557,6 +558,8 @@ public class MimeMessage extends Message {
             		} finally {
             			out.close();
             		}
+            		
+            		savedSignedMultipart = true;
                 
             	} else {
             		body = MimeUtility.decodeBody(in,

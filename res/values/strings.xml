@@ -29,13 +29,13 @@
     <string name="welcome_message_title">Welcome to Squeaky Mail</string>
     <string name="accounts_welcome"><![CDATA[
 <p>
-Squeaky Mail is based entirely on the popular, open source K-9 Mail application. The only difference is that Squeaky Mail integrates with PGP KeyRing, a crypto provider.
+Squeaky Mail is based entirely on the popular, open source K-9 Mail application. The only difference is that Squeaky Mail integrates with PGP KeyRing, a crypto provider, and can send and receive PGP/MIME mail.
 </p><p>
 Its improved features include:
 </p>
 <ul>
   <li>Integration with PGP KeyRing</li>
-  <li>Support for PGP/MIME (receipt only)
+  <li>Support for PGP/MIME</li>
   <li>Push mail using IMAP IDLE</li>
   <li>Better performance</li>
   <li>Message refiling</li>

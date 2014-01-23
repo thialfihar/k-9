@@ -1438,11 +1438,11 @@ public class MessagingController implements Runnable {
         	try {
     
     			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    			message.writeTo( baos );
-    			
-    			byte[] content = baos.toByteArray();
     			Body b = signedMultipart.getBodyPart( 0 ).getBody();
     			if( b instanceof TextBody ) {
+    			
+    				message.writeTo( baos );
+    				byte[] content = baos.toByteArray();
     				
 	    			TextBody textBody = ( TextBody )b;
 	    			String contentTransferEncoding = textBody.getEncoding();
@@ -1471,15 +1471,16 @@ public class MessagingController implements Runnable {
 		    			
 	    			}
 	    			
-	    			String signedContent = new String( baos.toByteArray() );
-	    			
-	    			//Log.w( K9.LOG_TAG, "Signed content:\n" + signedContent );
-	    			LocalMessage localMessage = localFolder.getMessage(message.getUid());
-	    			localMessage.setSignedMultipart( signedContent );
-    			
     			} else {
-    				Log.i( K9.LOG_TAG, "Signed part is not a simple TextBody; won't handle" );
+    				signedMultipart.getBodyPart( 0 ).writeTo( baos );
     			}
+	    			
+	    		String signedContent = new String( baos.toByteArray() );
+	    			
+	    		Log.w( K9.LOG_TAG, "Signed content:\n" + signedContent );
+	    		LocalMessage localMessage = localFolder.getMessage(message.getUid());
+	    		localMessage.setSignedMultipart( signedContent );
+    			
     		
     		} catch( Exception e ) {
     			Log.e( K9.LOG_TAG, e.getMessage(), e );
