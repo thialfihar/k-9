@@ -58,6 +58,10 @@ public class MimeMessage extends Message {
     protected Body mRawData;
     protected int mSize;
 
+    // this is the content that was originally signed for unencrypted PGP/MIME messages
+    private MimeMultipart signedMultipart;
+    private boolean savedSignedMultipart;
+
     public MimeMessage() {
     }
 
@@ -528,24 +532,29 @@ public class MimeMessage extends Message {
 
         public void body(BodyDescriptor bd, InputStream in) throws IOException {
             expect(Part.class);
-            Body body = null;
-            if( multipartSigned && bd.getMimeType().contains( "text/" ) ) {
-
-            	body = new BinaryTempFileBody();
-                OutputStream out = ( ( BinaryTempFileBody )body ).getOutputStream();
-                try {
-                    IOUtils.copy(in, out);
-                } finally {
-                    out.close();
-                }
-
-            } else {
-            	body = MimeUtility.decodeBody(in, bd.getTransferEncoding());
-            }
             try {
-                Body body = MimeUtility.decodeBody(in,
-                        bd.getTransferEncoding(), bd.getMimeType());
-                ((Part)stack.peek()).setBody(body);
+            	Body body = null;
+            	if( signedMultipart != null && !savedSignedMultipart ) {
+
+            		body = new BinaryTempFileBody();
+            		body.setEncoding( bd.getTransferEncoding() );
+            		( ( BinaryTempFileBody )body ).setDecoded( false );
+            		OutputStream out = ( ( BinaryTempFileBody )body ).getOutputStream();
+            		try {
+            			IOUtils.copy(in, out);
+            		} catch( IOException e ) {
+            			Log.w(K9.LOG_TAG, e );
+            		} finally {
+            			out.close();
+            		}
+
+            		savedSignedMultipart = true;
+
+            	} else {
+            		body = MimeUtility.decodeBody(in,
+                            bd.getTransferEncoding(), bd.getMimeType());
+            	}
+            	((Part)stack.peek()).setBody(body);
             } catch (MessagingException me) {
                 throw new Error(me);
             }
