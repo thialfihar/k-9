@@ -639,8 +639,11 @@ public class PGPKeyRing extends CryptoProvider {
             
         case ENCRYPT_FILE:
         	
-        	if( resultCode != Activity.RESULT_OK || data == null ) {       
+        	if( resultCode != Activity.RESULT_OK || data == null ) {
+        		
                 pgpData.setEncryptionKeys( null );
+                pgpData.setFilename( null );
+                
             } else {   
                 pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
             }

@@ -1073,6 +1073,8 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             	} catch( Throwable e ) {
             		Log.i( K9.LOG_TAG, "Decrypted PGP/MIME message is not signed or encountered a problem parsing signed message", e );
             	}
+            	
+                mMessageView.setFilterPgpAttachments( true );
             		
             }
             
