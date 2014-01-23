@@ -1860,7 +1860,10 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     			is = new BufferedInputStream( new FileInputStream( f ) );
     			IOUtils.copy( is, baos );
 
-    			mPgpData.setEncryptedData( new String( baos.toByteArray() ) );
+    			String encrypted = new String( baos.toByteArray() );
+    			Log.e( K9.LOG_TAG, "Encrypted:\n" + encrypted );
+
+    			mPgpData.setEncryptedData( encrypted );
     			mPgpData.setFilename( null );
 
     		} catch( IOException e ) {
@@ -1988,19 +1991,19 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	        	boolean success = false;
 	        	if( usePgpMime ) {
 
-	        		MimeMultipart mp = null;
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 	        		if( mPgpData.hasSignatureKey() ) {
 
-	        			mp = buildPgpMimeSigned( mPgpData.getSignature() );
-	        			baos.writeTo( baos );
+	        			MimeMessage m = new MimeMessage();
+	        			m.setBody( buildPgpMimeSigned( mPgpData.getSignature() ) );
+	        			m.writeTo( baos );
 
 	        		} else if (mMessageFormat == SimpleMessageFormat.HTML) {
 	        	        // HTML message (with alternative text part)
 
 	        	        // This is the compiled MIME part for an HTML message.
-	        	        mp = new MimeMultipart();
+	        	        MimeMultipart mp = new MimeMultipart();
 	        	        mp.setSubType("alternative");   // Let the receiver select either the text or the HTML part.
 	        	        mp.addBodyPart( new MimeBodyPart( textBody, "text/html" ) );
 	        	        Body bodyPlain = buildText( false, SimpleMessageFormat.TEXT );
@@ -2018,7 +2021,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
 	        			if( mAttachments.getChildCount() > 0 ) {
 
-		        			mp = new MimeMultipart();
+		        			MimeMultipart mp = new MimeMultipart();
 		                    mp.addBodyPart( new MimeBodyPart( textBody, "text/plain" ));
 		                    addAttachmentsToMessage( mp );
 
@@ -2121,8 +2124,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		encryptedMultipart.addBodyPart( bodyPart );
 
     		bodyPart = new MimeBodyPart();
-    		bodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, "application/octet-stream" );
-    		bodyPart.setUsing7bitTransport();
+    		bodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, String.format( "application/octet-stream; name=\"%s\"", "encrypted.asc" ) );
+    		bodyPart.addHeader( MimeHeader.HEADER_CONTENT_DISPOSITION, String.format( "attachment; filename=\"%s\"", "encrypted.asc"));
     		bodyPart.setBody( new TextBody( encrypted ) );
 
     		encryptedMultipart.addBodyPart( bodyPart );

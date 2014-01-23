@@ -1849,6 +1849,7 @@ public class LocalStore extends Store implements Serializable {
                                     Cursor cursor = null;
                                     MimeMultipart mp = new MimeMultipart();
                                     mp.setSubType("mixed");
+                                    boolean pgpMime = false;
                                     try {
                                         cursor = db.rawQuery("SELECT html_content, text_content, mime_type, signed_multipart FROM messages "
                                                              + "WHERE id = ?",
@@ -1861,7 +1862,10 @@ public class LocalStore extends Store implements Serializable {
                                             // If this is a multipart message, preserve both text
                                             // and html parts, as well as the subtype.
                                         	if( ( mimeType.contains( "multipart/signed" ) && mimeType.length() > "multipart/signed".length() ) || ( mimeType.contains( "multipart/encrypted") && mimeType.length() > "multipart/encrypted".length() ) ) {
+                                        		
+                                        		pgpMime = true;
                                         		mp.setContentType( mimeType );
+                                        	
                                         	} else {
                                         		mp.setSubType(mimeType.toLowerCase(Locale.US).replaceFirst("^multipart/", ""));
                                         	}
@@ -1978,6 +1982,10 @@ public class LocalStore extends Store implements Serializable {
                                             String contentId = cursor.getString(6);
                                             String contentDisposition = cursor.getString(7);
                                             String encoding = MimeUtility.getEncodingforType(type);
+                                            if( pgpMime && name != null && name.contains( "encrypted.asc" ) ) {
+                                            	encoding = MimeUtil.ENC_7BIT;
+                                            }
+                                            
                                             Body body = null;
 
                                             if (contentDisposition == null) {
