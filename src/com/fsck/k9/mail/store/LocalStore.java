@@ -1862,10 +1862,10 @@ public class LocalStore extends Store implements Serializable {
                                             // If this is a multipart message, preserve both text
                                             // and html parts, as well as the subtype.
                                         	if( ( mimeType.contains( "multipart/signed" ) && mimeType.length() > "multipart/signed".length() ) || ( mimeType.contains( "multipart/encrypted") && mimeType.length() > "multipart/encrypted".length() ) ) {
-                                        		
+
                                         		pgpMime = true;
                                         		mp.setContentType( mimeType );
-                                        	
+
                                         	} else {
                                         		mp.setSubType(mimeType.toLowerCase(Locale.US).replaceFirst("^multipart/", ""));
                                         	}
@@ -1882,7 +1882,7 @@ public class LocalStore extends Store implements Serializable {
                                             		String multipartSignedText = cursor.getString( 3 );
                                             		if( multipartSignedText != null ) {
 
-                                            			//Log.w( K9.LOG_TAG, "Stored multipart signed text:\n" + multipartSignedText );
+                                            			Log.w( K9.LOG_TAG, "Stored multipart signed text:\n" + multipartSignedText );
                                             			ByteArrayInputStream bais = new ByteArrayInputStream( multipartSignedText.getBytes() );
                                             			MimeMessage m = new MimeMessage( bais );
                                             			MimeMultipart signed = ( MimeMultipart )m.getBody();
@@ -1890,7 +1890,7 @@ public class LocalStore extends Store implements Serializable {
                                             			message.setSignedMultipart( signed );
 
                                             		} else {
-                                            			Log.w( K9.LOG_TAG, "I don't have the original signed data; signature verification will fail" );
+                                            			Log.w( K9.LOG_TAG, "I don't have the original signed data; signature verification may fail" );
                                             		}
 
                                             	} else if( !mimeType.contains( "multipart/encrypted" ) ) {
@@ -1985,7 +1985,7 @@ public class LocalStore extends Store implements Serializable {
                                             if( pgpMime && name != null && name.contains( "encrypted.asc" ) ) {
                                             	encoding = MimeUtil.ENC_7BIT;
                                             }
-                                            
+
                                             Body body = null;
 
                                             if (contentDisposition == null) {
@@ -3828,7 +3828,7 @@ public class LocalStore extends Store implements Serializable {
                     public Void doDbWork(final SQLiteDatabase db) throws WrappedException, UnavailableStorageException {
 
                     	String[] idArg = new String[] { Long.toString(mId) };
-                    	
+
                     	ContentValues cv = new ContentValues();
                     	cv.put( "signed_multipart", signedMultipart );
 

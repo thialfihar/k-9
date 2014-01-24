@@ -48,6 +48,7 @@ import com.fsck.k9.helper.FileBrowserHelper;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.Flag;
+import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
@@ -58,6 +59,8 @@ import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.internet.MimeBodyPart;
+import com.fsck.k9.mail.store.LocalStore;
+import com.fsck.k9.mail.store.LocalStore.LocalFolder;
 import com.fsck.k9.mail.store.LocalStore.LocalMessage;
 import com.fsck.k9.view.AttachmentView;
 import com.fsck.k9.view.AttachmentView.AttachmentFileDownloadCallback;
@@ -690,17 +693,24 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
         			} else {
 
+        				msgPart.writeTo( baos );
+        				/*
         				( ( MimeBodyPart )msgPart ).writeHeadersTo( baos );
         				baos.write( "\r\n".getBytes() );
         				InputStream in = msgPart.getBody().getInputStream();
         				IOUtils.copy( in, baos );
         				in.close();
+        				*/
 
         			}
 
         			String signedData = new String( baos.toByteArray() );
 
         			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
+
+        			if( signedData.length() > 1000 ) {
+        				Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 1000 ) );
+        			}
 
         			InputStream is = sigPart.getBody().getInputStream();
         			String sig = IOUtils.toString( is, "US-ASCII" );
