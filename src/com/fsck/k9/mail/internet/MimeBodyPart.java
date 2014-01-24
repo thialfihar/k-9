@@ -78,10 +78,14 @@ public class MimeBodyPart extends BodyPart {
             Multipart multipart = ((Multipart)body);
             multipart.setParent(this);
             String type = multipart.getContentType();
-            setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
+            if( mHeader.getFirstHeader( MimeHeader.HEADER_CONTENT_TYPE ) == null || !mHeader.getFirstHeader( MimeHeader.HEADER_CONTENT_TYPE ).contains( type ) ) {
+            	setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
+            }
+            /*
             if (!type.contains("multipart/signed") && !type.contains( "multipart/encrypted")) {
                 setEncoding(MimeUtil.ENC_8BIT);
             }
+            */
         } else if (body instanceof TextBody) {
         	if( decoded ) {
         		

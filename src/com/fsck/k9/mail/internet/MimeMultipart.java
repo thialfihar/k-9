@@ -1,6 +1,7 @@
 
 package com.fsck.k9.mail.internet;
 
+import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
@@ -8,6 +9,8 @@ import com.fsck.k9.mail.Multipart;
 import java.io.*;
 import java.util.Locale;
 import java.util.Random;
+
+import org.apache.james.mime4j.util.MimeUtil;
 
 public class MimeMultipart extends Multipart {
     protected String mPreamble;
@@ -106,7 +109,11 @@ public class MimeMultipart extends Multipart {
             writer.write("\r\n");
             writer.flush();
             bodyPart.writeTo(out);
-            writer.write("\r\n");
+            
+            Body b = bodyPart.getBody();
+            if( !( b instanceof BinaryTempFileBody ) || !( ( BinaryTempFileBody )b ).getEncoding().equals( MimeUtil.ENC_BASE64 ) ) {
+            	writer.write("\r\n");
+            }
         }
 
         writer.write("--");

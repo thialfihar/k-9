@@ -113,9 +113,11 @@ public class BinaryTempFileBody implements Body {
             try {
                 super.close();
             } finally {
+            	/*
             	if( decoded ) {
             		mFile.delete();
             	}
+            	*/
             }
         }
 

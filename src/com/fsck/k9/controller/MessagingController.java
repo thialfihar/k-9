@@ -1438,10 +1438,11 @@ public class MessagingController implements Runnable {
         	try {
     
     			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				message.writeTo( baos );
+				
     			Body b = signedMultipart.getBodyPart( 0 ).getBody();
     			if( b instanceof TextBody ) {
-    			
-    				message.writeTo( baos );
+
     				byte[] content = baos.toByteArray();
     				
 	    			TextBody textBody = ( TextBody )b;
@@ -1471,8 +1472,6 @@ public class MessagingController implements Runnable {
 		    			
 	    			}
 	    			
-    			} else {
-    				signedMultipart.getBodyPart( 0 ).writeTo( baos );
     			}
 	    			
 	    		String signedContent = new String( baos.toByteArray() );
@@ -3121,6 +3120,18 @@ public class MessagingController implements Runnable {
                 fp.add(FetchProfile.Item.BODY);
 
                 remoteFolder.fetch(new Message[] { remoteMessage }, fp, null);
+                MimeMultipart signedMultipart = remoteMessage.getSignedMultipart();
+                if( signedMultipart != null ) {
+                	
+                	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                	remoteMessage.writeTo( baos );
+                	String contents = new String( baos.toByteArray() );
+                	Log.i( K9.LOG_TAG, "I have the original signed message:\n" + contents );
+
+                	message.setSignedMultipart( signedMultipart ); 
+                	setSignedMultipart( remoteMessage, localFolder );            
+                	
+                }
 
                 // Store the message locally and load the stored message into memory
                 localFolder.appendMessages(new Message[] { remoteMessage });
@@ -3151,6 +3162,7 @@ public class MessagingController implements Runnable {
             }
             return true;
         } catch (Exception e) {
+        	Log.e( K9.LOG_TAG, e.getMessage(), e );
             for (MessagingListener l : getListeners(listener)) {
                 l.loadMessageForViewFailed(account, folder, uid, e);
             }
