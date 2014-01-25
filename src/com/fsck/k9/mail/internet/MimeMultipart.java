@@ -14,6 +14,8 @@ import org.apache.james.mime4j.util.MimeUtil;
 
 public class MimeMultipart extends Multipart {
     protected String mPreamble;
+    
+    protected String mEpilogue;
 
     protected String mContentType;
 
@@ -59,7 +61,15 @@ public class MimeMultipart extends Multipart {
         this.mPreamble = preamble;
     }
 
-    @Override
+    public String getEpilogue() {
+		return mEpilogue;
+	}
+
+	public void setEpilogue(String mEpilogue) {
+		this.mEpilogue = mEpilogue;
+	}
+
+	@Override
     public String getContentType() {
         return mContentType;
     }
@@ -119,6 +129,12 @@ public class MimeMultipart extends Multipart {
         writer.write("--");
         writer.write(mBoundary);
         writer.write("--\r\n");
+        
+        if( mEpilogue != null ) {
+        	writer.write(mEpilogue);
+        	writer.write( "\r\n" );
+        }
+        
         writer.flush();
     }
 

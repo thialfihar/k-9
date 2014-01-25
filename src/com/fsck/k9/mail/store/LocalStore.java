@@ -3820,7 +3820,7 @@ public class LocalStore extends Store implements Serializable {
             notifyChange();
         }
 
-        public void setSignedMultipart( final String signedMultipart ) throws MessagingException {
+        public void setSignedMultipartDb( final String signedMultipart ) throws MessagingException {
 
         	try {
                 database.execute(true, new DbCallback<Void>() {

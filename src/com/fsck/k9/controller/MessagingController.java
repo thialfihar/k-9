@@ -78,15 +78,18 @@ import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Folder.FolderType;
 
 import com.fsck.k9.mail.Body;
+import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.mail.CertificateValidationException;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.PushReceiver;
 import com.fsck.k9.mail.Pusher;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
+import com.fsck.k9.mail.internet.MimeBodyPart;
 import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.internet.MimeUtility;
@@ -1374,9 +1377,9 @@ public class MessagingController implements Runnable {
         //        fp.add(FetchProfile.Item.ENVELOPE);
 
         downloadSmallMessages(account, remoteFolder, localFolder, smallMessages, progress, unreadBeforeStart, newMessages, todo, fp);
-        for( Message message: smallMessages ) {
-        	setSignedMultipart( message, localFolder );
-        }	
+        //for( Message message: smallMessages ) {
+        //	setSignedMultipart( message, localFolder );
+        //}	
         smallMessages.clear();
 
         /*
@@ -1385,9 +1388,9 @@ public class MessagingController implements Runnable {
         fp.clear();
         fp.add(FetchProfile.Item.STRUCTURE);
         downloadLargeMessages(account, remoteFolder, localFolder, largeMessages, progress, unreadBeforeStart,  newMessages, todo, fp);
-        for( Message message: smallMessages ) {
-        	setSignedMultipart( message, localFolder );
-        }	
+        //for( Message message: smallMessages ) {
+        //	setSignedMultipart( message, localFolder );
+        //}	
         largeMessages.clear();
 
         /*
@@ -1433,63 +1436,24 @@ public class MessagingController implements Runnable {
 
 	private void setSignedMultipart( Message message, LocalFolder localFolder ) {
 		
-    	MimeMultipart signedMultipart = message.getSignedMultipart();
-        if( signedMultipart != null ) {
+		Log.w( K9.LOG_TAG, "!!!!!!!!!!!      setSignedMultipart        !!!!!!!!!!" );
+        try {
         	
-        	try {
-    
-    			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				message.writeTo( baos );
+    		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			message.writeTo( baos );
 				
-    			Body b = signedMultipart.getBodyPart( 0 ).getBody();
-    			if( b instanceof TextBody ) {
-
-    				byte[] content = baos.toByteArray();
-    				
-	    			TextBody textBody = ( TextBody )b;
-	    			String contentTransferEncoding = textBody.getEncoding();
-	    			
-	    			if( contentTransferEncoding != null ) {
-	    				
-		    			InputStream in = new ByteArrayInputStream( content );
-		    			boolean decode = false;
-		    			if( contentTransferEncoding.equalsIgnoreCase( MimeUtil.ENC_QUOTED_PRINTABLE ) ) {
-		    				
-		    				decode = true;
-		    				in = new QuotedPrintableInputStream( in );
-		    			
-		    			} else if( contentTransferEncoding.equalsIgnoreCase( MimeUtil.ENC_BASE64 ) ) {
-		    				
-		    				decode = true;
-		    				in = new Base64InputStream( in );
-		    			}
-		    			
-		    			if( decode ) {
-		    				
-			    			baos = new ByteArrayOutputStream();
-			    			IOUtils.copy( in, baos );
-			    			
-		    			}
-		    			
-	    			}
-	    			
-    			}
-	    			
-	    		String signedContent = new String( baos.toByteArray() );
-	    			
-	    		Log.w( K9.LOG_TAG, "Signed content:\n" + signedContent );
-	    		LocalMessage localMessage = localFolder.getMessage(message.getUid());
-	    		localMessage.setSignedMultipart( signedContent );
+	    	String signedContent = new String( baos.toByteArray() );	
+	    	Log.w( K9.LOG_TAG, "Signed content:\n" + signedContent );
+	    		
+	    	LocalMessage localMessage = localFolder.getMessage(message.getUid());
+	    	localMessage.setSignedMultipartDb( signedContent );
     			
-    		
-    		} catch( Exception e ) {
-    			Log.e( K9.LOG_TAG, e.getMessage(), e );
-    		}
-        	
-        }
+    	} catch( Exception e ) {
+    		Log.e( K9.LOG_TAG, e.getMessage(), e );
+    	}
         
 	}
-	
+    
     private void evaluateMessageForDownload(final Message message, final String folder,
                                             final LocalFolder localFolder,
                                             final Folder remoteFolder,
@@ -1715,6 +1679,21 @@ public class MessagingController implements Runnable {
                         return;
                     }
 
+                    Message orig = null;
+                    if( message.getSignedMultipart() != null ) {
+                    	try {
+                    	
+	                    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	                    	message.writeTo( baos );
+	                    	
+	                    	ByteArrayInputStream bais = new ByteArrayInputStream( baos.toByteArray() );
+	                    	orig = new MimeMessage( bais );
+	                    	
+                    	} catch( IOException e ) {
+                    		Log.w( K9.LOG_TAG, "Could not preserve original signed message", e );
+                    	}	
+                    }
+                    
                     // Store the updated message locally
                     final Message localMessage = localFolder.storeSmallMessage(message, new Runnable() {
                         @Override
@@ -1722,7 +1701,13 @@ public class MessagingController implements Runnable {
                             progress.incrementAndGet();
                         }
                     });
-
+                    
+                    orig.setUid( localMessage.getUid() );
+                    
+                    if( orig != null ) {
+                    	setSignedMultipart( orig, localFolder );
+                    }
+                    
                     // Increment the number of "new messages" if the newly downloaded message is
                     // not marked as read.
                     if (!localMessage.isSet(Flag.SEEN)) {
@@ -1811,8 +1796,7 @@ public class MessagingController implements Runnable {
                 localFolder.appendMessages(new Message[] { message });
 
                 Message localMessage = localFolder.getMessage(message.getUid());
-
-
+                
                 // Certain (POP3) servers give you the whole message even when you ask for only the first x Kb
                 if (!message.isSet(Flag.X_DOWNLOADED_FULL)) {
                     /*
@@ -1833,13 +1817,37 @@ public class MessagingController implements Runnable {
                     }
                 }
             } else {
-                /*
+            	
+            	Message orig = null;
+                if( message.getSignedMultipart() != null ) {
+                	try {
+                	
+                    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    	message.writeTo( baos );
+                    	
+                    	ByteArrayInputStream bais = new ByteArrayInputStream( baos.toByteArray() );
+                    	orig = new MimeMessage( bais );
+                    	
+                	} catch( IOException e ) {
+                		Log.w( K9.LOG_TAG, "Could not preserve original signed message", e );
+                	}	
+                }
+                
+            	// Store the updated message locally
+                localFolder.appendMessages(new Message[] { message });
+                
+                orig.setUid( message.getUid() );
+                
+                if( orig != null ) {
+                	setSignedMultipart( orig, localFolder );
+                }
+            	
+            	/*
                  * We have a structure to deal with, from which
                  * we can pull down the parts we want to actually store.
                  * Build a list of parts we are interested in. Text parts will be downloaded
                  * right now, attachments will be left for later.
                  */
-
                 Set<Part> viewables = MimeUtility.collectTextParts(message);
 
                 /*
@@ -1848,14 +1856,13 @@ public class MessagingController implements Runnable {
                 for (Part part : viewables) {
                     remoteFolder.fetchPart(message, part, null);
                 }
-                // Store the updated message locally
-                localFolder.appendMessages(new Message[] { message });
-
+               
                 Message localMessage = localFolder.getMessage(message.getUid());
 
                 // Set a flag indicating this message has been fully downloaded and can be
                 // viewed.
                 localMessage.setFlag(Flag.X_DOWNLOADED_PARTIAL, true);
+           
             }
             if (K9.DEBUG)
                 Log.v(K9.LOG_TAG, "About to notify listeners that we got a new large message "

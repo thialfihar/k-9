@@ -17,22 +17,18 @@ import java.io.*;
  */
 public class BinaryTempFileBody implements Body {
     private static File mTempDirectory;
-    private boolean decoded = true;
+    private boolean unencodedOutput = false;
 
     private File mFile;
 
     String mEncoding = null;
-
+    
     public static void setTempDirectory(File tempDirectory) {
         mTempDirectory = tempDirectory;
     }
 
-    public void setDecoded( boolean decoded ) {
-    	this.decoded = decoded;
-    }
-    
-    public boolean isDecoded() {
-    	return decoded;
+    public void setUnencodedOutput( boolean unencodedOutput ) {
+    	this.unencodedOutput = unencodedOutput;
     }
     
     public void setEncoding(String encoding) throws MessagingException {
@@ -83,14 +79,15 @@ public class BinaryTempFileBody implements Body {
         InputStream in = getInputStream();
         try {
             boolean closeStream = false;
-            if (MimeUtil.isBase64Encoding(mEncoding)) {
-                out = new Base64OutputStream(out);
-                closeStream = true;
-            } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
-                out = new QuotedPrintableOutputStream(out, false);
-                closeStream = true;
+            if( !unencodedOutput ) {
+	            if (MimeUtil.isBase64Encoding(mEncoding)) {
+	                out = new Base64OutputStream(out);
+	                closeStream = true;
+	            } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
+	                out = new QuotedPrintableOutputStream(out, false);
+	                closeStream = true;
+	            }
             }
-
             try {
                 IOUtils.copy(in, out);
             } finally {

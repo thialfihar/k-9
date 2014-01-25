@@ -530,15 +530,20 @@ public class MimeMessage extends Message {
             }
         }
 
+        // don't decode multipart/signed parts, we want to store them as is
         public void body(BodyDescriptor bd, InputStream in) throws IOException {
             expect(Part.class);
             try {
             	Body body = null;
+            	body = MimeUtility.decodeBody(in,
+                        bd.getTransferEncoding(), bd.getMimeType());
+
+            	/*
             	if( signedMultipart != null && !savedSignedMultipart ) {
 
             		body = new BinaryTempFileBody();
             		body.setEncoding( bd.getTransferEncoding() );
-            		( ( BinaryTempFileBody )body ).setDecoded( false );
+            		( ( BinaryTempFileBody )body ).setDecodedOutput( true );
             		OutputStream out = ( ( BinaryTempFileBody )body ).getOutputStream();
             		try {
             			IOUtils.copy(in, out);
@@ -554,7 +559,13 @@ public class MimeMessage extends Message {
             		body = MimeUtility.decodeBody(in,
                             bd.getTransferEncoding(), bd.getMimeType());
             	}
-            	((Part)stack.peek()).setBody(body);
+            	*/
+            	Part p = ((Part)stack.peek());
+            	if( p instanceof MimeBodyPart ) {
+            		( ( MimeBodyPart )p ).setBodyNoHeaders( body );
+            	} else {
+            		p.setBody( body );
+            	}
             } catch (MessagingException me) {
                 throw new Error(me);
             }
@@ -588,7 +599,7 @@ public class MimeMessage extends Message {
             while ((b = is.read()) != -1) {
                 sb.append((char)b);
             }
-            // ((Multipart) stack.peek()).setEpilogue(sb.toString());
+            ((MimeMultipart) stack.peek()).setEpilogue(sb.toString());
         }
 
         public void preamble(InputStream is) throws IOException {

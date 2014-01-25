@@ -47,6 +47,7 @@ import com.fsck.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmen
 import com.fsck.k9.helper.FileBrowserHelper;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Body;
+import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Message;
@@ -59,6 +60,7 @@ import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.internet.MimeBodyPart;
+import com.fsck.k9.mail.internet.TextBody;
 import com.fsck.k9.mail.store.LocalStore;
 import com.fsck.k9.mail.store.LocalStore.LocalFolder;
 import com.fsck.k9.mail.store.LocalStore.LocalMessage;
@@ -614,11 +616,18 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
     }
 
-    private boolean handlePgpMimeSigned( Account account, Multipart mp ) {
+    private boolean handlePgpMimeSigned( Account account, MimeMultipart mp ) {
 
     	boolean isPgpMime = false;
 
-    	if( !mMessageView.haveHandledPgpMimeSigned() ) {
+    	int count = mp.getCount();
+    	if( count != 2 ) {
+			Log.w( K9.LOG_TAG, "I have a multipart/signed with " + mp.getCount() + " parts; ignoring" );
+		}
+
+    	if( !mMessageView.haveHandledPgpMimeSigned() && count == 2 ) {
+
+    		MimeUtility.unencodedBodies( mp, true );
 
         	try {
 
@@ -626,15 +635,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         		Part sigPart = null;
 
     			msgPart = mp.getBodyPart( 0 );
-    			sigPart = MimeUtility.findFirstPartByMimeType( mMessage, "application/pgp-signature" );
-
-    			/*
-        		if( mp.getContentType().contains( "multipart/signed" ) ) {
-        			sigPart = mp.getBodyPart( 1 );
-        		} else if( mp.getContentType().contains( "multipart/mixed" ) ) {
-        			sigPart = MimeUtility.findFirstPartByMimeType( mMessage, "application/pgp-signature" );
-        		}
-        		*/
+    			sigPart = mp.getBodyPart( 1 );
 
         		if( sigPart == null ) {
 
@@ -645,72 +646,14 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
         		if( sigPart != null && msgPart != null ) {
         			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        			if( msgPart.getMimeType().contains( "multipart/alternative" ) ) {
-
-        				( ( MimeBodyPart )msgPart ).writeHeadersTo( baos );
-        				baos.write( "\r\n".getBytes() );
-        				String boundary = MimeUtility.getHeaderParameter( msgPart.getContentType(), "boundary" );
-
-        				mp = ( Multipart )msgPart.getBody();
-        				int count = mp.getCount();
-
-        				if( count > 0 ) {
-
-        					baos.write( boundary.getBytes() );
-        					baos.write( "\r\n".getBytes() );
-
-        				}
-
-        				for( int i=0; i<count; i++ ) {
-
-        					Part p = mp.getBodyPart( i );
-        					String mimeType = p.getMimeType();
-        					( ( MimeBodyPart )p ).writeHeadersTo( baos );
-            				baos.write( "\r\n".getBytes() );
-
-                			if( mimeType.contains( "text/" ) ) {
-
-                				InputStream in = p.getBody().getInputStream();
-                				IOUtils.copy( in, baos );
-                				in.close();
-
-                			} else {
-                				Log.w( K9.LOG_TAG, "I've got a signed multipart alternative with non-text parts: " + mimeType );
-                			}
-
-            				baos.write( "\r\n".getBytes() );
-                			baos.write( boundary.getBytes() );
-
-                			if( i == count-1 ) {
-            					baos.write( "--".getBytes() );
-            				}
-
-                			baos.write( "\r\n".getBytes() );
-
-        				}
-
-
-        			} else {
-
-        				msgPart.writeTo( baos );
-        				/*
-        				( ( MimeBodyPart )msgPart ).writeHeadersTo( baos );
-        				baos.write( "\r\n".getBytes() );
-        				InputStream in = msgPart.getBody().getInputStream();
-        				IOUtils.copy( in, baos );
-        				in.close();
-        				*/
-
-        			}
+        			msgPart.writeTo( baos );
 
         			String signedData = new String( baos.toByteArray() );
 
         			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
-
-        			if( signedData.length() > 1000 ) {
-        				Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 1000 ) );
-        			}
+        			//if( signedData.length() > 2000 ) {
+        			//	Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 2000 ) );
+        			//}
 
         			InputStream is = sigPart.getBody().getInputStream();
         			String sig = IOUtils.toString( is, "US-ASCII" );
@@ -726,6 +669,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         		Log.e( K9.LOG_TAG, "Error processing message parts", e );
         	}
 
+    		MimeUtility.unencodedBodies( mp, false );
 
     	}
 
@@ -996,8 +940,8 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
             	if( msgPart != null ) {
 
-            		String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) );
+            		//String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
+            		//msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) );
 
             		String text = MimeUtility.getTextFromPart( msgPart );
                 	if( text.trim().startsWith( "<pre class=\"k9mail" ) ) {
@@ -1051,7 +995,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
             				Log.d( K9.LOG_TAG, "Decrypted data is a mime multipart" );
 
-	            			Multipart mp = ( Multipart )mimeMsg.getBody();
+	            			MimeMultipart mp = ( MimeMultipart )mimeMsg.getBody();
 
 	            			// in case a decrypted PGP/MIME message revealed a signed message
 	            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp ) ) {
@@ -1067,8 +1011,9 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 	            			}
 
 	            			if( p != null ) {
-	            				String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-	                    		p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) );
+
+	            				//String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
+	                    		//p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) );
 
 	                    		//String text = MimeUtility.getTextFromPart( p );
 	            				pgpData.setDecryptedData( MimeUtility.getTextFromPart( p ) );

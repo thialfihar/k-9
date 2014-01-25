@@ -1958,8 +1958,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	            TextBody textBody = buildText(false);
 	        	if( usePgpMime ) {
 
-	        		mSignedTextBodyPart = new MimeBodyPart( textBody, "text/plain" );
-	        		//mSignedTextBodyPart.setEncoding( MimeUtil.ENC_QUOTED_PRINTABLE );
+	        		textBody.setUnencodedOutput( true );
+	        		mSignedTextBodyPart = new MimeBodyPart( textBody );
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        		mSignedTextBodyPart.writeTo( baos );
 
