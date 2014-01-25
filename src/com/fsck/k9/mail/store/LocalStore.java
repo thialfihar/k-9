@@ -2632,7 +2632,7 @@ public class LocalStore extends Store implements Serializable {
                                         db.update("messages", cv, "id = ?", new String[] { Long.toString(oldMessageId) });
                                         msgId = oldMessageId;
                                     }
-
+                                    
                                     for (Part attachment : attachments) {
                                         saveAttachment(msgId, attachment, copy);
                                     }
@@ -3818,7 +3818,7 @@ public class LocalStore extends Store implements Serializable {
             notifyChange();
         }
         
-        public void setSignedMultipart( final String signedMultipart ) throws MessagingException {
+        public void setSignedMultipartDb( final String signedMultipart ) throws MessagingException {
         	      	
         	try {
                 database.execute(true, new DbCallback<Void>() {

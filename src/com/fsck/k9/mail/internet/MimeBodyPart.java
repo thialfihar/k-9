@@ -1,11 +1,14 @@
 
 package com.fsck.k9.mail.internet;
 
+import android.util.Log;
+
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.CompositeBody;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
+import com.imaeses.squeaky.K9;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -23,7 +26,6 @@ public class MimeBodyPart extends BodyPart {
     protected MimeHeader mHeader = new MimeHeader();
     protected Body mBody;
     protected int mSize;
-    protected boolean decoded = true;
 
     public MimeBodyPart() throws MessagingException {
         this(null);
@@ -38,10 +40,6 @@ public class MimeBodyPart extends BodyPart {
             addHeader(MimeHeader.HEADER_CONTENT_TYPE, mimeType);
         }
         setBody(body);
-    }
-    
-    public void setDecoded( boolean decoded ) {
-    	this.decoded = decoded;
     }
 
     protected String getFirstHeader(String name) {
@@ -72,38 +70,32 @@ public class MimeBodyPart extends BodyPart {
         return mBody;
     }
     
+    public void setBodyNoHeaders(Body body) {
+    	mBody = body;
+    }
+    
     public void setBody(Body body) throws MessagingException {
         this.mBody = body;
         if (body instanceof Multipart) {
             Multipart multipart = ((Multipart)body);
             multipart.setParent(this);
             String type = multipart.getContentType();
-            if( mHeader.getFirstHeader( MimeHeader.HEADER_CONTENT_TYPE ) == null || !mHeader.getFirstHeader( MimeHeader.HEADER_CONTENT_TYPE ).contains( type ) ) {
-            	setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
-            }
-            /*
-            if (!type.contains("multipart/signed") && !type.contains( "multipart/encrypted")) {
-                setEncoding(MimeUtil.ENC_8BIT);
-            }
-            */
-        } else if (body instanceof TextBody) {
-        	if( decoded ) {
-        		
-	            String contentType = null;
-	            String mimeType = getMimeType();
-	            if( mimeType.contains( "application/pgp-signature" ) || mimeType.contains( "application/pgp-encrypted" ) || mimeType.contains( "application/octet-stream" ) ) {    
-	            	contentType = mimeType;
-		            setEncoding(MimeUtil.ENC_7BIT);
-	            } else {	
-	            	contentType = String.format("%s; charset=utf-8", mimeType);
-	            	setEncoding(MimeUtil.ENC_QUOTED_PRINTABLE);
-	            }
-	            String name = MimeUtility.getHeaderParameter(getContentType(), "name");
-	            if (name != null) {
-	                contentType += String.format("; name=\"%s\"", name);
-	            }
-	            setHeader(MimeHeader.HEADER_CONTENT_TYPE, contentType);
-        	}
+            setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
+        } else if (body instanceof TextBody ) {
+		    String mimeType = getMimeType();
+			String contentType = null;
+			if( mimeType.contains( "application/pgp-signature" ) || mimeType.contains( "application/pgp-encrypted" ) || mimeType.contains( "application/octet-stream" ) ) {    
+				contentType = mimeType;
+				setEncoding(MimeUtil.ENC_7BIT);
+			} else {	
+			    contentType = String.format("%s; charset=utf-8", mimeType);
+			    setEncoding(MimeUtil.ENC_QUOTED_PRINTABLE);
+			}
+			String name = MimeUtility.getHeaderParameter(getContentType(), "name");
+			if (name != null) {
+				contentType += String.format("; name=\"%s\"", name);
+			}
+			setHeader(MimeHeader.HEADER_CONTENT_TYPE, contentType);
         }
     }
 

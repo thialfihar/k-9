@@ -1,8 +1,11 @@
 
 package com.fsck.k9.mail.internet;
 
+import android.util.Log;
+
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.MessagingException;
+import com.imaeses.squeaky.K9;
 
 import java.io.*;
 
@@ -19,6 +22,7 @@ public class TextBody implements Body {
     private String mBody;
     private String mEncoding;
     private String mCharset = "utf-8";
+    private boolean unencodedOutput = false;
     // Length of the message composed (as opposed to quoted). I don't like the name of this variable and am open to
     // suggestions as to what it should otherwise be. -achen 20101207
     private Integer mComposedMessageLength;
@@ -31,8 +35,9 @@ public class TextBody implements Body {
 
     public void writeTo(OutputStream out) throws IOException, MessagingException {
         if (mBody != null) {
+        	Log.w( K9.LOG_TAG, "Unencoded output: " + unencodedOutput );
             byte[] bytes = mBody.getBytes(mCharset);
-            if (MimeUtil.ENC_8BIT.equalsIgnoreCase(mEncoding) || MimeUtil.ENC_7BIT.equalsIgnoreCase(mEncoding)) {
+            if ( unencodedOutput || MimeUtil.ENC_8BIT.equalsIgnoreCase(mEncoding) || MimeUtil.ENC_7BIT.equalsIgnoreCase(mEncoding)) {
                 out.write(bytes);
             } else {
                 QuotedPrintableOutputStream qp = new QuotedPrintableOutputStream(out, false);
@@ -41,6 +46,10 @@ public class TextBody implements Body {
                 qp.close();
             }
         }
+    }
+    
+    public void setUnencodedOutput( boolean unencodedOutput ) {
+    	this.unencodedOutput = unencodedOutput;
     }
 
     /**

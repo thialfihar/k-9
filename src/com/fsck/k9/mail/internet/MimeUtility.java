@@ -951,6 +951,35 @@ public class MimeUtility {
     public static String foldAndEncode(String s) {
         return s;
     }
+    
+    public static void unencodedBodies( MimeMultipart mp, boolean unencoded ) {
+		
+    	Log.w( K9.LOG_TAG, "DECODE TEXT BODIES" );
+    	
+		int count = mp.getCount();
+		Log.w( K9.LOG_TAG, "THERE ARE " + count + " BODIES" );
+		for( int i=0; i<count; i++ ) {
+		
+			BodyPart bp = mp.getBodyPart( i );
+			Log.w( K9.LOG_TAG, "THIS IS A " + bp.getClass().getName() );
+			if( bp instanceof MimeBodyPart ) {
+				
+				MimeBodyPart mbp = ( MimeBodyPart )bp;
+				Log.w( K9.LOG_TAG, "BODY PART: " + mbp.getBody().getClass().getName() );
+				if( mbp.getBody() instanceof TextBody ) {
+					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
+					( ( TextBody )mbp.getBody() ).setUnencodedOutput( unencoded );
+				} else if( mbp.getBody() instanceof BinaryTempFileBody ) {
+					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
+					( ( BinaryTempFileBody )mbp.getBody() ).setUnencodedOutput( unencoded );
+				} else if( mbp.getBody() instanceof MimeMultipart ) {
+					unencodedBodies( ( MimeMultipart )bp.getBody(), unencoded );
+				}
+				
+			}
+			
+		}
+	}
 
     /**
      * Returns the named parameter of a header field. If name is null the first
@@ -1092,17 +1121,15 @@ public class MimeUtility {
                      */
                     InputStream in = part.getBody().getInputStream();
                     try {
-                        String text = readToString(in, charset);
                         
+                    	String text = readToString(in, charset);
                         TextBody textBody = new TextBody( text );
+                       
                         if( part instanceof MimeBodyPart ) {
                         	
 	                        BinaryTempFileBody btfb = ( BinaryTempFileBody )part.getBody();
-	                        ( ( MimeBodyPart )part ).setDecoded( btfb.isDecoded() );
-	                        if( !btfb.isDecoded() ) {
-	                        	textBody.setEncoding( btfb.getEncoding() );
-	                        }
-	                        
+	                        textBody.setEncoding( btfb.getEncoding() );
+                      
                         }
                         
                         // Replace the body with a TextBody that already contains the decoded text
