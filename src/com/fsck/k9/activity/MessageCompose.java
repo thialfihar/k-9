@@ -243,7 +243,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     /**
      * When sending PGP/MIME signed messages, this is the body part including headers that was actually signed.
      */
-    private MimeBodyPart mSignedTextBodyPart;
+    private MimeBodyPart mSignedPart;
     
     /**
      * Indicates that the source message has been processed at least once and should not
@@ -1495,7 +1495,25 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         	if (mPgpData.getEncryptedData() != null ) {
         		msgBody = buildPgpMimeEncrypted( mPgpData.getEncryptedData() );
         	} else {
+        		
         		msgBody = buildPgpMimeSigned( mPgpData.getSignature() );
+        		
+        		try {
+        			
+        			MimeMessage m = new MimeMessage();
+        			m.setBody( msgBody );
+	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        		m.writeTo( baos );
+	        		
+	        		ByteArrayInputStream bais = new ByteArrayInputStream( baos.toByteArray() );
+	        		m = new MimeMessage( bais );
+	        		
+	        		message.setSignedMultipart( m.getSignedMultipart() );
+	        		
+        		} catch( Exception e ) {
+        			Log.w( K9.LOG_TAG, "Unable to copy signed message for sending" );
+        		}
+        		
         	}
         } else if (mMessageFormat == SimpleMessageFormat.HTML) {
             // HTML message (with alternative text part)
@@ -1962,13 +1980,24 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	            TextBody textBody = buildText(false);
 	        	if( usePgpMime ) {
 	      		
-	        		textBody.setUnencodedOutput( true );
-	        		mSignedTextBodyPart = new MimeBodyPart( textBody );
-	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        		mSignedTextBodyPart.writeTo( baos );
+        			textBody.setRawOutput( true );
 	        		
+	        		if( mAttachments.getChildCount() > 0 ) {
+	        			
+	        			MimeMultipart mp = new MimeMultipart();
+	        			mp.addBodyPart( new MimeBodyPart( textBody ) );
+	        			addAttachmentsToMessage( mp );
+	        			
+	        			mSignedPart = new MimeBodyPart( mp );
+	        			
+	        		} else {
+	        			mSignedPart = new MimeBodyPart( textBody );
+	        		}
+	        		
+	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        		mSignedPart.writeTo( baos );
 	        		byte[] payload = baos.toByteArray();
-	        		Log.w( K9.LOG_TAG, "Text body part to sign:\n" + new String( payload ) );
+	        		Log.w( K9.LOG_TAG, "Part to sign:\n" + new String( payload ) );
 	        		
 	        		String filename = writeToTempFile( payload );
 	        		if( filename != null ) {
@@ -2095,7 +2124,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		String boundary = signedMultipart.generateBoundary();
     		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-md5; protocol=\"application/pgp-signature\"; boundary=" + boundary );
     		
-    		signedMultipart.addBodyPart( mSignedTextBodyPart );
+    		signedMultipart.addBodyPart( mSignedPart );
     		
     		MimeBodyPart sigBodyPart = new MimeBodyPart();
     		sigBodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, String.format( "application/pgp-signature; name=\"%s\"", "signature.asc" ) );
@@ -2263,7 +2292,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      */
     private void onAddAttachment2(final String mime_type) {
         //if (!mAccount.getCryptoProvider().supportsAttachments(this) ) {
-    	if( mAccount.getCryptoProvider().isAvailable( this ) ) {
+    	if( mAccount.getCryptoProvider().isAvailable( this ) && !mAccount.isCryptoUsePgpMime() ) {
             Toast.makeText(this, R.string.attachment_encryption_unsupported, Toast.LENGTH_LONG).show();
         }
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
