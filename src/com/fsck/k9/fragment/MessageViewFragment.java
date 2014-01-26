@@ -651,9 +651,9 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         			String signedData = new String( baos.toByteArray() );
 
         			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
-        			//if( signedData.length() > 2000 ) {
-        			//	Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 2000 ) );
-        			//}
+        			if( signedData.length() > 2000 ) {
+        				Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 2000 ) );
+        			}
 
         			InputStream is = sigPart.getBody().getInputStream();
         			String sig = IOUtils.toString( is, "US-ASCII" );

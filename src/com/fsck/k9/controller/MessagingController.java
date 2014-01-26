@@ -141,6 +141,8 @@ public class MessagingController implements Runnable {
      */
     private static final Folder[] EMPTY_FOLDER_ARRAY = new Folder[0];
 
+    private HashMap<String,MimeMultipart> signedParts = new HashMap<String,MimeMultipart>();
+    
     /**
      * The maximum message size that we'll consider to be "small". A small message is downloaded
      * in full immediately instead of in pieces. Anything over this size will be downloaded in
@@ -3362,11 +3364,18 @@ public class MessagingController implements Runnable {
                             final Message message,
                             MessagingListener listener) {
         try {
+        	
             LocalStore localStore = account.getLocalStore();
             LocalFolder localFolder = localStore.getFolder(account.getOutboxFolderName());
             localFolder.open(Folder.OPEN_MODE_RW);
             localFolder.appendMessages(new Message[] { message });
             Message localMessage = localFolder.getMessage(message.getUid());
+            
+            MimeMultipart signedMultipart = message.getSignedMultipart();
+        	if( signedMultipart != null ) {
+        		signedParts.put( localMessage.getUid(), signedMultipart );
+        	}
+        	
             localMessage.setFlag(Flag.X_DOWNLOADED_FULL, true);
             localFolder.close();
             sendPendingMessages(account, listener);
@@ -3659,7 +3668,17 @@ public class MessagingController implements Runnable {
                         message.setFlag(Flag.X_SEND_IN_PROGRESS, true);
                         if (K9.DEBUG)
                             Log.i(K9.LOG_TAG, "Sending message with UID " + message.getUid());
+                        
+                        MimeMultipart signed = signedParts.get( message.getUid() );
+                        if( signed != null ) {
+                        	
+                        	message.setBody( signed );
+                        	signedParts.remove( message.getUid() );
+                        	
+                        } 
+                        	
                         transport.sendMessage(message);
+                        
                         message.setFlag(Flag.X_SEND_IN_PROGRESS, false);
                         message.setFlag(Flag.SEEN, true);
                         progress++;

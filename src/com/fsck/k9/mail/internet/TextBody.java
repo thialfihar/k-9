@@ -9,6 +9,8 @@ import com.imaeses.squeaky.K9;
 
 import java.io.*;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
 import org.apache.james.mime4j.util.MimeUtil;
 
@@ -22,12 +24,13 @@ public class TextBody implements Body {
     private String mBody;
     private String mEncoding;
     private String mCharset = "utf-8";
-    private boolean unencodedOutput = false;
     // Length of the message composed (as opposed to quoted). I don't like the name of this variable and am open to
     // suggestions as to what it should otherwise be. -achen 20101207
     private Integer mComposedMessageLength;
     // Offset from position 0 where the composed message begins.
     private Integer mComposedMessageOffset;
+    private boolean unencodedOutput = false;
+    private boolean rawOutput = false;
 
     public TextBody(String body) {
         this.mBody = body;
@@ -35,10 +38,16 @@ public class TextBody implements Body {
 
     public void writeTo(OutputStream out) throws IOException, MessagingException {
         if (mBody != null) {
-        	Log.w( K9.LOG_TAG, "Unencoded output: " + unencodedOutput );
             byte[] bytes = mBody.getBytes(mCharset);
-            if ( unencodedOutput || MimeUtil.ENC_8BIT.equalsIgnoreCase(mEncoding) || MimeUtil.ENC_7BIT.equalsIgnoreCase(mEncoding)) {
+            if (rawOutput || MimeUtil.ENC_8BIT.equalsIgnoreCase(mEncoding) || MimeUtil.ENC_7BIT.equalsIgnoreCase(mEncoding)) {
                 out.write(bytes);
+            } else if( unencodedOutput ){
+            	
+            	InputStream in = new QuotedPrintableInputStream( getInputStream() );
+            	IOUtils.copy( in, out );
+            	out.flush();
+            	out.close();
+            	
             } else {
                 QuotedPrintableOutputStream qp = new QuotedPrintableOutputStream(out, false);
                 qp.write(bytes);
@@ -51,7 +60,11 @@ public class TextBody implements Body {
     public void setUnencodedOutput( boolean unencodedOutput ) {
     	this.unencodedOutput = unencodedOutput;
     }
-
+    
+    public void setRawOutput( boolean rawOutput ) {
+    	this.rawOutput = rawOutput;
+    }
+    
     /**
      * Get the text of the body in it's unencoded format.
      * @return

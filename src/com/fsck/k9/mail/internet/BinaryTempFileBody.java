@@ -4,6 +4,8 @@ import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.filter.Base64OutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.james.mime4j.codec.Base64InputStream;
+import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
 import org.apache.james.mime4j.util.MimeUtil;
 
@@ -17,8 +19,18 @@ import java.io.*;
  */
 public class BinaryTempFileBody implements Body {
     private static File mTempDirectory;
-    private boolean unencodedOutput = false;
-
+    /*
+     * Whether we have a body already encoded and it should be decoded on output.
+     */
+    private boolean unencodedOutput = false; 
+    
+    /*
+     * Whether we should just write our body out without any processing on the <b>next</b>
+     * call to writeTo() only. We only need rawOutput for incoming pgp/mime signed message
+     * parts when we initially store them.
+     */
+    private boolean rawOutput = false;
+    
     private File mFile;
 
     String mEncoding = null;
@@ -29,6 +41,10 @@ public class BinaryTempFileBody implements Body {
 
     public void setUnencodedOutput( boolean unencodedOutput ) {
     	this.unencodedOutput = unencodedOutput;
+    }
+    
+    public void setRawOutput( boolean rawOutput ) {
+    	this.rawOutput = rawOutput;
     }
     
     public void setEncoding(String encoding) throws MessagingException {
@@ -79,14 +95,24 @@ public class BinaryTempFileBody implements Body {
         InputStream in = getInputStream();
         try {
             boolean closeStream = false;
-            if( !unencodedOutput ) {
-	            if (MimeUtil.isBase64Encoding(mEncoding)) {
-	                out = new Base64OutputStream(out);
-	                closeStream = true;
-	            } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
-	                out = new QuotedPrintableOutputStream(out, false);
-	                closeStream = true;
+            if( !rawOutput ) {
+	            if( unencodedOutput ) {
+	            	if (MimeUtil.isBase64Encoding(mEncoding)) {
+	            		in = new Base64InputStream( in );
+	            	} else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
+	            		in = new QuotedPrintableInputStream( in );
+	            	}
+	            } else {
+		            if (MimeUtil.isBase64Encoding(mEncoding)) {
+		                out = new Base64OutputStream(out);
+		                closeStream = true;
+		            } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
+		                out = new QuotedPrintableOutputStream(out, false);
+		                closeStream = true;
+		            }
 	            }
+            } else {
+            	rawOutput = false;
             }
             try {
                 IOUtils.copy(in, out);

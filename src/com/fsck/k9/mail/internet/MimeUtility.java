@@ -957,7 +957,6 @@ public class MimeUtility {
     	Log.w( K9.LOG_TAG, "DECODE TEXT BODIES" );
     	
 		int count = mp.getCount();
-		Log.w( K9.LOG_TAG, "THERE ARE " + count + " BODIES" );
 		for( int i=0; i<count; i++ ) {
 		
 			BodyPart bp = mp.getBodyPart( i );
@@ -967,8 +966,8 @@ public class MimeUtility {
 				MimeBodyPart mbp = ( MimeBodyPart )bp;
 				Log.w( K9.LOG_TAG, "BODY PART: " + mbp.getBody().getClass().getName() );
 				if( mbp.getBody() instanceof TextBody ) {
-					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
-					( ( TextBody )mbp.getBody() ).setUnencodedOutput( unencoded );
+					//Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
+					//( ( TextBody )mbp.getBody() ).setUnencodedOutput( unencoded );
 				} else if( mbp.getBody() instanceof BinaryTempFileBody ) {
 					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
 					( ( BinaryTempFileBody )mbp.getBody() ).setUnencodedOutput( unencoded );

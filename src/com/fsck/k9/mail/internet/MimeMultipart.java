@@ -119,11 +119,7 @@ public class MimeMultipart extends Multipart {
             writer.write("\r\n");
             writer.flush();
             bodyPart.writeTo(out);
-            
-            Body b = bodyPart.getBody();
-            if( !( b instanceof BinaryTempFileBody ) || !( ( BinaryTempFileBody )b ).getEncoding().equals( MimeUtil.ENC_BASE64 ) ) {
-            	writer.write("\r\n");
-            }
+            writer.write("\r\n");
         }
 
         writer.write("--");

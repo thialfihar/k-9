@@ -90,6 +90,7 @@ public class MimeBodyPart extends BodyPart {
 			} else {
 			    contentType = String.format("%s; charset=utf-8", mimeType);
 			    setEncoding(MimeUtil.ENC_QUOTED_PRINTABLE);
+			    ( ( TextBody )body ).setRawOutput( true );
 			}
 			String name = MimeUtility.getHeaderParameter(getContentType(), "name");
 			if (name != null) {
