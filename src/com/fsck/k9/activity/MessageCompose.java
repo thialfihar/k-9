@@ -1976,8 +1976,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	            TextBody textBody = buildText(false);
 	        	if( usePgpMime ) {
 
-        			textBody.setRawOutput( true );
-
 	        		if( mAttachments.getChildCount() > 0 ) {
 
 	        			MimeMultipart mp = new MimeMultipart();
@@ -2027,6 +2025,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	        			MimeMessage m = new MimeMessage();
 	        			m.setBody( buildPgpMimeSigned( mPgpData.getSignature() ) );
 	        			m.writeTo( baos );
+
+		        		mPgpData.setSignatureKeyId( 0L );
 
 	        		} else if (mMessageFormat == SimpleMessageFormat.HTML) {
 	        	        // HTML message (with alternative text part)
@@ -2117,8 +2117,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		signedMultipart = new MimeMultipart();
     		String boundary = signedMultipart.generateBoundary();
     		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-md5; protocol=\"application/pgp-signature\"; boundary=" + boundary );
-
     		signedMultipart.addBodyPart( mSignedPart );
+
+    		MimeUtility.rawBodies( signedMultipart, true );
 
     		MimeBodyPart sigBodyPart = new MimeBodyPart();
     		sigBodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, String.format( "application/pgp-signature; name=\"%s\"", "signature.asc" ) );
