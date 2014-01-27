@@ -952,9 +952,9 @@ public class MimeUtility {
         return s;
     }
     
-    public static void unencodedBodies( MimeMultipart mp, boolean unencoded ) {
+    public static void decodeBodies( MimeMultipart mp, boolean unencoded ) {
 		
-    	Log.w( K9.LOG_TAG, "DECODE TEXT BODIES" );
+    	Log.w( K9.LOG_TAG, "DECODE BODIES" );
     	
 		int count = mp.getCount();
 		for( int i=0; i<count; i++ ) {
@@ -967,18 +967,49 @@ public class MimeUtility {
 				Log.w( K9.LOG_TAG, "BODY PART: " + mbp.getBody().getClass().getName() );
 				if( mbp.getBody() instanceof TextBody ) {
 					//Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
+					//( ( TextBody )mbp.getBody() ).setRawOutput( false );
 					//( ( TextBody )mbp.getBody() ).setUnencodedOutput( unencoded );
 				} else if( mbp.getBody() instanceof BinaryTempFileBody ) {
 					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
+					( ( BinaryTempFileBody )mbp.getBody() ).setRawOutput( false );
 					( ( BinaryTempFileBody )mbp.getBody() ).setUnencodedOutput( unencoded );
 				} else if( mbp.getBody() instanceof MimeMultipart ) {
-					unencodedBodies( ( MimeMultipart )bp.getBody(), unencoded );
+					decodeBodies( ( MimeMultipart )bp.getBody(), unencoded );
 				}
 				
 			}
 			
 		}
 	}
+    
+    public static void rawBodies( MimeMultipart mp, boolean raw ) {
+    	
+    	Log.w( K9.LOG_TAG, "RAW BODIES" );
+    	
+		int count = mp.getCount();
+		for( int i=0; i<count; i++ ) {
+		
+			BodyPart bp = mp.getBodyPart( i );
+			Log.w( K9.LOG_TAG, "THIS IS A " + bp.getClass().getName() );
+			if( bp instanceof MimeBodyPart ) {
+				
+				MimeBodyPart mbp = ( MimeBodyPart )bp;
+				Log.w( K9.LOG_TAG, "BODY PART: " + mbp.getBody().getClass().getName() );
+				if( mbp.getBody() instanceof TextBody ) {
+					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + raw );
+					( ( TextBody )mbp.getBody() ).setRawOutput( raw );
+				} else if( mbp.getBody() instanceof BinaryTempFileBody ) {
+					Log.w( K9.LOG_TAG, "SETTING RAW OUTPUT TO: " + raw );
+					( ( BinaryTempFileBody )mbp.getBody() ).setRawOutput( raw );
+				} else if( mbp.getBody() instanceof MimeMultipart ) {
+					rawBodies( ( MimeMultipart )bp.getBody(), raw );
+				}
+				
+			}
+			
+		}
+		
+    }
 
     /**
      * Returns the named parameter of a header field. If name is null the first

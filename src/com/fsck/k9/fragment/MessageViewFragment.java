@@ -615,7 +615,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     	
     }
     
-    private boolean handlePgpMimeSigned( Account account, MimeMultipart mp ) {
+    private boolean handlePgpMimeSigned( Account account, MimeMultipart mp, boolean decode ) {
     	
     	boolean isPgpMime = false;
  
@@ -626,7 +626,9 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 		
     	if( !mMessageView.haveHandledPgpMimeSigned() && count == 2 ) {
  
-    		MimeUtility.unencodedBodies( mp, true );
+    		if( decode ) {
+    			MimeUtility.decodeBodies( mp, true );
+    		}
     		
         	try {
         		
@@ -668,8 +670,10 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         		Log.e( K9.LOG_TAG, "Error processing message parts", e );
         	}
         	
-    		MimeUtility.unencodedBodies( mp, false );
-    		
+        	if( decode ) {
+        		MimeUtility.decodeBodies( mp, false );
+        	}
+        	
     	}
     	
     	return isPgpMime;
@@ -758,7 +762,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     			Log.e( K9.LOG_TAG, new String(baos.toByteArray()));
                     			
                     			MimeMultipart signedMultipart = message.getSignedMultipart();
-                    			isPgpMime = handlePgpMimeSigned( account, signedMultipart != null ? signedMultipart : mp );
+                    			isPgpMime = handlePgpMimeSigned( account, signedMultipart != null ? signedMultipart : mp, true );
                     			
                     		}
                     		
@@ -947,8 +951,8 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             	
             	if( msgPart != null ) {
             		
-            		//String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-            		//msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) ); 
+            		String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
+            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) ); 
 		
             		String text = MimeUtility.getTextFromPart( msgPart );
                 	if( text.trim().startsWith( "<pre class=\"k9mail" ) ) {
@@ -1006,7 +1010,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 	            			MimeMultipart mp = ( MimeMultipart )mimeMsg.getBody();
 	            			
 	            			// in case a decrypted PGP/MIME message revealed a signed message
-	            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp ) ) {
+	            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp, false ) ) {
 		    				
 	            				mPgpSignedMessage = decryptedMsg;
 	            				return;
@@ -1020,11 +1024,11 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 		    			
 	            			if( p != null ) {
 	            				
-	            				//String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-	                    		//p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) ); 
+	            				String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
+	                    		p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) ); 
 	        		
-	                    		//String text = MimeUtility.getTextFromPart( p );
-	            				pgpData.setDecryptedData( MimeUtility.getTextFromPart( p ) );
+	                    		String text = MimeUtility.getTextFromPart( p );
+	            				pgpData.setDecryptedData( text );
 	            				
 	            			}
 		    			
