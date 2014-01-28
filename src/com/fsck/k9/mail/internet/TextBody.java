@@ -29,7 +29,6 @@ public class TextBody implements Body {
     private Integer mComposedMessageLength;
     // Offset from position 0 where the composed message begins.
     private Integer mComposedMessageOffset;
-    private boolean unencodedOutput = false;
     private boolean rawOutput = false;
 
     public TextBody(String body) {
@@ -41,13 +40,6 @@ public class TextBody implements Body {
             byte[] bytes = mBody.getBytes(mCharset);
             if (rawOutput || MimeUtil.ENC_8BIT.equalsIgnoreCase(mEncoding) || MimeUtil.ENC_7BIT.equalsIgnoreCase(mEncoding)) {
                 out.write(bytes);
-            } else if( unencodedOutput ){
-            	
-            	InputStream in = new QuotedPrintableInputStream( getInputStream() );
-            	IOUtils.copy( in, out );
-            	out.flush();
-            	out.close();
-            	
             } else {
                 QuotedPrintableOutputStream qp = new QuotedPrintableOutputStream(out, false);
                 qp.write(bytes);
@@ -57,12 +49,12 @@ public class TextBody implements Body {
         }
     }
     
-    public void setUnencodedOutput( boolean unencodedOutput ) {
-    	this.unencodedOutput = unencodedOutput;
-    }
-    
     public void setRawOutput( boolean rawOutput ) {
     	this.rawOutput = rawOutput;
+    }
+    
+    public boolean isRawOutput() {
+    	return rawOutput;
     }
     
     /**

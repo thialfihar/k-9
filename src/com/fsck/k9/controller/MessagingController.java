@@ -1437,7 +1437,6 @@ public class MessagingController implements Runnable {
 
 	private void setSignedMultipart( Message message, LocalFolder localFolder ) {
 		
-		Log.w( K9.LOG_TAG, "!!!!!!!!!!!      setSignedMultipart        !!!!!!!!!!" );
         try {
         	
     		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1702,11 +1701,12 @@ public class MessagingController implements Runnable {
                             progress.incrementAndGet();
                         }
                     });
-                    
-                    orig.setUid( localMessage.getUid() );
-                    
+
                     if( orig != null ) {
+                    	
+                    	orig.setUid( localMessage.getUid() );
                     	setSignedMultipart( orig, localFolder );
+                    	
                     }
                     
                     // Increment the number of "new messages" if the newly downloaded message is
@@ -1837,10 +1837,11 @@ public class MessagingController implements Runnable {
             	// Store the updated message locally
                 localFolder.appendMessages(new Message[] { message });
                 
-                orig.setUid( message.getUid() );
-                
                 if( orig != null ) {
+                	
+                	orig.setUid( message.getUid() ); 
                 	setSignedMultipart( orig, localFolder );
+                
                 }
             	
             	/*
