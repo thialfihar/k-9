@@ -753,10 +753,6 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     		} else if( mp.getContentType().contains( "multipart/signed" ) &&
                     				MimeUtility.findFirstPartByMimeType( message, "application/pgp-signature" ) != null ) {
                     	      
-                    			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    			mMessage.writeTo(baos);
-                    			Log.e( K9.LOG_TAG, new String(baos.toByteArray()));
-                    			
                     			MimeMultipart signedMultipart = message.getSignedMultipart();
                     			isPgpMime = handlePgpMimeSigned( account, signedMultipart != null ? signedMultipart : mp );
                     			

@@ -2129,8 +2129,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-md5; protocol=\"application/pgp-signature\"; boundary=" + boundary );
     		signedMultipart.addBodyPart( mSignedPart );
     		
-    		MimeUtility.rawBodies( signedMultipart, true );
-    		
     		MimeBodyPart sigBodyPart = new MimeBodyPart();
     		sigBodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, String.format( "application/pgp-signature; name=\"%s\"", "signature.asc" ) );
     		sigBodyPart.addHeader( MimeHeader.HEADER_CONTENT_DISPOSITION, String.format(
