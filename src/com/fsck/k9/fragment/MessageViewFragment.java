@@ -616,7 +616,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
     }
 
-    private boolean handlePgpMimeSigned( Account account, MimeMultipart mp, boolean decode ) {
+    private boolean handlePgpMimeSigned( Account account, MimeMultipart mp ) {
 
     	boolean isPgpMime = false;
 
@@ -627,9 +627,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
     	if( !mMessageView.haveHandledPgpMimeSigned() && count == 2 ) {
 
-    		if( decode ) {
-    			MimeUtility.decodeBodies( mp, true );
-    		}
+    		MimeUtility.rawBodies( mp, true );
 
         	try {
 
@@ -671,9 +669,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         		Log.e( K9.LOG_TAG, "Error processing message parts", e );
         	}
 
-        	if( decode ) {
-        		MimeUtility.decodeBodies( mp, false );
-        	}
+        	MimeUtility.rawBodies( mp, false );
 
     	}
 
@@ -762,7 +758,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
                     			Log.e( K9.LOG_TAG, new String(baos.toByteArray()));
 
                     			MimeMultipart signedMultipart = message.getSignedMultipart();
-                    			isPgpMime = handlePgpMimeSigned( account, signedMultipart != null ? signedMultipart : mp, true );
+                    			isPgpMime = handlePgpMimeSigned( account, signedMultipart != null ? signedMultipart : mp );
 
                     		}
 
@@ -1002,7 +998,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 	            			MimeMultipart mp = ( MimeMultipart )mimeMsg.getBody();
 
 	            			// in case a decrypted PGP/MIME message revealed a signed message
-	            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp, false ) ) {
+	            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp ) ) {
 
 	            				mPgpSignedMessage = decryptedMsg;
 	            				return;

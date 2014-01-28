@@ -1859,6 +1859,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     public void onEncryptionKeySelectionDone() {
+    	Log.w( K9.LOG_TAG, "There are " + mPgpData.getEncryptionKeys().length + " encryption keys" );
         if (mPgpData.hasEncryptionKeys()) {
             onSend();
         } else {
@@ -1951,7 +1952,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             emails.append(mIdentity.getEmail());
 
             mPreventDraftSaving = true;
-            if (!crypto.selectEncryptionKeys(MessageCompose.this, emails.toString(), mPgpData)) {
+            if (!crypto.selectEncryptionKeys(this, emails.toString(), mPgpData)) {
                 mPreventDraftSaving = false;
             }
             return;
@@ -1965,50 +1966,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     	boolean usePgpMime = mAccount.isCryptoUsePgpMime();
 
     	try {
-	        if( mPgpData.hasSignatureKey() && (  usePgpMime && mPgpData.getSignature() == null ) ||
-	        		                          ( !usePgpMime && mPgpData.getEncryptedData() == null ) ) {
 
-	        	Log.i( K9.LOG_TAG, "I have a signature to calculate" );
-
-	            mPreventDraftSaving = true;
-
-	        	boolean success = false;
-	            TextBody textBody = buildText(false);
-	        	if( usePgpMime ) {
-
-	        		if( mAttachments.getChildCount() > 0 ) {
-
-	        			MimeMultipart mp = new MimeMultipart();
-	        			mp.addBodyPart( new MimeBodyPart( textBody ) );
-	        			addAttachmentsToMessage( mp );
-
-	        			mSignedPart = new MimeBodyPart( mp );
-
-	        		} else {
-	        			mSignedPart = new MimeBodyPart( textBody );
-	        		}
-
-	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        		mSignedPart.writeTo( baos );
-	        		byte[] payload = baos.toByteArray();
-	        		Log.w( K9.LOG_TAG, "Part to sign:\n" + new String( payload ) );
-
-	        		String filename = writeToTempFile( payload );
-	        		if( filename != null ) {
-	        			success = crypto.sign(this, Uri.fromFile( new File( filename) ).toString(), mPgpData);
-	        		}
-
-	        	} else {
-	                success = crypto.encrypt(this, textBody.getText(), mPgpData);
-	        	}
-
-	        	if( !success ) {
-	                mPreventDraftSaving = false;
-	            }
-
-	            return;
-
-	        } else if( mPgpData.hasEncryptionKeys() && mPgpData.getEncryptedData() == null ) {
+    		if( mPgpData.hasEncryptionKeys() && mPgpData.getEncryptedData() == null ) {
 
 	        	Log.i( K9.LOG_TAG, "I am going to encrypt the message" );
 
@@ -2020,15 +1979,16 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
+	        		/*
 	        		if( mPgpData.hasSignatureKey() ) {
 
 	        			MimeMessage m = new MimeMessage();
 	        			m.setBody( buildPgpMimeSigned( mPgpData.getSignature() ) );
 	        			m.writeTo( baos );
 
-		        		mPgpData.setSignatureKeyId( 0L );
-
 	        		} else if (mMessageFormat == SimpleMessageFormat.HTML) {
+	        		*/
+	        		if (mMessageFormat == SimpleMessageFormat.HTML) {
 	        	        // HTML message (with alternative text part)
 
 	        	        // This is the compiled MIME part for an HTML message.
@@ -2083,7 +2043,51 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
 	        	return;
 
+	        } else if( mPgpData.getEncryptionKeys() == null && mPgpData.hasSignatureKey() && (  usePgpMime && mPgpData.getSignature() == null ) ||
+	        		                          		 										 ( !usePgpMime && mPgpData.getEncryptedData() == null ) ) {
+
+	        	Log.i( K9.LOG_TAG, "I have a signature to calculate" );
+
+	            mPreventDraftSaving = true;
+
+	        	boolean success = false;
+	            TextBody textBody = buildText(false);
+	        	if( usePgpMime ) {
+
+	        		if( mAttachments.getChildCount() > 0 ) {
+
+	        			MimeMultipart mp = new MimeMultipart();
+	        			mp.addBodyPart( new MimeBodyPart( textBody ) );
+	        			addAttachmentsToMessage( mp );
+
+	        			mSignedPart = new MimeBodyPart( mp );
+
+	        		} else {
+	        			mSignedPart = new MimeBodyPart( textBody );
+	        		}
+
+	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        		mSignedPart.writeTo( baos );
+	        		byte[] payload = baos.toByteArray();
+	        		Log.w( K9.LOG_TAG, "Part to sign:\n" + new String( payload ) );
+
+	        		String filename = writeToTempFile( payload );
+	        		if( filename != null ) {
+	        			success = crypto.sign(this, Uri.fromFile( new File( filename) ).toString(), mPgpData);
+	        		}
+
+	        	} else {
+	                success = crypto.encrypt(this, textBody.getText(), mPgpData);
+	        	}
+
+	        	if( !success ) {
+	                mPreventDraftSaving = false;
+	            }
+
+	            return;
+
 	        }
+
     	} catch( Exception e ) {
 
         	Log.e( K9.LOG_TAG, "Unable to send message", e );

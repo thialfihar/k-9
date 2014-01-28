@@ -952,36 +952,6 @@ public class MimeUtility {
         return s;
     }
     
-    public static void decodeBodies( MimeMultipart mp, boolean unencoded ) {
-		
-    	Log.w( K9.LOG_TAG, "DECODE BODIES" );
-    	
-		int count = mp.getCount();
-		for( int i=0; i<count; i++ ) {
-		
-			BodyPart bp = mp.getBodyPart( i );
-			Log.w( K9.LOG_TAG, "THIS IS A " + bp.getClass().getName() );
-			if( bp instanceof MimeBodyPart ) {
-				
-				MimeBodyPart mbp = ( MimeBodyPart )bp;
-				Log.w( K9.LOG_TAG, "BODY PART: " + mbp.getBody().getClass().getName() );
-				if( mbp.getBody() instanceof TextBody ) {
-					//Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
-					//( ( TextBody )mbp.getBody() ).setRawOutput( false );
-					//( ( TextBody )mbp.getBody() ).setUnencodedOutput( unencoded );
-				} else if( mbp.getBody() instanceof BinaryTempFileBody ) {
-					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + unencoded );
-					( ( BinaryTempFileBody )mbp.getBody() ).setRawOutput( false );
-					( ( BinaryTempFileBody )mbp.getBody() ).setUnencodedOutput( unencoded );
-				} else if( mbp.getBody() instanceof MimeMultipart ) {
-					decodeBodies( ( MimeMultipart )bp.getBody(), unencoded );
-				}
-				
-			}
-			
-		}
-	}
-    
     public static void rawBodies( MimeMultipart mp, boolean raw ) {
     	
     	Log.w( K9.LOG_TAG, "RAW BODIES" );
@@ -1008,7 +978,7 @@ public class MimeUtility {
 			}
 			
 		}
-		
+    	
     }
 
     /**

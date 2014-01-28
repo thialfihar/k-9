@@ -19,11 +19,7 @@ import java.io.*;
  */
 public class BinaryTempFileBody implements Body {
     private static File mTempDirectory;
-    /*
-     * Whether we have a body already encoded and it should be decoded on output.
-     */
-    private boolean unencodedOutput = false; 
-    
+   
     /*
      * Whether we should just write our body out without any processing on the <b>next</b>
      * call to writeTo() only. We only need rawOutput for incoming pgp/mime signed message
@@ -39,12 +35,12 @@ public class BinaryTempFileBody implements Body {
         mTempDirectory = tempDirectory;
     }
 
-    public void setUnencodedOutput( boolean unencodedOutput ) {
-    	this.unencodedOutput = unencodedOutput;
-    }
-    
     public void setRawOutput( boolean rawOutput ) {
     	this.rawOutput = rawOutput;
+    }
+    
+    public boolean isRawOutput() {
+    	return rawOutput;
     }
     
     public void setEncoding(String encoding) throws MessagingException {
@@ -96,24 +92,16 @@ public class BinaryTempFileBody implements Body {
         try {
             boolean closeStream = false;
             if( !rawOutput ) {
-	            if( unencodedOutput ) {
-	            	if (MimeUtil.isBase64Encoding(mEncoding)) {
-	            		in = new Base64InputStream( in );
-	            	} else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
-	            		in = new QuotedPrintableInputStream( in );
-	            	}
-	            } else {
-		            if (MimeUtil.isBase64Encoding(mEncoding)) {
-		                out = new Base64OutputStream(out);
-		                closeStream = true;
-		            } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
-		                out = new QuotedPrintableOutputStream(out, false);
-		                closeStream = true;
-		            }
-	            }
-            } else {
+            	if (MimeUtil.isBase64Encoding(mEncoding)) {
+            		out = new Base64OutputStream(out);
+		            closeStream = true;
+		        } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
+		            out = new QuotedPrintableOutputStream(out, false);
+		            closeStream = true;
+		        }
+            } /*else {
             	rawOutput = false;
-            }
+            }*/
             try {
                 IOUtils.copy(in, out);
             } finally {
