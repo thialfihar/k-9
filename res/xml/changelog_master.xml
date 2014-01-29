@@ -10,6 +10,8 @@
 <changelog>
     <release version="4.701.02" versioncode="19004">
         <change>Support for sending PGP/MIME messages (go to Settings to disable)</change>
+        <change>You will have to upgrade PGP KeyRing to version 1.7 to send PGP/MIME messages</change>
+        <change>Squeaky Mail has changed the way it stores unencrypted, signed messages. You may have to reload existing unencrypted, signed messages for them to verify correctly. Sorry for the inconvenience!</change>
     </release>
     <release version="4.701.01" versioncode="19003" >
         <change>Overhauled how we do message view scrolling to fix a KitKat issue. Thanks to Joe Steele!</change>

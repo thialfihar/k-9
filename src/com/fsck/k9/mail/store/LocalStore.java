@@ -27,6 +27,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.james.mime4j.codec.Base64InputStream;
+import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
 import org.apache.james.mime4j.util.MimeUtil;
 
@@ -63,6 +65,7 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.filter.Base64OutputStream;
+import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mail.internet.MimeBodyPart;
 import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeMessage;
@@ -2834,7 +2837,23 @@ public class LocalStore extends Store implements Serializable {
                                      * If the attachment has a body we're expected to save it into the local store
                                      * so we copy the data into a cached attachment file.
                                      */
-                                    InputStream in = attachment.getBody().getInputStream();
+                                	Body b = attachment.getBody();
+                                	InputStream in = b.getInputStream();
+                                	if( b instanceof BinaryTempFileBody ) {
+                                		
+                                		BinaryTempFileBody btfp = ( BinaryTempFileBody )b;
+                                		if( btfp.isRawOutput() ) {
+                                			
+                                			Log.w( K9.LOG_TAG, "This is a multipart signed attachment; let's decode it now" );
+                                			String contentEncoding = btfp.getEncoding();
+                                			if (MimeUtil.ENC_QUOTED_PRINTABLE.equalsIgnoreCase(contentEncoding)) {
+                                                in = new QuotedPrintableInputStream(in);
+                                            } else if (MimeUtil.ENC_BASE64.equalsIgnoreCase(contentEncoding)) {
+                                                in = new Base64InputStream(in);
+                                            }
+                                			
+                                		}
+                                	} 
                                     try {
                                         tempAttachmentFile = File.createTempFile("att", null, attachmentDirectory);
                                         FileOutputStream out = new FileOutputStream(tempAttachmentFile);

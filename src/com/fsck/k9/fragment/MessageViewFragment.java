@@ -933,10 +933,9 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         		
             }
             	
-            Part msgPart = null;
             try {
             	
-            	msgPart = MimeUtility.findFirstPartByMimeType( m, "text/html" );
+            	Part msgPart = MimeUtility.findFirstPartByMimeType( m, "text/html" );
             	if( msgPart == null ) {
             		msgPart = MimeUtility.findFirstPartByMimeType( m, "text/plain" );
             	}
@@ -1016,6 +1015,8 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 		    			
 	            			if( p != null ) {
 	            				
+	            				
+	            				// is this necessary?
 	            				String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
 	                    		p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) ); 
 	        		
