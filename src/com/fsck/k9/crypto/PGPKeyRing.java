@@ -850,6 +850,7 @@ public class PGPKeyRing extends CryptoProvider {
     @Override
     public boolean supportsPgpMimeReceive( Context context ) {
 
+    	/*
     	boolean supportsFloatingSigs = false;
 
     	if( isAvailable( context ) ) {
@@ -873,6 +874,8 @@ public class PGPKeyRing extends CryptoProvider {
     	}
 
         return supportsFloatingSigs;
+        */
+    	return supportsPgpMimeSend( context );
 
     }
 

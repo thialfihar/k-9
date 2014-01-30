@@ -1474,7 +1474,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // HTML mode or not.  Should probably fix this so we don't mix up html and text parts.
         TextBody textBody = null;
         Body msgBody = null;
-        boolean usePgpMime = mAccount.isCryptoUsePgpMime();
+        boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
         if (mPgpData.getEncryptedData() != null && !usePgpMime ) {
             String text = mPgpData.getEncryptedData();
             textBody = new TextBody(text);
@@ -1859,7 +1859,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     public void onEncryptionKeySelectionDone() {
-    	Log.w( K9.LOG_TAG, "There are " + mPgpData.getEncryptionKeys().length + " encryption keys" );
         if (mPgpData.hasEncryptionKeys()) {
             onSend();
         } else {
@@ -1880,7 +1879,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     			IOUtils.copy( is, baos );
 
     			String encrypted = new String( baos.toByteArray() );
-    			Log.e( K9.LOG_TAG, "Encrypted:\n" + encrypted );
+    			//Log.w( K9.LOG_TAG, "Encrypted:\n" + encrypted );
 
     			mPgpData.setEncryptedData( encrypted );
     			mPgpData.setFilename( null );
@@ -1904,7 +1903,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		}
     	}
 
-        if (mPgpData.getEncryptedData() != null || ( mPgpData.getSignature() != null && mAccount.isCryptoUsePgpMime() ) ) {
+        if (mPgpData.getEncryptedData() != null || ( mPgpData.getSignature() != null && mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this ) ) ) {
             onSend();
         } else {
             Toast.makeText(this, R.string.send_aborted, Toast.LENGTH_SHORT).show();
@@ -1963,7 +1962,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // When using PGP/MIME, however, we must first package the signature in MIME format before
         // then applying the encryption, which is subsequently packaged in its own MIME format.
         // In this case, we must keep track of the signature data and the encrypted data separately.
-    	boolean usePgpMime = mAccount.isCryptoUsePgpMime();
+    	boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
 
     	try {
 
@@ -2069,7 +2068,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        		mSignedPart.writeTo( baos );
 	        		byte[] payload = baos.toByteArray();
-	        		Log.w( K9.LOG_TAG, "Part to sign:\n" + new String( payload ) );
+	        		//Log.w( K9.LOG_TAG, "Part to sign:\n" + new String( payload ) );
 
 	        		String filename = writeToTempFile( payload );
 	        		if( filename != null ) {
@@ -2113,7 +2112,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
     private MimeMultipart buildPgpMimeSigned( String signature ) {
 
-    	Log.e(K9.LOG_TAG, "signature: " + signature );
+    	//Log.w(K9.LOG_TAG, "signature: " + signature );
 
     	MimeMultipart signedMultipart = null;
     	try {
@@ -2289,7 +2288,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      */
     private void onAddAttachment2(final String mime_type) {
         //if (!mAccount.getCryptoProvider().supportsAttachments(this) ) {
-    	if( mAccount.getCryptoProvider().isAvailable( this ) && !mAccount.isCryptoUsePgpMime() ) {
+    	CryptoProvider crypto = mAccount.getCryptoProvider();
+    	if( crypto.isAvailable( this ) && ( !mAccount.isCryptoUsePgpMime() || !crypto.supportsPgpMimeSend( this ) ) ) {
             Toast.makeText(this, R.string.attachment_encryption_unsupported, Toast.LENGTH_LONG).show();
         }
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);

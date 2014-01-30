@@ -1444,7 +1444,7 @@ public class MessagingController implements Runnable {
 			message.writeTo( baos );
 				
 	    	String signedContent = new String( baos.toByteArray() );	
-	    	Log.w( K9.LOG_TAG, "Signed content:\n" + signedContent );
+	    	//Log.w( K9.LOG_TAG, "Signed content:\n" + signedContent );
 	    		
 	    	LocalMessage localMessage = localFolder.getMessage(message.getUid());
 	    	localMessage.setSignedMultipartDb( signedContent );

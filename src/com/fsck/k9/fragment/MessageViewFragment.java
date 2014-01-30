@@ -649,11 +649,12 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         			msgPart.writeTo( baos );
 
         			String signedData = new String( baos.toByteArray() );
-
+        			/*
         			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
         			if( signedData.length() > 2000 ) {
         				Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 2000 ) );
         			}
+        			*/
 
         			InputStream is = sigPart.getBody().getInputStream();
         			String sig = IOUtils.toString( is, "US-ASCII" );
@@ -967,7 +968,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
             		is.close();
             		f.delete();
 
-            		Log.w( K9.LOG_TAG, "Decrypted msg: " + decryptedMsg );
+            		//Log.w( K9.LOG_TAG, "Decrypted msg: " + decryptedMsg );
 
             		if( decryptedMsg != null && decryptedMsg.length() > 0 ) {
 

@@ -1885,7 +1885,7 @@ public class LocalStore extends Store implements Serializable {
                                             		String multipartSignedText = cursor.getString( 3 );
                                             		if( multipartSignedText != null ) {
 
-                                            			Log.w( K9.LOG_TAG, "Stored multipart signed text:\n" + multipartSignedText );
+                                            			//Log.w( K9.LOG_TAG, "Stored multipart signed text:\n" + multipartSignedText );
                                             			ByteArrayInputStream bais = new ByteArrayInputStream( multipartSignedText.getBytes() );
                                             			MimeMessage m = new MimeMessage( bais );
                                             			MimeMultipart signed = ( MimeMultipart )m.getBody();
@@ -2841,20 +2841,20 @@ public class LocalStore extends Store implements Serializable {
                                 	Body b = attachment.getBody();
                                 	InputStream in = b.getInputStream();
                                 	if( b instanceof BinaryTempFileBody ) {
-                                		
+
                                 		BinaryTempFileBody btfp = ( BinaryTempFileBody )b;
                                 		if( btfp.isRawOutput() ) {
-                                			
-                                			Log.w( K9.LOG_TAG, "This is a multipart signed attachment; let's decode it now" );
+
+                                			// We preserved the original bytes of the attachment because it was signed; let's decode it (for viewing) now
                                 			String contentEncoding = btfp.getEncoding();
                                 			if (MimeUtil.ENC_QUOTED_PRINTABLE.equalsIgnoreCase(contentEncoding)) {
                                                 in = new QuotedPrintableInputStream(in);
                                             } else if (MimeUtil.ENC_BASE64.equalsIgnoreCase(contentEncoding)) {
                                                 in = new Base64InputStream(in);
                                             }
-                                			
+
                                 		}
-                                	} 
+                                	}
                                     try {
                                         tempAttachmentFile = File.createTempFile("att", null, attachmentDirectory);
                                         FileOutputStream out = new FileOutputStream(tempAttachmentFile);
