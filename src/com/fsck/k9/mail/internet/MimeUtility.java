@@ -954,22 +954,16 @@ public class MimeUtility {
     
     public static void rawBodies( MimeMultipart mp, boolean raw ) {
     	
-    	Log.w( K9.LOG_TAG, "RAW BODIES" );
-    	
-		int count = mp.getCount();
+ 		int count = mp.getCount();
 		for( int i=0; i<count; i++ ) {
 		
 			BodyPart bp = mp.getBodyPart( i );
-			Log.w( K9.LOG_TAG, "THIS IS A " + bp.getClass().getName() );
 			if( bp instanceof MimeBodyPart ) {
 				
 				MimeBodyPart mbp = ( MimeBodyPart )bp;
-				Log.w( K9.LOG_TAG, "BODY PART: " + mbp.getBody().getClass().getName() );
 				if( mbp.getBody() instanceof TextBody ) {
-					Log.w( K9.LOG_TAG, "SETTING DECODING OUTPUT TO: " + raw );
 					( ( TextBody )mbp.getBody() ).setRawOutput( raw );
 				} else if( mbp.getBody() instanceof BinaryTempFileBody ) {
-					Log.w( K9.LOG_TAG, "SETTING RAW OUTPUT TO: " + raw );
 					( ( BinaryTempFileBody )mbp.getBody() ).setRawOutput( raw );
 				} else if( mbp.getBody() instanceof MimeMultipart ) {
 					rawBodies( ( MimeMultipart )bp.getBody(), raw );
