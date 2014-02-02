@@ -8,6 +8,10 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.03" versioncode="19005">
+        <change>Fixed a crash for users who have not upgraded to PGP KeyRing 1.7</change>
+        <change>PGP/MIME features cannot be used without upgrading to PGP KeyRing 1.7 or higher!</change>
+    </release>
     <release version="4.701.02" versioncode="19004">
         <change>Support for sending PGP/MIME messages (go to Settings to disable)</change>
         <change>You will have to upgrade PGP KeyRing to version 1.7 to send PGP/MIME messages</change>
