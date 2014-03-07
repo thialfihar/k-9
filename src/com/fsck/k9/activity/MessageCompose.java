@@ -1288,6 +1288,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         return buildText(isDraft, mMessageFormat);
     }
 
+    private TextBody buildText( boolean isDraft, SimpleMessageFormat messageFormat ) {
+    	return buildText( isDraft, messageFormat, mMessageContentView.getCharacters() );
+    }
     /**
      * Build the {@link Body} that will contain the text of the message.
      *
@@ -1305,7 +1308,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      * @return {@link TextBody} instance that contains the entered text and possibly the quoted
      *         original message.
      */
-    private TextBody buildText(boolean isDraft, SimpleMessageFormat messageFormat) {
+    private TextBody buildText(boolean isDraft, SimpleMessageFormat messageFormat, String text ) {
         // The length of the formatted version of the user-supplied text/reply
         int composedMessageLength;
 
@@ -1320,7 +1323,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
          * "un-hide" the quoted text if (s)he opens a saved draft.
          */
         boolean includeQuotedText = (mQuotedTextMode.equals(QuotedTextMode.SHOW) || isDraft);
-
+        
         // Reply after quote makes no sense for HEADER style replies
         boolean replyAfterQuote = (mQuoteStyle == QuoteStyle.HEADER) ?
                 false : mAccount.isReplyAfterQuote();
@@ -1328,13 +1331,14 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         boolean signatureBeforeQuotedText = mAccount.isSignatureBeforeQuotedText();
 
         // Get the user-supplied text
-        String text = mMessageContentView.getCharacters();
+        //String text = mMessageContentView.getCharacters();
 
         // Handle HTML separate from the rest of the text content
         if (messageFormat == SimpleMessageFormat.HTML) {
 
             // Do we have to modify an existing message to include our reply?
             if (includeQuotedText && mQuotedHtmlContent != null) {
+           
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "insertable: " + mQuotedHtmlContent.toDebugString());
                 }
@@ -1480,8 +1484,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         Body msgBody = null;
         boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
         if (mPgpData.getEncryptedData() != null && !usePgpMime ) {
-            String text = mPgpData.getEncryptedData();
-            textBody = new TextBody(text);
+            textBody = buildText( isDraft, mMessageFormat, mPgpData.getEncryptedData());
         } else {
             textBody = buildText(isDraft);
         }
@@ -2048,8 +2051,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	        	
 	        	return;
         	
-	        } else if( mPgpData.getEncryptionKeys() == null && mPgpData.hasSignatureKey() && (  usePgpMime && mPgpData.getSignature() == null ) ||
-	        		                          		 										 ( !usePgpMime && mPgpData.getEncryptedData() == null ) ) {
+	        } else if( mPgpData.getEncryptionKeys() == null && mPgpData.hasSignatureKey() && (  usePgpMime && mPgpData.getSignature() == null ||
+	        		                          		 										   !usePgpMime && mPgpData.getEncryptedData() == null ) ) {
 	        	
 	        	Log.i( K9.LOG_TAG, "I have a signature to calculate" );
 	        	
@@ -4268,6 +4271,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
     private void updateMessageFormat() {
         MessageFormat origMessageFormat = mAccount.getMessageFormat();
+        boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
         SimpleMessageFormat messageFormat;
         if (origMessageFormat == MessageFormat.TEXT) {
             // The user wants to send text/plain messages. We don't override that choice under
@@ -4277,9 +4281,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             // Right now we send a text/plain-only message when the quoted text was edited, no
             // matter what the user selected for the message format.
             messageFormat = SimpleMessageFormat.TEXT;
-        } else if (mEncryptCheckbox.isChecked() || mCryptoSignatureCheckbox.isChecked()) {
-            // Right now we only support PGP inline which doesn't play well with HTML. So force
-            // plain text in those cases.
+        } else if (!usePgpMime && ( mEncryptCheckbox.isChecked() || mCryptoSignatureCheckbox.isChecked())) {
+            // PGP inline is always processed as plain text (for now)
             messageFormat = SimpleMessageFormat.TEXT;
         } else if (origMessageFormat == MessageFormat.AUTO) {
             if (mAction == Action.COMPOSE || mQuotedTextFormat == SimpleMessageFormat.TEXT ||
