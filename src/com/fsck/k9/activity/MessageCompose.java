@@ -3575,7 +3575,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 }
             }
 
-            mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage, content, mQuoteStyle));
+            String quotedText = quoteOriginalTextMessage(mSourceMessage, HtmlConverter.htmlToText( content ), mQuoteStyle);
+            mQuotedText.setCharacters(quotedText);
         }
 
         if (showQuotedText) {

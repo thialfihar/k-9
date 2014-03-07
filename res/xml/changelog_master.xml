@@ -8,6 +8,11 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.04" versioncode="19006">
+        <change>When answering decrypted messages, quoted text is now properly displayed and included in the reply</change>
+        <change>When replying to messages using plain text, quoted text should not be HTML formatted</change>
+        <change>Fixed a problem sending unencrypted and unsigned messages using PGP inline</change>
+    </release>
     <release version="4.701.03" versioncode="19005">
         <change>Fixed a crash for users who have not upgraded to PGP KeyRing 1.7</change>
         <change>PGP/MIME features cannot be used without upgrading to PGP KeyRing 1.7 or higher!</change>
