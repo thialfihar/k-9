@@ -465,6 +465,8 @@ public class MessagingController implements Runnable {
                                 }
                             }
                         } .start();
+                    } catch( Exception e ) {
+                    	Log.e(K9.LOG_TAG, "Unable to execute command", e );
                     }
 
                     if (K9.DEBUG)
@@ -562,7 +564,11 @@ public class MessagingController implements Runnable {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
-                listFoldersSynchronous(account, refreshRemote, listener);
+            	try {
+            		listFoldersSynchronous(account, refreshRemote, listener);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "listFolders()", e );
+            	}
             }
         });
     }
@@ -703,7 +709,11 @@ public class MessagingController implements Runnable {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
-                searchLocalMessagesSynchronous(search, listener);
+            	try {
+            		searchLocalMessagesSynchronous(search, listener);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "searchLocalMessages()", e );
+            	}
             }
         });
     }
@@ -785,7 +795,11 @@ public class MessagingController implements Runnable {
         return threadPool.submit(new Runnable() {
             @Override
             public void run() {
-                searchRemoteMessagesSynchronous(acctUuid, folderName, query, requiredFlags, forbiddenFlags, listener);
+            	try {
+            		searchRemoteMessagesSynchronous(acctUuid, folderName, query, requiredFlags, forbiddenFlags, listener);
+            	} catch( Exception e ) {
+            		Log.e(K9.LOG_TAG, "searchRemoteMessages()", e );
+            	}
             }
         });
     }
@@ -877,7 +891,7 @@ public class MessagingController implements Runnable {
                     }
 
                     loadSearchResultsSynchronous(messages, localFolder, remoteFolder, listener);
-                } catch (MessagingException e) {
+                } catch (Exception e) {
                     Log.e(K9.LOG_TAG, "Exception in loadSearchResults: " + e);
                     addErrorMessage(account, null, e);
                 } finally {
@@ -948,7 +962,11 @@ public class MessagingController implements Runnable {
         putBackground("synchronizeMailbox", listener, new Runnable() {
             @Override
             public void run() {
-                synchronizeMailboxSynchronous(account, folder, listener, providedRemoteFolder);
+            	try {
+            		synchronizeMailboxSynchronous(account, folder, listener, providedRemoteFolder);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "synchronizeMailbox()", e );
+            	}
             }
         });
     }
@@ -2025,7 +2043,7 @@ public class MessagingController implements Runnable {
                 } catch (UnavailableStorageException e) {
                     Log.i(K9.LOG_TAG, "Failed to process pending command because storage is not available - trying again later.");
                     throw new UnavailableAccountException(e);
-                } catch (MessagingException me) {
+                } catch (Exception me) {
                     Log.e(K9.LOG_TAG, "processPendingCommands", me);
 
                     addErrorMessage(account, null, me);
@@ -2461,16 +2479,20 @@ public class MessagingController implements Runnable {
         putBackground("queueSetFlag " + account.getDescription() + ":" + folderName, null, new Runnable() {
             @Override
             public void run() {
-                PendingCommand command = new PendingCommand();
-                command.command = PENDING_COMMAND_SET_FLAG_BULK;
-                int length = 3 + uids.length;
-                command.arguments = new String[length];
-                command.arguments[0] = folderName;
-                command.arguments[1] = newState;
-                command.arguments[2] = flag;
-                System.arraycopy(uids, 0, command.arguments, 3, uids.length);
-                queuePendingCommand(account, command);
-                processPendingCommands(account);
+            	try {
+	                PendingCommand command = new PendingCommand();
+	                command.command = PENDING_COMMAND_SET_FLAG_BULK;
+	                int length = 3 + uids.length;
+	                command.arguments = new String[length];
+	                command.arguments[0] = folderName;
+	                command.arguments[1] = newState;
+	                command.arguments[2] = flag;
+	                System.arraycopy(uids, 0, command.arguments, 3, uids.length);
+	                queuePendingCommand(account, command);
+	                processPendingCommands(account);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "queueSetFlag()", e );
+            	}
             }
         });
     }
@@ -2563,14 +2585,18 @@ public class MessagingController implements Runnable {
         putBackground("queueExpunge " + account.getDescription() + ":" + folderName, null, new Runnable() {
             @Override
             public void run() {
-                PendingCommand command = new PendingCommand();
-                command.command = PENDING_COMMAND_EXPUNGE;
-
-                command.arguments = new String[1];
-
-                command.arguments[0] = folderName;
-                queuePendingCommand(account, command);
-                processPendingCommands(account);
+            	try {
+	                PendingCommand command = new PendingCommand();
+	                command.command = PENDING_COMMAND_EXPUNGE;
+	
+	                command.arguments = new String[1];
+	
+	                command.arguments[0] = folderName;
+	                queuePendingCommand(account, command);
+	                processPendingCommands(account);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "queueExpunge()", e );
+            	}
             }
         });
     }
@@ -2865,7 +2891,11 @@ public class MessagingController implements Runnable {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
-                setFlagSynchronous(account, messageIds, flag, newState, false);
+            	try {
+            		setFlagSynchronous(account, messageIds, flag, newState, false);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "setFlag()", e );
+            	}
             }
         });
     }
@@ -2878,7 +2908,11 @@ public class MessagingController implements Runnable {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
-                setFlagSynchronous(account, threadRootIds, flag, newState, true);
+            	try {
+            		setFlagSynchronous(account, threadRootIds, flag, newState, true);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "setFlagForThreads()", e );
+            	}
             }
         });
     }
@@ -3068,7 +3102,11 @@ public class MessagingController implements Runnable {
         put("loadMessageForViewRemote", listener, new Runnable() {
             @Override
             public void run() {
-                loadMessageForViewRemoteSynchronous(account, folder, uid, listener, false, false);
+            	try {
+            		loadMessageForViewRemoteSynchronous(account, folder, uid, listener, false, false);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "loadMessageForViewRemote()", e );
+            	}
             }
         });
     }
@@ -3336,7 +3374,7 @@ public class MessagingController implements Runnable {
                     for (MessagingListener l : getListeners(listener)) {
                         l.loadAttachmentFinished(account, message, part, tag);
                     }
-                } catch (MessagingException me) {
+                } catch (Exception me) {
                     if (K9.DEBUG)
                         Log.v(K9.LOG_TAG, "Exception loading attachment", me);
 
@@ -3421,6 +3459,8 @@ public class MessagingController implements Runnable {
 
                     try {
                         sendPendingMessagesSynchronous(account);
+                    } catch( Exception e ) {
+                		Log.e( K9.LOG_TAG, "sendPendingMessages()", e );
                     } finally {
                         notifyWhileSendingDone(account);
                     }
@@ -3770,7 +3810,7 @@ public class MessagingController implements Runnable {
                 try {
                     AccountStats stats = account.getStats(context);
                     listener.accountStatusChanged(account, stats);
-                } catch (MessagingException me) {
+                } catch (Exception me) {
                     Log.e(K9.LOG_TAG, "Count not get unread count for account " +
                             account.getDescription(), me);
                 }
@@ -3785,7 +3825,11 @@ public class MessagingController implements Runnable {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
-                getSearchAccountStatsSynchronous(searchAccount, listener);
+            	try {
+            		getSearchAccountStatsSynchronous(searchAccount, listener);
+            	} catch (Exception me) {
+                    Log.e(K9.LOG_TAG, "getSearchAccountStats()", me);
+                }
             }
         });
     }
@@ -3866,7 +3910,7 @@ public class MessagingController implements Runnable {
                 try {
                     Folder localFolder = account.getLocalStore().getFolder(folderName);
                     unreadMessageCount = localFolder.getUnreadMessageCount();
-                } catch (MessagingException me) {
+                } catch (Exception me) {
                     Log.e(K9.LOG_TAG, "Count not get unread count for account " + account.getDescription(), me);
                 }
                 l.folderStatusChanged(account, folderName, unreadMessageCount);
@@ -3916,8 +3960,12 @@ public class MessagingController implements Runnable {
         putBackground("moveMessages", null, new Runnable() {
             @Override
             public void run() {
-                moveOrCopyMessageSynchronous(account, srcFolder, messages, destFolder, false,
+            	try {
+            		moveOrCopyMessageSynchronous(account, srcFolder, messages, destFolder, false,
                         listener);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "moveMessages()", e );
+            	}
             }
         });
     }
@@ -3934,7 +3982,7 @@ public class MessagingController implements Runnable {
                     List<Message> messagesInThreads = collectMessagesInThreads(account, messages);
                     moveOrCopyMessageSynchronous(account, srcFolder, messagesInThreads, destFolder,
                             false, null);
-                } catch (MessagingException e) {
+                } catch (Exception e) {
                     addErrorMessage(account, "Exception while moving messages", e);
                 }
             }
@@ -3954,8 +4002,12 @@ public class MessagingController implements Runnable {
         putBackground("copyMessages", null, new Runnable() {
             @Override
             public void run() {
-                moveOrCopyMessageSynchronous(account, srcFolder, messages, destFolder, true,
+            	try {
+            		moveOrCopyMessageSynchronous(account, srcFolder, messages, destFolder, true,
                         listener);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "copyMessages()", e );
+            	}
             }
         });
     }
@@ -3970,7 +4022,7 @@ public class MessagingController implements Runnable {
                     List<Message> messagesInThreads = collectMessagesInThreads(account, messages);
                     moveOrCopyMessageSynchronous(account, srcFolder, messagesInThreads, destFolder,
                             true, null);
-                } catch (MessagingException e) {
+                } catch (Exception e) {
                     addErrorMessage(account, "Exception while copying messages", e);
                 }
             }
@@ -4082,7 +4134,11 @@ public class MessagingController implements Runnable {
         putBackground("expunge", null, new Runnable() {
             @Override
             public void run() {
-                queueExpunge(account, folder);
+            	try {
+            		queueExpunge(account, folder);
+            	} catch( Exception e ) {
+            		Log.e( K9.LOG_TAG, "expunge()", e );
+            	}
             }
         });
     }
@@ -4119,7 +4175,11 @@ public class MessagingController implements Runnable {
                 putBackground("deleteThreads", null, new Runnable() {
                     @Override
                     public void run() {
-                        deleteThreadsSynchronous(account, folder.getName(), accountMessages);
+                    	try {
+                    		deleteThreadsSynchronous(account, folder.getName(), accountMessages);
+                    	} catch( Exception e ) {
+                    		Log.e( K9.LOG_TAG, "deleteThreads()", e );
+                    	}
                     }
                 });
             }
@@ -4168,8 +4228,12 @@ public class MessagingController implements Runnable {
                 putBackground("deleteMessages", null, new Runnable() {
                     @Override
                     public void run() {
-                        deleteMessagesSynchronous(account, folder.getName(),
+                    	try {
+                    		deleteMessagesSynchronous(account, folder.getName(),
                                 accountMessages.toArray(EMPTY_MESSAGE_ARRAY), listener);
+                    	} catch( Exception e ) {
+                    		Log.e( K9.LOG_TAG, "deleteMessages()", e );
+                    	}
                     }
                 });
             }
@@ -4568,7 +4632,7 @@ public class MessagingController implements Runnable {
                         if (stats == null || stats.unreadMessageCount == 0) {
                             notifyAccountCancel(context, account);
                         }
-                    } catch (MessagingException e) {
+                    } catch (Exception e) {
                         Log.e(K9.LOG_TAG, "Unable to getUnreadMessageCount for account: " + account, e);
                     }
                 }

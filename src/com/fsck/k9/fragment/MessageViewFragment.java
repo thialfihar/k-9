@@ -45,6 +45,7 @@ import com.fsck.k9.crypto.CryptoProvider.CryptoDecryptCallback;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
 import com.fsck.k9.helper.FileBrowserHelper;
+import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
@@ -1035,6 +1036,11 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
             }
 
     	}
+
+    	String text = pgpData.getDecryptedData();
+		if( text != null && !text.trim().startsWith( "<html>" ) ) {
+            pgpData.setDecryptedData( HtmlConverter.textToHtml( text ) );
+        }
 
         try {
         	mMessageView.setMessage(account, message, pgpData, controller, listener, replacement);
