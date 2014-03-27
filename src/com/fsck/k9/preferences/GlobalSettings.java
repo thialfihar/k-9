@@ -185,10 +185,10 @@ public class GlobalSettings {
                 new V(1, new BooleanSetting(false))
             ));
         s.put("theme", Settings.versions(
-                new V(1, new ThemeSetting(K9.Theme.LIGHT))
+                new V(1, new ThemeSetting(K9.Theme.DARK))
             ));
         s.put("messageViewTheme", Settings.versions(
-                new V(16, new ThemeSetting(K9.Theme.LIGHT)),
+                new V(16, new ThemeSetting(K9.Theme.DARK)),
                 new V(24, new SubThemeSetting(K9.Theme.USE_GLOBAL))
             ));
         s.put("useGalleryBugWorkaround", Settings.versions(
