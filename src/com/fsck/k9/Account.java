@@ -46,6 +46,8 @@ import com.fsck.k9.security.LocalKeyStore;
 import com.fsck.k9.view.ColorChip;
 import com.larswerkman.colorpicker.ColorPicker;
 
+import org.thialfihar.android.apg.R;
+
 /**
  * Account stores all of the settings for a single account defined by the user. It is able to save
  * and delete itself given a Preferences to work with. Each account is defined by a UUID.

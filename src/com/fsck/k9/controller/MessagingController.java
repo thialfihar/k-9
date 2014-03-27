@@ -48,7 +48,7 @@ import com.fsck.k9.K9.Intents;
 import com.fsck.k9.K9.NotificationQuickDelete;
 import com.fsck.k9.NotificationSetting;
 import com.fsck.k9.Preferences;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.activity.Accounts;
 import com.fsck.k9.activity.FolderList;
 import com.fsck.k9.activity.MessageList;

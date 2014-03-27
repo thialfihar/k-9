@@ -30,6 +30,8 @@ import com.fsck.k9.mail.store.ImapStore.ImapStoreSettings;
 import com.fsck.k9.mail.store.WebDavStore.WebDavStoreSettings;
 import com.fsck.k9.service.MailService;
 
+import org.thialfihar.android.apg.R;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -4,7 +4,7 @@ import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.remotecontrol.K9RemoteControl;
 import com.fsck.k9.Preferences;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.Account.FolderMode;
 import com.fsck.k9.K9.BACKGROUND_OPS;
 

@@ -13,6 +13,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+
 import com.fsck.k9.*;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
@@ -22,6 +23,8 @@ import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.transport.SmtpTransport;
+
+import org.thialfihar.android.apg.R;
 
 import java.net.URI;
 import java.net.URISyntaxException;

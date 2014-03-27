@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import com.fsck.k9.K9;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.mail.Message;

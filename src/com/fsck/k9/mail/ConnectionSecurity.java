@@ -1,7 +1,7 @@
 package com.fsck.k9.mail;
 
 import com.fsck.k9.K9;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 
 public enum ConnectionSecurity {
     NONE(R.string.account_setup_incoming_security_none_label),

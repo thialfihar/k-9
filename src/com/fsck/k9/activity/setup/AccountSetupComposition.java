@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import com.fsck.k9.Account;
 import com.fsck.k9.Preferences;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.activity.K9Activity;
 
 public class AccountSetupComposition extends K9Activity {

@@ -25,6 +25,8 @@ import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.store.WebDavStore;
 import com.fsck.k9.mail.filter.Hex;
 
+import org.thialfihar.android.apg.R;
+
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;

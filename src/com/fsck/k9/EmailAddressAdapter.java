@@ -24,6 +24,8 @@ import android.view.View;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
+import org.thialfihar.android.apg.R;
+
 public class EmailAddressAdapter extends ResourceCursorAdapter {
     private final Contacts mContacts;
 

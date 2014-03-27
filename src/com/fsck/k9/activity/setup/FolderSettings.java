@@ -8,17 +8,19 @@ import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.util.Log;
+
 import com.fsck.k9.*;
 import com.fsck.k9.activity.FolderInfoHolder;
 import com.fsck.k9.activity.K9PreferenceActivity;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Folder.FolderClass;
-
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.store.LocalStore;
 import com.fsck.k9.mail.store.LocalStore.LocalFolder;
 import com.fsck.k9.service.MailService;
+
+import org.thialfihar.android.apg.R;
 
 public class FolderSettings extends K9PreferenceActivity {
 

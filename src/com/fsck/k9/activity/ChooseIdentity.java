@@ -12,7 +12,7 @@ import android.widget.Toast;
 import com.fsck.k9.Account;
 import com.fsck.k9.Identity;
 import com.fsck.k9.Preferences;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import java.util.List;
 
 public class ChooseIdentity extends K9ListActivity {

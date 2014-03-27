@@ -45,6 +45,8 @@ import com.fsck.k9.service.MailService;
 import com.fsck.k9.service.ShutdownReceiver;
 import com.fsck.k9.service.StorageGoneReceiver;
 
+import org.thialfihar.android.apg.R;
+
 public class K9 extends Application {
     /**
      * Components that are interested in knowing when the K9 instance is

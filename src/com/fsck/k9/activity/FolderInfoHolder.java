@@ -3,7 +3,7 @@ package com.fsck.k9.activity;
 import android.content.Context;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.mail.Folder;
 
 public class FolderInfoHolder implements Comparable<FolderInfoHolder> {

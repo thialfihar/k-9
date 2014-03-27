@@ -25,7 +25,7 @@ import android.widget.Toast;
 import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.activity.ChooseFolder;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.controller.MessagingController;

@@ -9,6 +9,8 @@ import android.preference.*;
 import com.fsck.k9.*;
 import com.fsck.k9.activity.K9PreferenceActivity;
 
+import org.thialfihar.android.apg.R;
+
 /**
  * Activity to configure the font size of the information displayed in the
  * account list, folder list, message list and in the message view.
@@ -183,7 +185,7 @@ public class FontSizeSettings extends K9PreferenceActivity {
         fontSizes.save(editor);
         editor.commit();
     }
-    
+
     private int scaleToInt(float sliderValue) {
         return (int) (FONT_PERCENT_MIN + sliderValue * (FONT_PERCENT_MAX - FONT_PERCENT_MIN));
     }

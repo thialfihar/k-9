@@ -4,7 +4,7 @@ package com.fsck.k9.mail.internet;
 import android.content.Context;
 import android.util.Log;
 import com.fsck.k9.K9;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.mail.*;
 import com.fsck.k9.mail.Message.RecipientType;

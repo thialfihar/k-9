@@ -34,6 +34,7 @@ import android.view.View;
 import android.widget.SeekBar;
 import com.fsck.k9.*;
 
+import org.thialfihar.android.apg.R;
 
 /**
  * @author Jay Weisskopf

@@ -3,7 +3,7 @@ package com.fsck.k9.search;
 import android.content.Context;
 
 import com.fsck.k9.BaseAccount;
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.search.SearchSpecification.Attribute;
 import com.fsck.k9.search.SearchSpecification.Searchfield;
 

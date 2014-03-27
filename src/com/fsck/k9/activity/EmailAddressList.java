@@ -9,7 +9,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.fsck.k9.R;
+import org.thialfihar.android.apg.R;
 import com.fsck.k9.helper.ContactItem;
 
 public class EmailAddressList extends K9ListActivity implements OnItemClickListener {
