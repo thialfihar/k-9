@@ -922,6 +922,10 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        boolean result = super.onCreateOptionsMenu(menu);
+        if (!result) {
+            return false;
+        }
         getMenuInflater().inflate(R.menu.message_list_option, menu);
         mMenu = menu;
         mMenuButtonCheckMail= menu.findItem(R.id.check_mail);

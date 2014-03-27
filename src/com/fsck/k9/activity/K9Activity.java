@@ -7,14 +7,16 @@ import android.view.MotionEvent;
 import com.fsck.k9.activity.K9ActivityCommon.K9ActivityMagic;
 import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
 
+import org.thialfihar.android.apg.ui.DrawerActivity;
 
-public class K9Activity extends SherlockFragmentActivity implements K9ActivityMagic {
+public class K9Activity extends DrawerActivity implements K9ActivityMagic {
 
     private K9ActivityCommon mBase;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        mIsMailActivity = true;
         mBase = K9ActivityCommon.newInstance(this);
         super.onCreate(savedInstanceState);
     }
