@@ -577,8 +577,6 @@ public class K9 extends Application {
             StrictMode.enableDefaults();
         }
 
-        PRNGFixes.apply();
-
         super.onCreate();
         app = this;
 
