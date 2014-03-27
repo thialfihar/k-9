@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -21,7 +22,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
 import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
@@ -46,7 +46,7 @@ import com.fsck.k9.view.MessageHeader;
 import com.fsck.k9.view.SingleMessageView;
 
 
-public class MessageViewFragment extends SherlockFragment implements OnClickListener,
+public class MessageViewFragment extends Fragment implements OnClickListener,
         CryptoDecryptCallback, ConfirmationDialogFragmentListener {
 
     private static final String ARG_REFERENCE = "reference";

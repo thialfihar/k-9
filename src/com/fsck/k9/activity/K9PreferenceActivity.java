@@ -1,6 +1,6 @@
 package com.fsck.k9.activity;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import android.preference.PreferenceActivity;
 import com.fsck.k9.K9;
 
 import android.os.Build;
@@ -9,7 +9,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 
 
-public class K9PreferenceActivity extends SherlockPreferenceActivity {
+public class K9PreferenceActivity extends PreferenceActivity {
     @Override
     public void onCreate(Bundle icicle) {
         K9ActivityCommon.setLanguage(this, K9.getK9Language());

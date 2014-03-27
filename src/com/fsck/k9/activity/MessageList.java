@@ -14,8 +14,11 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,9 +27,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.K9;
@@ -922,7 +922,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.message_list_option, menu);
+        getMenuInflater().inflate(R.menu.message_list_option, menu);
         mMenu = menu;
         mMenuButtonCheckMail= menu.findItem(R.id.check_mail);
         return true;

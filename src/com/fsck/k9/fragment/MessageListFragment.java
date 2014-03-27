@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -44,12 +45,17 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -59,12 +65,6 @@ import android.widget.QuickContactBadge;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.FontSizes;
@@ -107,7 +107,7 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
 
-public class MessageListFragment extends SherlockFragment implements OnItemClickListener,
+public class MessageListFragment extends Fragment implements OnItemClickListener,
         ConfirmationDialogFragmentListener, LoaderCallbacks<Cursor> {
 
     private static final String[] THREADED_PROJECTION = {
@@ -2209,7 +2209,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             }
 
             if (mActionMode == null) {
-                mActionMode = getSherlockActivity().startActionMode(mActionModeCallback);
+                mActionMode = getActivity().startActionMode(mActionModeCallback);
             }
             computeBatchDirection();
             updateActionModeTitle();
@@ -2268,7 +2268,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
                 return;
             }
         } else {
-            mActionMode = getSherlockActivity().startActionMode(mActionModeCallback);
+            mActionMode = getActivity().startActionMode(mActionModeCallback);
         }
 
         if (selected) {
@@ -3521,7 +3521,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         }
 
         if (mActionMode == null) {
-            mActionMode = getSherlockActivity().startActionMode(mActionModeCallback);
+            mActionMode = getActivity().startActionMode(mActionModeCallback);
         }
 
         recalculateSelectionCount();
