@@ -13,7 +13,6 @@ import com.fsck.k9.Account.SortType;
 import com.fsck.k9.K9;
 import org.thialfihar.android.apg.R;
 import com.fsck.k9.Account.FolderMode;
-import com.fsck.k9.crypto.Apg;
 import com.fsck.k9.mail.store.StorageManager;
 import com.fsck.k9.preferences.Settings.*;
 
@@ -48,9 +47,6 @@ public class AccountSettings {
             ));
         s.put("chipColor", Settings.versions(
                 new V(1, new ColorSetting(0xFF0000FF))
-            ));
-        s.put("cryptoApp", Settings.versions(
-                new V(1, new StringSetting(Apg.NAME))
             ));
         s.put("cryptoAutoEncrypt", Settings.versions(
                 new V(3, new BooleanSetting(false))

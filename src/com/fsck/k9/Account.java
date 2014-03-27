@@ -207,7 +207,6 @@ public class Account implements BaseAccount {
     private boolean mReplyAfterQuote;
     private boolean mStripSignature;
     private boolean mSyncRemoteDeletions;
-    private String mCryptoApp;
     private boolean mCryptoAutoSignature;
     private boolean mCryptoAutoEncrypt;
     private boolean mMarkMessageAsReadOnView;
@@ -306,7 +305,6 @@ public class Account implements BaseAccount {
         mReplyAfterQuote = DEFAULT_REPLY_AFTER_QUOTE;
         mStripSignature = DEFAULT_STRIP_SIGNATURE;
         mSyncRemoteDeletions = true;
-        mCryptoApp = Apg.NAME;
         mCryptoAutoSignature = false;
         mCryptoAutoEncrypt = false;
         mAllowRemoteSearch = false;
@@ -490,7 +488,6 @@ public class Account implements BaseAccount {
         mIsSignatureBeforeQuotedText = prefs.getBoolean(mUuid  + ".signatureBeforeQuotedText", false);
         identities = loadIdentities(prefs);
 
-        mCryptoApp = prefs.getString(mUuid + ".cryptoApp", Apg.NAME);
         mCryptoAutoSignature = prefs.getBoolean(mUuid + ".cryptoAutoSignature", false);
         mCryptoAutoEncrypt = prefs.getBoolean(mUuid + ".cryptoAutoEncrypt", false);
         mAllowRemoteSearch = prefs.getBoolean(mUuid + ".allowRemoteSearch", false);
@@ -580,7 +577,6 @@ public class Account implements BaseAccount {
         editor.remove(mUuid + ".showPicturesEnum");
         editor.remove(mUuid + ".replyAfterQuote");
         editor.remove(mUuid + ".stripSignature");
-        editor.remove(mUuid + ".cryptoApp");
         editor.remove(mUuid + ".cryptoAutoSignature");
         editor.remove(mUuid + ".cryptoAutoEncrypt");
         editor.remove(mUuid + ".enabled");
@@ -754,7 +750,6 @@ public class Account implements BaseAccount {
         editor.putBoolean(mUuid + ".defaultQuotedTextShown", mDefaultQuotedTextShown);
         editor.putBoolean(mUuid + ".replyAfterQuote", mReplyAfterQuote);
         editor.putBoolean(mUuid + ".stripSignature", mStripSignature);
-        editor.putString(mUuid + ".cryptoApp", mCryptoApp);
         editor.putBoolean(mUuid + ".cryptoAutoSignature", mCryptoAutoSignature);
         editor.putBoolean(mUuid + ".cryptoAutoEncrypt", mCryptoAutoEncrypt);
         editor.putBoolean(mUuid + ".allowRemoteSearch", mAllowRemoteSearch);
@@ -1648,16 +1643,6 @@ public class Account implements BaseAccount {
         mStripSignature = stripSignature;
     }
 
-    public String getCryptoApp() {
-        return mCryptoApp;
-    }
-
-    public void setCryptoApp(String cryptoApp) {
-        mCryptoApp = cryptoApp;
-        // invalidate the provider
-        mCryptoProvider = null;
-    }
-
     public boolean getCryptoAutoSignature() {
         return mCryptoAutoSignature;
     }
@@ -1712,13 +1697,6 @@ public class Account implements BaseAccount {
 
     public synchronized void setLastSelectedFolderName(String folderName) {
         lastSelectedFolderName = folderName;
-    }
-
-    public synchronized CryptoProvider getCryptoProvider() {
-        if (mCryptoProvider == null) {
-            mCryptoProvider = CryptoProvider.createInstance(getCryptoApp());
-        }
-        return mCryptoProvider;
     }
 
     public synchronized NotificationSetting getNotificationSetting() {

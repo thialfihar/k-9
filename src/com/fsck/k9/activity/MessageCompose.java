@@ -62,6 +62,7 @@ import com.fsck.k9.activity.loader.AttachmentInfoLoader;
 import com.fsck.k9.activity.misc.Attachment;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
+import com.fsck.k9.crypto.Apg;
 import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.ProgressDialogFragment;
@@ -648,8 +649,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
             @Override
             public void afterTextChanged(android.text.Editable s) {
-                final CryptoProvider crypto = mAccount.getCryptoProvider();
-                if (mAutoEncrypt && crypto.isAvailable(getApplicationContext())) {
+                final CryptoProvider crypto = new Apg();
+                if (mAutoEncrypt) {
                     for (Address address : getRecipientAddresses()) {
                         if (crypto.hasPublicKeyForEmail(getApplicationContext(),
                                 address.getAddress())) {
@@ -843,41 +844,37 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         }
 
         initializeCrypto();
-        final CryptoProvider crypto = mAccount.getCryptoProvider();
-        if (crypto.isAvailable(this)) {
-            mEncryptLayout.setVisibility(View.VISIBLE);
-            mCryptoSignatureCheckbox.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    CheckBox checkBox = (CheckBox) v;
-                    if (checkBox.isChecked()) {
-                        mPreventDraftSaving = true;
-                        if (!crypto.selectSecretKey(MessageCompose.this, mPgpData)) {
-                            mPreventDraftSaving = false;
-                        }
-                        checkBox.setChecked(false);
-                    } else {
-                        mPgpData.setSignatureKeyId(0);
-                        updateEncryptLayout();
+        final CryptoProvider crypto = new Apg();
+        mEncryptLayout.setVisibility(View.VISIBLE);
+        mCryptoSignatureCheckbox.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckBox checkBox = (CheckBox) v;
+                if (checkBox.isChecked()) {
+                    mPreventDraftSaving = true;
+                    if (!crypto.selectSecretKey(MessageCompose.this, mPgpData)) {
+                        mPreventDraftSaving = false;
                     }
-                }
-            });
-
-            if (mAccount.getCryptoAutoSignature()) {
-                long ids[] = crypto.getSecretKeyIdsFromEmail(this, mIdentity.getEmail());
-                if (ids != null && ids.length > 0) {
-                    mPgpData.setSignatureKeyId(ids[0]);
-                    mPgpData.setSignatureUserId(crypto.getUserId(this, ids[0]));
+                    checkBox.setChecked(false);
                 } else {
                     mPgpData.setSignatureKeyId(0);
-                    mPgpData.setSignatureUserId(null);
+                    updateEncryptLayout();
                 }
             }
-            updateEncryptLayout();
-            mAutoEncrypt = mAccount.isCryptoAutoEncrypt();
-        } else {
-            mEncryptLayout.setVisibility(View.GONE);
+        });
+
+        if (mAccount.getCryptoAutoSignature()) {
+            long ids[] = crypto.getSecretKeyIdsFromEmail(this, mIdentity.getEmail());
+            if (ids != null && ids.length > 0) {
+                mPgpData.setSignatureKeyId(ids[0]);
+                mPgpData.setSignatureUserId(crypto.getUserId(this, ids[0]));
+            } else {
+                mPgpData.setSignatureKeyId(0);
+                mPgpData.setSignatureUserId(null);
+            }
         }
+        updateEncryptLayout();
+        mAutoEncrypt = mAccount.isCryptoAutoEncrypt();
 
         // Set font size of input controls
         int fontSize = mFontSizes.getMessageComposeInput();
@@ -1059,7 +1056,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
             String userId = mPgpData.getSignatureUserId();
             if (userId == null) {
-                userId = mAccount.getCryptoProvider().getUserId(this, mPgpData.getSignatureKeyId());
+                userId = new Apg().getUserId(this, mPgpData.getSignatureKeyId());
                 mPgpData.setSignatureUserId(userId);
             }
 
@@ -1848,7 +1845,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     private void performSend() {
-        final CryptoProvider crypto = mAccount.getCryptoProvider();
+        final CryptoProvider crypto = new Apg();
         if (mEncryptCheckbox.isChecked() && !mPgpData.hasEncryptionKeys()) {
             // key selection before encryption
             StringBuilder emails = new StringBuilder();
@@ -1984,9 +1981,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      *         The MIME type we want our attachment to have.
      */
     private void onAddAttachment2(final String mime_type) {
-        if (mAccount.getCryptoProvider().isAvailable(this)) {
-            Toast.makeText(this, R.string.attachment_encryption_unsupported, Toast.LENGTH_LONG).show();
-        }
+        Toast.makeText(this, R.string.attachment_encryption_unsupported, Toast.LENGTH_LONG).show();
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
         i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         i.addCategory(Intent.CATEGORY_OPENABLE);
@@ -2170,7 +2165,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // if a CryptoSystem activity is returning, then mPreventDraftSaving was set to true
         mPreventDraftSaving = false;
 
-        if (mAccount.getCryptoProvider().onActivityResult(this, requestCode, resultCode, data, mPgpData)) {
+        if (new Apg().onActivityResult(this, requestCode, resultCode, data, mPgpData)) {
             return;
         }
 

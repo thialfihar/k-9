@@ -15,7 +15,6 @@ import com.fsck.k9.mail.Message;
 abstract public class CryptoProvider {
     static final long serialVersionUID = 0x21071234;
 
-    abstract public boolean isAvailable(Context context);
     abstract public boolean isEncrypted(Message message);
     abstract public boolean isSigned(Message message);
     abstract public boolean onActivityResult(Activity activity, int requestCode, int resultCode,
@@ -31,15 +30,9 @@ abstract public class CryptoProvider {
     abstract public boolean hasSecretKeyForEmail(Context context, String email);
     abstract public boolean hasPublicKeyForEmail(Context context, String email);
     abstract public String getUserId(Context context, long keyId);
-    abstract public String getName();
-    abstract public boolean test(Context context);
 
-    public static CryptoProvider createInstance(String name) {
-        if (Apg.NAME.equals(name)) {
-            return Apg.createInstance();
-        }
-
-        return None.createInstance();
+    public static CryptoProvider createInstance() {
+        return new Apg();
     }
 
     public interface CryptoDecryptCallback {

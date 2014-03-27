@@ -36,6 +36,7 @@ import com.fsck.k9.K9;
 import org.thialfihar.android.apg.R;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
+import com.fsck.k9.crypto.Apg;
 import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.MessageViewFragment;
@@ -615,7 +616,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
 
         if (text != null) {
             loadBodyFromText(text);
-            updateCryptoLayout(account.getCryptoProvider(), pgpData, message);
+            updateCryptoLayout(new Apg(), pgpData, message);
         } else {
             showStatusMessage(getContext().getString(R.string.webview_empty_message));
         }

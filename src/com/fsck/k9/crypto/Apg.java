@@ -16,12 +16,15 @@ import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
-import org.thialfihar.android.apg.R;
 import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MimeUtility;
+
+import org.thialfihar.android.apg.R;
+import org.thialfihar.android.apg.ui.SelectSecretKeyActivity;
+import org.thialfihar.android.apg.ui.SelectPublicKeyActivity;
 
 /**
  * APG integration.
@@ -88,33 +91,6 @@ public class Apg extends CryptoProvider {
         Pattern.compile(".*?(-----BEGIN PGP SIGNED MESSAGE-----.*?-----BEGIN PGP SIGNATURE-----.*?-----END PGP SIGNATURE-----).*",
                         Pattern.DOTALL);
 
-    public static Apg createInstance() {
-        return new Apg();
-    }
-
-    /**
-     * Check whether APG is installed and at a high enough version.
-     *
-     * @param context
-     * @return whether a suitable version of APG was found
-     */
-    @Override
-    public boolean isAvailable(Context context) {
-        try {
-            PackageInfo pi = context.getPackageManager().getPackageInfo(mApgPackageName, 0);
-            if (pi.versionCode >= mMinRequiredVersion) {
-                return true;
-            } else {
-                Toast.makeText(context,
-                               R.string.error_apg_version_not_supported, Toast.LENGTH_SHORT).show();
-            }
-        } catch (NameNotFoundException e) {
-            // not found
-        }
-
-        return false;
-    }
-
     /**
      * Select the signature key.
      *
@@ -124,8 +100,7 @@ public class Apg extends CryptoProvider {
      */
     @Override
     public boolean selectSecretKey(Activity activity, PgpData pgpData) {
-        android.content.Intent intent = new android.content.Intent(Intent.SELECT_SECRET_KEY);
-        intent.putExtra(EXTRA_INTENT_VERSION, INTENT_VERSION);
+        android.content.Intent intent = new android.content.Intent(activity, SelectSecretKeyActivity.class);
         try {
             activity.startActivityForResult(intent, Apg.SELECT_SECRET_KEY);
             return true;
@@ -147,8 +122,7 @@ public class Apg extends CryptoProvider {
      */
     @Override
     public boolean selectEncryptionKeys(Activity activity, String emails, PgpData pgpData) {
-        android.content.Intent intent = new android.content.Intent(Apg.Intent.SELECT_PUBLIC_KEYS);
-        intent.putExtra(EXTRA_INTENT_VERSION, INTENT_VERSION);
+        android.content.Intent intent = new android.content.Intent(activity, SelectPublicKeyActivity.class);
         long[] initialKeyIds = null;
         if (!pgpData.hasEncryptionKeys()) {
             List<Long> keyIds = new ArrayList<Long>();
@@ -541,48 +515,5 @@ public class Apg extends CryptoProvider {
 
         Matcher matcher = PGP_SIGNED_MESSAGE.matcher(data);
         return matcher.matches();
-    }
-
-    /**
-     * Get the name of the provider.
-     *
-     * @return provider name
-     */
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    /**
-     * Test the APG installation.
-     *
-     * @return success or failure
-     */
-    @Override
-    public boolean test(Context context) {
-        if (!isAvailable(context)) {
-            return false;
-        }
-
-        try {
-            // try out one content provider to check permissions
-            Uri contentUri = ContentUris.withAppendedId(
-                                 Apg.CONTENT_URI_SECRET_KEY_RING_BY_KEY_ID,
-                                 12345);
-            Cursor c = context.getContentResolver().query(contentUri,
-                       new String[] { "user_id" },
-                       null, null, null);
-            if (c != null) {
-                c.close();
-            }
-        } catch (SecurityException e) {
-            // if there was a problem, then let the user know, this will not stop K9/APG from
-            // working, but some features won't be available, so we can still return "true"
-            Toast.makeText(context,
-                           context.getResources().getString(R.string.insufficient_apg_permissions),
-                           Toast.LENGTH_LONG).show();
-        }
-
-        return true;
     }
 }
