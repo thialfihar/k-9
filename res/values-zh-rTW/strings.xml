@@ -908,7 +908,7 @@
     <string name="error_apg_version_not_supported">尚未支援所安裝的APG版本。</string>
     <string name="btn_crypto_sign">簽名</string>
     <string name="btn_encrypt">加密</string>
-    <string name="btn_decrypt">解密</string>
+    <string name="btn_decrypt2">解密</string>
     <string name="btn_verify">驗證</string>
     <string name="unknown_crypto_signature_user_id">&lt;未知&gt;</string>
     <string name="key_id">id: %s</string>

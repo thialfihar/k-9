@@ -940,7 +940,7 @@ K-9 Mail — почтовый клиент для Android.
     <string name="error_apg_version_not_supported">Установленная версия APG не поддерживается</string>
     <string name="btn_crypto_sign">Подписать</string>
     <string name="btn_encrypt">Шифровать</string>
-    <string name="btn_decrypt">Дешифр.</string>
+    <string name="btn_decrypt2">Дешифр.</string>
     <string name="btn_verify">Проверка</string>
     <string name="unknown_crypto_signature_user_id">&lt;н/д&gt;</string>
     <string name="key_id">id: %s</string>

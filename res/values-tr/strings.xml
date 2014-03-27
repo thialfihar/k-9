@@ -939,7 +939,7 @@ Lütfen hata raporlarınızı, istediğiniz yeni özellikleri ve sorularınızı
     <string name="error_apg_version_not_supported">Kurulu APG versiyon desteklenmiyor.</string>
     <string name="btn_crypto_sign">İşaret</string>
     <string name="btn_encrypt">Şifrelemek</string>
-    <string name="btn_decrypt">Çözmek</string>
+    <string name="btn_decrypt2">Çözmek</string>
     <string name="btn_verify">Doğrulamak</string>
     <string name="unknown_crypto_signature_user_id">&lt;bilinmiyor&gt;</string>
     <string name="key_id">no: %s</string>

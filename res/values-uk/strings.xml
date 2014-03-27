@@ -939,7 +939,7 @@ K-9 Mail це поштовий клієнт з відкритим вихідни
     <string name="error_apg_version_not_supported">Встановлена версія APG не підтримується.</string>
     <string name="btn_crypto_sign">Підписати</string>
     <string name="btn_encrypt">Зашифрувати</string>
-    <string name="btn_decrypt">Розшифрувати</string>
+    <string name="btn_decrypt2">Розшифрувати</string>
     <string name="btn_verify">Перевірити</string>
     <string name="unknown_crypto_signature_user_id">&lt;невідомий&gt;</string>
     <string name="key_id">id: %s</string>

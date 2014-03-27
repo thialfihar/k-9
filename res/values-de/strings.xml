@@ -938,7 +938,7 @@ Um Fehler zu melden, neue Funktionen vorzuschlagen oder Fragen zu stellen, besuc
     <string name="error_apg_version_not_supported">Die installierte APG-Version wird nicht unterstützt.</string>
     <string name="btn_crypto_sign">Signieren</string>
     <string name="btn_encrypt">Verschlüsseln</string>
-    <string name="btn_decrypt">Entschlüsseln</string>
+    <string name="btn_decrypt2">Entschlüsseln</string>
     <string name="btn_verify">Verifizieren</string>
     <string name="unknown_crypto_signature_user_id">&lt;unbekannt&gt;</string>
     <string name="key_id">id: %s</string>

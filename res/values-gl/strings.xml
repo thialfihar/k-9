@@ -939,7 +939,7 @@ Por favor, envía os erros detectados, contribúe con novas funcionalidas e preg
     <string name="error_apg_version_not_supported">Non se soporta esta versión de APG</string>
     <string name="btn_crypto_sign">Asinar</string>
     <string name="btn_encrypt">Cifrar</string>
-    <string name="btn_decrypt">Descifrar</string>
+    <string name="btn_decrypt2">Descifrar</string>
     <string name="btn_verify">Verificar</string>
     <string name="unknown_crypto_signature_user_id">&lt;descoñecido&gt;</string>
     <string name="key_id">id: %s</string>

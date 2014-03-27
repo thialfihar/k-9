@@ -940,7 +940,7 @@ Virheraportit, osallistuminen projektiin ja kysymykset: Mene osoitteeseen
     <string name="error_apg_version_not_supported">Asennettua APG-versiota ei tueta.</string>
     <string name="btn_crypto_sign">Allekirjoita</string>
     <string name="btn_encrypt">Salaa</string>
-    <string name="btn_decrypt">Pura salaus</string>
+    <string name="btn_decrypt2">Pura salaus</string>
     <string name="btn_verify">Vahvista</string>
     <string name="unknown_crypto_signature_user_id">&lt;tuntematon&gt;</string>
     <string name="key_id">id: %s</string>

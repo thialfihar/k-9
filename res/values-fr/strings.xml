@@ -965,7 +965,7 @@ de plus</string>
     <string name="error_apg_version_not_supported">La version installée de APG n\'est pas supportée.</string>
     <string name="btn_crypto_sign">Signer</string>
     <string name="btn_encrypt">Chiffrer</string>
-    <string name="btn_decrypt">Déchiffrer</string>
+    <string name="btn_decrypt2">Déchiffrer</string>
     <string name="btn_verify">Vérifier</string>
     <string name="unknown_crypto_signature_user_id">«\u00A0inconnu\u00A0»</string>
     <string name="key_id">id\u00A0: %s</string>

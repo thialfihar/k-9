@@ -938,7 +938,7 @@ K-9改进的功能包括：
     <string name="error_apg_version_not_supported">不支持所安装版本的APG。</string>
     <string name="btn_crypto_sign">签名</string>
     <string name="btn_encrypt">加密</string>
-    <string name="btn_decrypt">解密</string>
+    <string name="btn_decrypt2">解密</string>
     <string name="btn_verify">验证</string>
     <string name="unknown_crypto_signature_user_id">&lt;未知&gt;</string>
     <string name="key_id">id: %s</string>

@@ -916,7 +916,7 @@ Praneškite apie klaidas, pridėkite naujų galimybių ir užduokite klausimus m
     <string name="error_apg_version_not_supported">Įdiegta APG versija nepalaikoma.</string>
     <string name="btn_crypto_sign">Pasirašyti</string>
     <string name="btn_encrypt">Šifruoti</string>
-    <string name="btn_decrypt">Iššifruoti</string>
+    <string name="btn_decrypt2">Iššifruoti</string>
     <string name="btn_verify">Patikrinti</string>
     <string name="unknown_crypto_signature_user_id">&lt;nežinoma&gt;</string>
     <string name="key_id">id: %s</string>

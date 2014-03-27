@@ -939,7 +939,7 @@ Por favor, envía los errores detectados, contribuye con nuevas funcionalidades 
     <string name="error_apg_version_not_supported">No se admite esta versión de APG</string>
     <string name="btn_crypto_sign">Firmar</string>
     <string name="btn_encrypt">Cifrar</string>
-    <string name="btn_decrypt">Descifrar</string>
+    <string name="btn_decrypt2">Descifrar</string>
     <string name="btn_verify">Verificar</string>
     <string name="unknown_crypto_signature_user_id">&lt;desconocido&gt;</string>
     <string name="key_id">id: %s</string>

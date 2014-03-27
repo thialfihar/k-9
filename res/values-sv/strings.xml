@@ -940,7 +940,7 @@ Vänligen skicka felrapporter, hjälp till med nya funktioner och ställ frågor
     <string name="error_apg_version_not_supported">Den installerade versionen av APG stöds inte.</string>
     <string name="btn_crypto_sign">Signera</string>
     <string name="btn_encrypt">Kryptera</string>
-    <string name="btn_decrypt">Dekryptera</string>
+    <string name="btn_decrypt2">Dekryptera</string>
     <string name="btn_verify">Verifiera</string>
     <string name="unknown_crypto_signature_user_id">&lt;okänd&gt;</string>
     <string name="key_id">id: %s</string>

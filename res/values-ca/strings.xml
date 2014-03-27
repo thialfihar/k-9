@@ -941,7 +941,7 @@ Si us plau, envia\'ns els errors, contribueix a millorar-lo a
     <string name="error_apg_version_not_supported">Versió APG instal·lada no suportada.</string>
     <string name="btn_crypto_sign">Inicia</string>
     <string name="btn_encrypt">Encripta</string>
-    <string name="btn_decrypt">Desencripta</string>
+    <string name="btn_decrypt2">Desencripta</string>
     <string name="btn_verify">Verifica</string>
     <string name="unknown_crypto_signature_user_id">&lt;desconegut&gt;</string>
     <string name="key_id">id: %s</string>

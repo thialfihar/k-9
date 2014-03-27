@@ -938,7 +938,7 @@ K-9 메일은 대부분의 무료 hotmail 계정을 지원하지 않으며, 다�
     <string name="error_apg_version_not_supported">설치된 APG 버전을 지원하지 않습니다.</string>
     <string name="btn_crypto_sign">서명</string>
     <string name="btn_encrypt">암호화</string>
-    <string name="btn_decrypt">복호화</string>
+    <string name="btn_decrypt2">복호화</string>
     <string name="btn_verify">인증</string>
     <string name="unknown_crypto_signature_user_id">&lt;알 수 없음&gt;</string>
     <string name="key_id">id: %s</string>

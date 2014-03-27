@@ -950,7 +950,7 @@ Wszelkie zgłoszenia usterek, zapytania oraz nowe pomysły prosimy przesyłać z
     <string name="error_apg_version_not_supported">Zainstalowana wersja APG nie jest wspierana.</string>
     <string name="btn_crypto_sign">Podpisz</string>
     <string name="btn_encrypt">Szyfruj</string>
-    <string name="btn_decrypt">Deszyfruj</string>
+    <string name="btn_decrypt2">Deszyfruj</string>
     <string name="btn_verify">Potwierdź</string>
     <string name="unknown_crypto_signature_user_id">&lt;nieznany&gt;</string>
     <string name="key_id">id: %s</string>

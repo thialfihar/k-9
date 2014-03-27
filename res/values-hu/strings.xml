@@ -940,7 +940,7 @@ Hibajelentéseivel hozzájárul az újabb verziók tökéletesítéséhez, kérd
     <string name="error_apg_version_not_supported">A telepített APG verzió nem támogatott.</string>
     <string name="btn_crypto_sign">Aláírás</string>
     <string name="btn_encrypt">Titkosítás</string>
-    <string name="btn_decrypt">Dekódolás</string>
+    <string name="btn_decrypt2">Dekódolás</string>
     <string name="btn_verify">Ellenőrzés</string>
     <string name="unknown_crypto_signature_user_id">&lt;ismeretlen&gt;</string>
     <string name="key_id">azonosító: %s</string>

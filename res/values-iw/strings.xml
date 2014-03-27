@@ -939,7 +939,7 @@
     <string name="error_apg_version_not_supported">גרסת APG המותקנת אינה נתמכת.</string>
     <string name="btn_crypto_sign">חתום</string>
     <string name="btn_encrypt">הצפן</string>
-    <string name="btn_decrypt">פענח</string>
+    <string name="btn_decrypt2">פענח</string>
     <string name="btn_verify">אמת</string>
     <!-- NEW: <string name="unknown_crypto_signature_user_id">&lt;unknown&gt;</string>-->
     <!-- NEW: <string name="key_id">id: %s</string>-->

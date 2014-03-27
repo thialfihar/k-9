@@ -944,7 +944,7 @@ Posílejte prosím chybová hlášení, přispívejte novými funkcemi a ptejte 
     <string name="error_apg_version_not_supported">Nainstalovaná verze APG není podporována.</string>
     <string name="btn_crypto_sign">Podepsat</string>
     <string name="btn_encrypt">Šifrovat</string>
-    <string name="btn_decrypt">Dešifrovat</string>
+    <string name="btn_decrypt2">Dešifrovat</string>
     <string name="btn_verify">Ověřit</string>
     <string name="unknown_crypto_signature_user_id">&lt;neznámý&gt;</string>
     <string name="key_id">id: %s</string>

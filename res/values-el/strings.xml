@@ -939,7 +939,7 @@
     <string name="error_apg_version_not_supported">Η εγκατεστημένη έκδοση APG δεν υποστηρίζεται.</string>
     <string name="btn_crypto_sign">Υπογραφή</string>
     <string name="btn_encrypt">Κρυπτογράφηση</string>
-    <string name="btn_decrypt">Αποκρυπτογράφηση</string>
+    <string name="btn_decrypt2">Αποκρυπτογράφηση</string>
     <string name="btn_verify">Επιβεβαίωση</string>
     <string name="unknown_crypto_signature_user_id">&lt;άγνωστος&gt;</string>
     <string name="key_id">id: %s</string>

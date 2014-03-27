@@ -162,7 +162,7 @@ Vær venlig at sende fejlrapporter, anmodning om nye funktioner, og spørgsmål 
 
     <string name="message_view_theme_action_dark">Skift til mørkt theme</string>
     <string name="message_view_theme_action_light">Skift til lyst theme</string>
-    
+
     <string name="mark_as_unread_action">Marker som ulæst</string>
     <string name="add_cc_bcc_action">Tilføj Cc/Bcc</string>
     <string name="read_receipt">Kvittering for modtagelse</string>
@@ -940,7 +940,7 @@ Vær venlig at sende fejlrapporter, anmodning om nye funktioner, og spørgsmål 
     <string name="error_apg_version_not_supported">Den installerede version af APG understørttes ikke.</string>
     <string name="btn_crypto_sign">Signer</string>
     <string name="btn_encrypt">Krypter</string>
-    <string name="btn_decrypt">Dekrypter</string>
+    <string name="btn_decrypt2">Dekrypter</string>
     <string name="btn_verify">Verificer</string>
     <string name="unknown_crypto_signature_user_id">&lt;ukendt&gt;</string>
     <string name="key_id">id: %s</string>

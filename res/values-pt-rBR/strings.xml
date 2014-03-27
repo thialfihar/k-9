@@ -939,7 +939,7 @@ Por favor, nos envie relatórios de bugs, contribua para novas melhorias e faça
     <string name="error_apg_version_not_supported"> A versão da APG instalada não é suportada.</string>
     <string name="btn_crypto_sign">Entrar</string>
     <string name="btn_encrypt">Encriptar</string>
-    <string name="btn_decrypt">Decriptar</string>
+    <string name="btn_decrypt2">Decriptar</string>
     <string name="btn_verify">Verificar</string>
     <string name="unknown_crypto_signature_user_id">&lt;desconhecido&gt;</string>
     <string name="key_id">id: %s</string>

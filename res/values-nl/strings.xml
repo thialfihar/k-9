@@ -939,7 +939,7 @@ Graag foutrapporten, bijdrage nieuwe functies en vragen stellen op
     <string name="error_apg_version_not_supported">De geïnstalleerde APG versie wordt niet ondersteund.</string>
     <string name="btn_crypto_sign">Teken</string>
     <string name="btn_encrypt">Versleutelen</string>
-    <string name="btn_decrypt">Decoderen</string>
+    <string name="btn_decrypt2">Decoderen</string>
     <string name="btn_verify">Bevestig</string>
     <string name="unknown_crypto_signature_user_id">&lt;onbekend&gt;</string>
     <string name="key_id">id: %s</string>
