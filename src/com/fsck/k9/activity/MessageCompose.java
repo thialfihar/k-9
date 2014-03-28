@@ -1875,9 +1875,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             if (mPgpData.getEncryptedData() == null) {
                 String text = buildText(false).getText();
                 mPreventDraftSaving = true;
-                if (!crypto.encrypt(this, text, mPgpData)) {
-                    mPreventDraftSaving = false;
-                }
+                crypto.encrypt(this, text, mPgpData);
                 return;
             }
         }
@@ -2161,7 +2159,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // if a CryptoSystem activity is returning, then mPreventDraftSaving was set to true
         mPreventDraftSaving = false;
 

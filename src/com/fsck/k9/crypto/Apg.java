@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Messenger;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 
 import com.fsck.k9.activity.MessageCompose;
@@ -33,6 +34,7 @@ import org.thialfihar.android.apg.Constants;
 import org.thialfihar.android.apg.Id;
 import org.thialfihar.android.apg.R;
 import org.thialfihar.android.apg.helper.OtherHelper;
+import org.thialfihar.android.apg.helper.Preferences;
 import org.thialfihar.android.apg.pgp.PgpDecryptVerifyResult;
 import org.thialfihar.android.apg.pgp.PgpHelper;
 import org.thialfihar.android.apg.pgp.exception.PgpGeneralException;
@@ -437,6 +439,26 @@ public class Apg extends CryptoProvider {
     }
 
     /**
+     * Fixes bad message characters for gmail
+     *
+     * @param message
+     * @return
+     */
+    private String fixBadCharactersForGmail(String message) {
+        // fix the message a bit, trailing spaces and newlines break stuff,
+        // because Gmail sends as HTML and such things fuck up the
+        // signature,
+        // TODO: things like "<" and ">" also fuck up the signature
+        message = message.replaceAll(" +\n", "\n");
+        message = message.replaceAll("\n\n+", "\n\n");
+        message = message.replaceFirst("^\n+", "");
+        // make sure there'll be exactly one newline at the end
+        message = message.replaceFirst("\n*$", "\n");
+
+        return message;
+    }
+
+    /**
      * Start the encrypt activity.
      *
      * @param activity
@@ -445,22 +467,74 @@ public class Apg extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean encrypt(Activity activity, String data, PgpData pgpData) {
-        android.content.Intent intent = new android.content.Intent(Intent.ENCRYPT_AND_RETURN);
-        intent.putExtra(EXTRA_INTENT_VERSION, INTENT_VERSION);
-        intent.setType("text/plain");
-        intent.putExtra(Apg.EXTRA_TEXT, data);
-        intent.putExtra(Apg.EXTRA_ENCRYPTION_KEY_IDS, pgpData.getEncryptionKeys());
-        intent.putExtra(Apg.EXTRA_SIGNATURE_KEY_ID, pgpData.getSignatureKeyId());
-        try {
-            activity.startActivityForResult(intent, Apg.ENCRYPT_MESSAGE);
-            return true;
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(activity,
-                           R.string.error_activity_not_found,
-                           Toast.LENGTH_SHORT).show();
+    public boolean encrypt(final Activity activity, final String textData, final PgpData pgpData) {
+        final MessageCompose fragmentActivity = (MessageCompose) activity;
+        android.content.Intent intent = new android.content.Intent(activity, ApgIntentService.class);
+        boolean useAsciiArmor = true;
+        long encryptionKeyIds[] = pgpData.getEncryptionKeys();
+        boolean signOnly = (encryptionKeyIds == null || encryptionKeyIds.length == 0);
+        long secretKeyId = pgpData.getSignatureKeyId();
+        int compressionId = Preferences.getPreferences(activity).getDefaultMessageCompression();
+
+        if (secretKeyId != 0 &&
+            PassphraseCacheService.getCachedPassphrase(fragmentActivity, secretKeyId) == null) {
+            PassphraseDialogFragment.show(fragmentActivity, secretKeyId, new Handler() {
+                @Override
+                public void handleMessage(android.os.Message message) {
+                    if (message.what == PassphraseDialogFragment.MESSAGE_OKAY) {
+                        new Apg().encrypt(fragmentActivity, textData, pgpData);
+                    }
+                }
+            });
+
             return false;
         }
+        String message = textData;
+        if (signOnly) {
+            message = fixBadCharactersForGmail(message);
+        }
+
+        intent.setAction(ApgIntentService.ACTION_ENCRYPT_SIGN);
+
+        Bundle data = new Bundle();
+        data.putInt(ApgIntentService.TARGET, ApgIntentService.TARGET_BYTES);
+        data.putByteArray(ApgIntentService.ENCRYPT_MESSAGE_BYTES, message.getBytes());
+        data.putLong(ApgIntentService.ENCRYPT_SECRET_KEY_ID, secretKeyId);
+        data.putBoolean(ApgIntentService.ENCRYPT_USE_ASCII_ARMOR, useAsciiArmor);
+        data.putLongArray(ApgIntentService.ENCRYPT_ENCRYPTION_KEYS_IDS, encryptionKeyIds);
+        data.putInt(ApgIntentService.ENCRYPT_COMPRESSION_ID, compressionId);
+        data.putBoolean(ApgIntentService.ENCRYPT_GENERATE_SIGNATURE, false);
+        data.putBoolean(ApgIntentService.ENCRYPT_SIGN_ONLY, signOnly);
+
+        intent.putExtra(ApgIntentService.EXTRA_DATA, data);
+
+        // Message is received after encrypting is done in ApgService
+        ApgIntentServiceHandler saveHandler = new ApgIntentServiceHandler(fragmentActivity,
+                activity.getString(R.string.progress_encrypting), ProgressDialog.STYLE_HORIZONTAL) {
+            public void handleMessage(android.os.Message message) {
+                // handle messages by standard ApgHandler first
+                super.handleMessage(message);
+
+                if (message.arg1 == ApgIntentServiceHandler.MESSAGE_OKAY) {
+                    Bundle data = message.getData();
+                    android.content.Intent result = new android.content.Intent();
+                    result.putExtra("encryptedMessage", data.getString(ApgIntentService.RESULT_ENCRYPTED_STRING));
+                    fragmentActivity.onActivityResult(Apg.ENCRYPT_MESSAGE, Activity.RESULT_OK, result);
+                }
+            }
+        };
+
+        // Create a new Messenger for the communication back
+        Messenger messenger = new Messenger(saveHandler);
+        intent.putExtra(ApgIntentService.EXTRA_MESSENGER, messenger);
+
+        // show progress dialog
+        saveHandler.showProgressDialog(fragmentActivity);
+
+        // start service with intent
+        activity.startService(intent);
+
+        return true;
     }
 
     /**
