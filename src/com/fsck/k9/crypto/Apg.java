@@ -22,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 
+import com.fsck.k9.K9;
 import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
@@ -46,7 +47,11 @@ import org.thialfihar.android.apg.service.PassphraseCacheService;
 import org.thialfihar.android.apg.ui.dialog.PassphraseDialogFragment;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * APG integration.
@@ -379,28 +384,11 @@ public class Apg extends CryptoProvider {
         case Apg.SELECT_PUBLIC_KEYS:
             if (resultCode != Activity.RESULT_OK || data == null) {
                 pgpData.setEncryptionKeys(null);
-                ((MessageCompose) activity).onEncryptionKeySelectionDone();
+                ((MessageCompose) activity).setEncryptionKeySelectionDone(true);
                 break;
             }
             pgpData.setEncryptionKeys(data.getLongArrayExtra(Apg.EXTRA_SELECTION));
-            ((MessageCompose) activity).onEncryptionKeySelectionDone();
-            break;
-
-        case Apg.ENCRYPT_MESSAGE:
-            if (resultCode != Activity.RESULT_OK || data == null) {
-                pgpData.setEncryptionKeys(null);
-                ((MessageCompose) activity).onEncryptDone();
-                break;
-            }
-            pgpData.setEncryptedData(data.getStringExtra(Apg.EXTRA_ENCRYPTED_MESSAGE));
-            // this was a stupid bug in an earlier version, just gonna leave this in for an APG
-            // version or two
-            if (pgpData.getEncryptedData() == null) {
-                pgpData.setEncryptedData(data.getStringExtra(Apg.EXTRA_DECRYPTED_MESSAGE));
-            }
-            if (pgpData.getEncryptedData() != null) {
-                ((MessageCompose) activity).onEncryptDone();
-            }
+            ((MessageCompose) activity).setEncryptionKeySelectionDone(true);
             break;
 
         default:
@@ -438,24 +426,38 @@ public class Apg extends CryptoProvider {
         return true;
     }
 
-    /**
-     * Fixes bad message characters for gmail
-     *
-     * @param message
-     * @return
-     */
-    private String fixBadCharactersForGmail(String message) {
-        // fix the message a bit, trailing spaces and newlines break stuff,
-        // because Gmail sends as HTML and such things fuck up the
-        // signature,
-        // TODO: things like "<" and ">" also fuck up the signature
-        message = message.replaceAll(" +\n", "\n");
-        message = message.replaceAll("\n\n+", "\n\n");
-        message = message.replaceFirst("^\n+", "");
-        // make sure there'll be exactly one newline at the end
-        message = message.replaceFirst("\n*$", "\n");
+    private String writeToTempFile(Context context, byte[] binaryData) {
+        File f = null;
+        OutputStream os = null;
 
-        return message;
+        try {
+
+            f = File.createTempFile( "body", ".tmp", context.getExternalCacheDir() );
+            f.deleteOnExit();
+
+            os = new FileOutputStream(f);
+            os.write(binaryData);
+            os.flush();
+
+        } catch( Exception e ) {
+            Log.e( K9.LOG_TAG, "Error writing body to temp file", e );
+        } finally {
+            if( os != null ) {
+                try {
+                    os.close();
+                } catch( IOException e ) {
+                    Log.w( K9.LOG_TAG, "Error closing temp file for body", e );
+                }
+            }
+        }
+
+        String filename = null;
+        if( f != null && f.exists() ) {
+            filename = f.getAbsolutePath();
+        }
+
+        return filename;
+
     }
 
     /**
@@ -467,12 +469,12 @@ public class Apg extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean encrypt(final Activity activity, final String textData, final PgpData pgpData) {
+    public boolean encrypt(final Activity activity, final String textData, final byte[] binaryData, final PgpData pgpData) {
         final MessageCompose fragmentActivity = (MessageCompose) activity;
         android.content.Intent intent = new android.content.Intent(activity, ApgIntentService.class);
-        boolean useAsciiArmor = true;
         long encryptionKeyIds[] = pgpData.getEncryptionKeys();
         boolean signOnly = (encryptionKeyIds == null || encryptionKeyIds.length == 0);
+        boolean useAsciiArmor = true;
         long secretKeyId = pgpData.getSignatureKeyId();
         int compressionId = Preferences.getPreferences(activity).getDefaultMessageCompression();
 
@@ -482,23 +484,26 @@ public class Apg extends CryptoProvider {
                 @Override
                 public void handleMessage(android.os.Message message) {
                     if (message.what == PassphraseDialogFragment.MESSAGE_OKAY) {
-                        new Apg().encrypt(fragmentActivity, textData, pgpData);
+                        new Apg().encrypt(fragmentActivity, textData, binaryData, pgpData);
                     }
                 }
             });
 
             return false;
         }
-        String message = textData;
-        if (signOnly) {
-            message = fixBadCharactersForGmail(message);
-        }
-
         intent.setAction(ApgIntentService.ACTION_ENCRYPT_SIGN);
 
         Bundle data = new Bundle();
-        data.putInt(ApgIntentService.TARGET, ApgIntentService.TARGET_BYTES);
-        data.putByteArray(ApgIntentService.ENCRYPT_MESSAGE_BYTES, message.getBytes());
+        if (textData != null) {
+            data.putInt(ApgIntentService.TARGET, ApgIntentService.TARGET_BYTES);
+            data.putByteArray(ApgIntentService.ENCRYPT_MESSAGE_BYTES, textData.getBytes());
+        } else {
+            data.putInt(ApgIntentService.TARGET, ApgIntentService.TARGET_STREAM);
+            pgpData.setInputFilename(writeToTempFile(activity, binaryData));
+
+            data.putParcelable(ApgIntentService.ENCRYPT_PROVIDER_URI,
+                Uri.fromFile(new File(pgpData.getInputFilename())));
+        }
         data.putLong(ApgIntentService.ENCRYPT_SECRET_KEY_ID, secretKeyId);
         data.putBoolean(ApgIntentService.ENCRYPT_USE_ASCII_ARMOR, useAsciiArmor);
         data.putLongArray(ApgIntentService.ENCRYPT_ENCRYPTION_KEYS_IDS, encryptionKeyIds);
@@ -517,10 +522,10 @@ public class Apg extends CryptoProvider {
 
                 if (message.arg1 == ApgIntentServiceHandler.MESSAGE_OKAY) {
                     Bundle data = message.getData();
-                    android.content.Intent result = new android.content.Intent();
-                    result.putExtra("encryptedMessage", data.getString(ApgIntentService.RESULT_ENCRYPTED_STRING));
-                    fragmentActivity.onActivityResult(Apg.ENCRYPT_MESSAGE, Activity.RESULT_OK, result);
+                    pgpData.setEncryptedData(data.getString(ApgIntentService.RESULT_ENCRYPTED_STRING));
+                    pgpData.setEncryptedDataUri(data.getString(ApgIntentService.RESULT_URI));
                 }
+                fragmentActivity.onEncryptDone();
             }
         };
 
@@ -536,11 +541,11 @@ public class Apg extends CryptoProvider {
 
         return true;
     }
-    
+
     public boolean encryptFile( Activity activity, String filename, PgpData pgpData ) {
     	return false;
     }
-    
+
     public boolean sign( Activity activity, String filename, PgpData pgpData ) {
     	return false;
     }
@@ -655,12 +660,12 @@ public class Apg extends CryptoProvider {
     public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData ) {
     	return false;
     }
-    
+
     @Override
     public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData ) {
-    	return false;	
+    	return false;
     }
-    
+
     @Override
     public boolean isEncrypted(Message message) {
         String data = null;
@@ -684,7 +689,7 @@ public class Apg extends CryptoProvider {
         Matcher matcher = PGP_MESSAGE.matcher(data);
         return matcher.matches();
     }
-    
+
     @Override
     public boolean isSigned(Message message) {
         String data = null;

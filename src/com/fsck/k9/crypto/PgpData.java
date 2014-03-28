@@ -15,9 +15,11 @@ public class PgpData implements Serializable {
     protected boolean showFile = false;
     protected boolean pgpEncrypted = false;
     protected boolean pgpSigned = false;
-    protected String signature = null;
+    protected String mSignatureData = null;
     protected boolean forceArmored = false;
-    
+    protected String inputFilename = null;
+    protected String mEncryptedDataUri = null;
+
     public void setSignatureKeyId(long keyId) {
         mSignatureKeyId = keyId;
     }
@@ -58,6 +60,14 @@ public class PgpData implements Serializable {
         mDecryptedData = data;
     }
 
+    public String getEncryptedDataUri() {
+        return mEncryptedDataUri;
+    }
+
+    public void setEncryptedDataUri(String encryptedDataUri) {
+        mEncryptedDataUri = encryptedDataUri;
+    }
+
     public void setSignatureUserId(String userId) {
         mSignatureUserId = userId;
     }
@@ -81,45 +91,53 @@ public class PgpData implements Serializable {
     public void setSignatureUnknown(boolean unknown) {
         mSignatureUnknown = unknown;
     }
-    
+
     public String getFilename() {
-    	return filename;
+        return filename;
     }
-    
+
     public void setFilename( String filename ) {
-    	this.filename = filename;
+        this.filename = filename;
     }
-    
+
+    public String getInputFilename() {
+        return inputFilename;
+    }
+
+    public void setInputFilename( String inputFilename ) {
+        this.inputFilename = inputFilename;
+    }
+
     public boolean showFile() {
     	return showFile;
     }
-    
+
     public void setShowFile( boolean showFile ) {
     	this.showFile = showFile;
     }
-    
+
     public boolean isPgpEncrypted() {
     	return pgpEncrypted;
     }
-    
+
     public void setPgpEncrypted( boolean pgpEncrypted ) {
     	this.pgpEncrypted = pgpEncrypted;
     }
-    
+
     public boolean isPgpSigned() {
     	return pgpSigned;
     }
-    
+
     public void setPgpSigned( boolean pgpSigned ) {
     	this.pgpSigned = pgpSigned;
     }
 
-	public String getSignature() {
-		return signature;
+	public String getSignatureData() {
+		return mSignatureData;
 	}
 
-	public void setSignature(String signature) {
-		this.signature = signature;
+	public void setSignatureData(String signatureData) {
+		mSignatureData = signatureData;
 	}
 
 	public boolean isForceArmored() {
@@ -129,5 +147,5 @@ public class PgpData implements Serializable {
 	public void setForceArmored(boolean forceArmored) {
 		this.forceArmored = forceArmored;
 	}
-    
+
 }

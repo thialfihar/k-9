@@ -416,7 +416,7 @@ public class PGPKeyRing extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean encrypt( Activity activity, String data, PgpData pgpData ) {
+    public boolean encrypt( Activity activity, String data, byte[] binaryData, PgpData pgpData ) {
 
         boolean success = false;
 
@@ -671,7 +671,7 @@ public class PGPKeyRing extends CryptoProvider {
         	if( resultCode != Activity.RESULT_OK || data == null ) {
         		pgpData.setSignatureKeyId( 0L );
         	} else {
-        		pgpData.setSignature( data.getStringExtra( EXTRAS_SIGNATURE ) );
+        		pgpData.setSignatureData( data.getStringExtra( EXTRAS_SIGNATURE ) );
         	}
 
         	( ( MessageCompose )activity ).onEncryptDone();

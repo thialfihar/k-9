@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -346,6 +347,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     private boolean mDraftNeedsSaving = false;
     private boolean mPreventDraftSaving = false;
 
+    private boolean mEncryptionKeySelectionDone = false;
     /**
      * If this is {@code true} we don't save the message as a draft in {@link #onPause()}.
      */
@@ -1490,12 +1492,12 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         final boolean hasAttachments = mAttachments.getChildCount() > 0;
 
-        if( usePgpMime && ( mPgpData.getEncryptedData() != null || mPgpData.getSignature() != null ) ) {
+        if( usePgpMime && ( mPgpData.getEncryptedData() != null || mPgpData.getSignatureData() != null ) ) {
         	if (mPgpData.getEncryptedData() != null ) {
         		msgBody = buildPgpMimeEncrypted( mPgpData.getEncryptedData() );
         	} else {
 
-        		msgBody = buildPgpMimeSigned( mPgpData.getSignature() );
+        		msgBody = buildPgpMimeSigned( mPgpData.getSignatureData() );
 
         		try {
 
@@ -1870,45 +1872,37 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     public void onEncryptDone() {
+        if (mPgpData.getEncryptedDataUri() != null) {
+            String uri = mPgpData.getEncryptedDataUri();
+            String filename = uri.substring(uri.lastIndexOf('/') + 1);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            InputStream is = null;
+            try {
+                is = openFileInput(filename);
+                IOUtils.copy(is, baos);
 
-    	if(mPgpData.getFilename() != null ) {
+                if (mPgpData.getEncryptionKeys() == null) {
+                    mPgpData.setSignatureData(new String(baos.toByteArray()));
+                } else {
+                    mPgpData.setEncryptedData(new String(baos.toByteArray()));
+                }
+            } catch (IOException e) {
+                Log.e(K9.LOG_TAG, "Error reading encrypted data from file", e);
+            } finally {
+                if (is != null ) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        Log.e(K9.LOG_TAG, "Unable to close file", e);
+                    }
+                }
 
-    		File f = new File( mPgpData.getFilename() );
-    		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    		InputStream is = null;
-    		try {
-
-    			is = new BufferedInputStream( new FileInputStream( f ) );
-    			IOUtils.copy( is, baos );
-
-    			String encrypted = new String( baos.toByteArray() );
-    			//Log.w( K9.LOG_TAG, "Encrypted:\n" + encrypted );
-
-    			mPgpData.setEncryptedData( encrypted );
-    			mPgpData.setFilename( null );
-
-    		} catch( IOException e ) {
-    			Log.e( K9.LOG_TAG, "Error reading encrypted data from file", e );
-    		} finally {
-
-    			if( is != null ) {
-    				try {
-    					is.close();
-    				} catch( IOException e ) {
-    					Log.e( K9.LOG_TAG, "Unable to close file", e );
-    				}
-    			}
-
-    			if( f != null && f.exists() ) {
-    				f.delete();
-    			}
-
-    		}
-    	}
+                deleteFile(filename);
+            }
+        }
 
         if (mPgpData.getEncryptedData() != null ||
-            (mPgpData.getSignature() != null &&
-                mAccount.isCryptoUsePgpMime())) {
+            (mPgpData.getSignatureData() != null && mAccount.isCryptoUsePgpMime())) {
             onSend();
         } else {
             Toast.makeText(this, R.string.send_aborted, Toast.LENGTH_SHORT).show();
@@ -1979,16 +1973,15 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
 	    		TextBody textBody = buildText( false );
 	        	boolean success = false;
-	        	if( usePgpMime ) {
-
-	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                MimeMessage mimeMessage = null;
+                if( usePgpMime ) {
 
 	        		/*
 	        		if( mPgpData.hasSignatureKey() ) {
 
-	        			MimeMessage m = new MimeMessage();
-	        			m.setBody( buildPgpMimeSigned( mPgpData.getSignature() ) );
-	        			m.writeTo( baos );
+	        			MimeMessage mimeMessage = new MimeMessage();
+	        			mimeMessage.setBody( buildPgpMimeSigned( mPgpData.getSignature() ) );
+	        			mimeMessage.writeTo( baos );
 
 	        		} else if (mMessageFormat == SimpleMessageFormat.HTML) {
 	        		*/
@@ -2006,9 +1999,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 		        			addAttachmentsToMessage( mp );
 		        		}
 
-	        	        MimeMessage m = new MimeMessage();
-	        	        m.setBody( mp );
-	        	        m.writeTo( baos );
+	        	        mimeMessage = new MimeMessage();
+	        	        mimeMessage.setBody( mp );
 
 	        		} else if (mMessageFormat == SimpleMessageFormat.TEXT ) {
 
@@ -2018,38 +2010,33 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 		                    mp.addBodyPart( new MimeBodyPart( textBody, "text/plain" ));
 		                    addAttachmentsToMessage( mp );
 
-		                    MimeMessage m = new MimeMessage();
-		        	        m.setBody( mp );
-		        	        m.writeTo( baos );
+		                    mimeMessage = new MimeMessage();
+		        	        mimeMessage.setBody( mp );
 
 	        			} else {
 
-	        				MimeMessage m = new MimeMessage();
-	        				m.setBody( textBody );
-	        				m.writeTo( baos );
+	        				mimeMessage = new MimeMessage();
+	        				mimeMessage.setBody( textBody );
 
 	        			}
 
 	        		}
+                }
 
-                    String filename = writeToTempFile( baos.toByteArray() );
-
-	        		if( filename != null ) {
-	        			success = new Apg().encryptFile(this, Uri.fromFile( new File( filename ) ).toString(), mPgpData);
-	        		}
-
+                if (mimeMessage != null) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    mimeMessage.writeTo(baos);
+                    byte[] payload = baos.toByteArray();
+        			success = new Apg().encrypt(this, null, payload, mPgpData);
 	        	} else {
-	        		success = new Apg().encrypt(this, textBody.getText(), mPgpData);
+	        		success = new Apg().encrypt(this, textBody.getText(), null, mPgpData);
 	        	}
-
-	        	if( !success ) {
-	                mPreventDraftSaving = false;
-	            }
 
 	        	return;
 
-	        } else if( mPgpData.getEncryptionKeys() == null && mPgpData.hasSignatureKey() && (  usePgpMime && mPgpData.getSignature() == null ||
-	        		                          		 										   !usePgpMime && mPgpData.getEncryptedData() == null ) ) {
+	        } else if( mPgpData.getEncryptionKeys() == null && mPgpData.hasSignatureKey() &&
+                ((usePgpMime && mPgpData.getSignatureData() == null) ||
+	        	 (!usePgpMime && mPgpData.getEncryptedData() == null))) {
 
 	        	Log.i( K9.LOG_TAG, "I have a signature to calculate" );
 
@@ -2076,18 +2063,11 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	        		byte[] payload = baos.toByteArray();
 	        		//Log.w( K9.LOG_TAG, "Part to sign:\n" + new String( payload ) );
 
-	        		String filename = writeToTempFile( payload );
-	        		if( filename != null ) {
-	        			success = crypto.sign(this, Uri.fromFile( new File( filename) ).toString(), mPgpData);
-	        		}
+        			success = crypto.encrypt(this, null, payload, mPgpData);
 
 	        	} else {
-	                success = crypto.encrypt(this, textBody.getText(), mPgpData);
+	                success = crypto.encrypt(this, textBody.getText(), null, mPgpData);
 	        	}
-
-	        	if( !success ) {
-	                mPreventDraftSaving = false;
-	            }
 
 	            return;
 
@@ -2471,6 +2451,20 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             }
             case NONE:
                 break;
+        }
+    }
+
+
+    public void setEncryptionKeySelectionDone(boolean value) {
+        mEncryptionKeySelectionDone = value;
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        if (mEncryptionKeySelectionDone) {
+            onEncryptionKeySelectionDone();
+            mEncryptionKeySelectionDone = false;
         }
     }
 

@@ -25,7 +25,7 @@ abstract public class CryptoProvider {
             int requestCode, int resultCode, Intent data, PgpData pgpData);
     abstract public boolean selectSecretKey(Activity activity, PgpData pgpData);
     abstract public boolean selectEncryptionKeys(Activity activity, String emails, PgpData pgpData);
-    abstract public boolean encrypt(Activity activity, String data, PgpData pgpData);
+    abstract public boolean encrypt(Activity activity, String textData, byte[] binaryData, PgpData pgpData);
     abstract public boolean encryptFile( Activity activity, String filename, PgpData pgpData );
     abstract public boolean sign( Activity activity, String filename, PgpData pgpData );
     abstract public boolean decrypt(Fragment fragment, String filename, PgpData pgpData);

@@ -71,7 +71,7 @@ public class K9 extends Application {
 
     public static Application app = null;
     public static File tempDirectory;
-    public static final String LOG_TAG = "k9";
+    public static final String LOG_TAG = "APG";
 
     /**
      * Name of the {@link SharedPreferences} file used to store the last known version of the
