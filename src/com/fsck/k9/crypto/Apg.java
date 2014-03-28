@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.util.Log;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentUris;
 import android.content.Context;
@@ -13,6 +15,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Messenger;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
@@ -22,9 +27,24 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MimeUtility;
 
+import org.openintents.openpgp.OpenPgpSignatureResult;
+
+import org.thialfihar.android.apg.Constants;
+import org.thialfihar.android.apg.Id;
 import org.thialfihar.android.apg.R;
+import org.thialfihar.android.apg.helper.OtherHelper;
+import org.thialfihar.android.apg.pgp.PgpDecryptVerifyResult;
+import org.thialfihar.android.apg.pgp.PgpHelper;
+import org.thialfihar.android.apg.pgp.exception.PgpGeneralException;
 import org.thialfihar.android.apg.ui.SelectSecretKeyActivity;
 import org.thialfihar.android.apg.ui.SelectPublicKeyActivity;
+import org.thialfihar.android.apg.service.ApgIntentService;
+import org.thialfihar.android.apg.service.ApgIntentServiceHandler;
+import org.thialfihar.android.apg.service.PassphraseCacheService;
+import org.thialfihar.android.apg.ui.dialog.PassphraseDialogFragment;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * APG integration.
@@ -452,21 +472,101 @@ public class Apg extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean decrypt(Fragment fragment, String data, PgpData pgpData) {
-        android.content.Intent intent = new android.content.Intent(Apg.Intent.DECRYPT_AND_RETURN);
-        intent.putExtra(EXTRA_INTENT_VERSION, INTENT_VERSION);
-        intent.setType("text/plain");
-        if (data == null) {
-            return false;
-        }
+    public boolean decrypt(final Fragment fragment, final String textData, final PgpData pgpData) {
+        // Send all information needed to service to decrypt in other thread
+        android.content.Intent intent = new android.content.Intent(fragment.getActivity(), ApgIntentService.class);
+
+        // fill values for this action
+        Bundle data = new Bundle();
+
+        intent.setAction(ApgIntentService.ACTION_DECRYPT_VERIFY);
+
+        byte[] byteData = textData.getBytes();
+        long secretKeyId = 0;
         try {
-            intent.putExtra(EXTRA_TEXT, data);
-            fragment.startActivityForResult(intent, Apg.DECRYPT_MESSAGE);
-            return true;
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT).show();
+            secretKeyId = PgpHelper.getDecryptionKeyId(fragment.getActivity(), new ByteArrayInputStream(byteData));
+        } catch (PgpGeneralException e) {
+            Log.e(Constants.TAG, "couldn't get decryption key", e);
+            // todo: handle this somehow
+        } catch (IOException e) {
+            Log.e(Constants.TAG, "couldn't get decryption key", e);
+            // todo: handle this somehow
+        }
+
+        Log.d("APG", "secret key: " + secretKeyId);
+
+        if (secretKeyId != Id.key.not_required && secretKeyId != Id.key.none &&
+            PassphraseCacheService.getCachedPassphrase(fragment.getActivity(), secretKeyId) == null) {
+            PassphraseDialogFragment.show(fragment.getActivity(), secretKeyId, new Handler() {
+                @Override
+                public void handleMessage(android.os.Message message) {
+                    if (message.what == PassphraseDialogFragment.MESSAGE_OKAY) {
+                        new Apg().decrypt(fragment, textData, pgpData);
+                    }
+                }
+            });
             return false;
         }
+        data.putLong(ApgIntentService.ENCRYPT_SECRET_KEY_ID, secretKeyId);
+
+        // choose action based on input: decrypt stream, file or bytes
+        data.putInt(ApgIntentService.TARGET, ApgIntentService.TARGET_BYTES);
+
+        data.putByteArray(ApgIntentService.DECRYPT_CIPHERTEXT_BYTES, byteData);
+
+        data.putBoolean(ApgIntentService.DECRYPT_RETURN_BYTES, false);
+        data.putBoolean(ApgIntentService.DECRYPT_ASSUME_SYMMETRIC, secretKeyId == Id.key.symmetric);
+
+        intent.putExtra(ApgIntentService.EXTRA_DATA, data);
+
+        OtherHelper.logDebugBundle(data, "data");
+        final Fragment fragment2 = fragment;
+        // Message is received after encrypting is done in ApgService
+        ApgIntentServiceHandler saveHandler = new ApgIntentServiceHandler(fragment.getActivity(),
+                fragment.getString(R.string.progress_decrypting), ProgressDialog.STYLE_HORIZONTAL) {
+            public void handleMessage(android.os.Message message) {
+                // handle messages by standard ApgHandler first
+                super.handleMessage(message);
+
+                if (message.arg1 == ApgIntentServiceHandler.MESSAGE_OKAY) {
+                    // get returned data bundle
+                    Bundle returnData = message.getData();
+
+                    android.content.Intent intent = new android.content.Intent();
+                    PgpDecryptVerifyResult decryptVerifyResult =
+                        returnData.getParcelable(ApgIntentService.RESULT_DECRYPT_VERIFY_RESULT);
+
+                    OpenPgpSignatureResult signatureResult = decryptVerifyResult.getSignatureResult();
+                    if (signatureResult != null) {
+                        intent.putExtra(EXTRA_SIGNATURE_USER_ID, signatureResult.getUserId());
+                        intent.putExtra(EXTRA_SIGNATURE_KEY_ID, signatureResult.getKeyId());
+                        intent.putExtra(EXTRA_SIGNATURE_SUCCESS,
+                            signatureResult.getStatus() ==
+                                OpenPgpSignatureResult.SIGNATURE_SUCCESS_UNCERTIFIED);
+                        intent.putExtra(EXTRA_SIGNATURE_UNKNOWN,
+                            signatureResult.getStatus() ==
+                                OpenPgpSignatureResult.SIGNATURE_UNKNOWN_PUB_KEY);
+                    }
+                    intent.putExtra(EXTRA_DECRYPTED_MESSAGE,
+                        returnData.getString(ApgIntentService.RESULT_DECRYPTED_STRING));
+
+                    OtherHelper.logDebugBundle(intent.getExtras(), "intent");
+                    fragment2.onActivityResult(Apg.DECRYPT_MESSAGE, Activity.RESULT_OK, intent);
+                }
+            }
+        };
+
+        // Create a new Messenger for the communication back
+        Messenger messenger = new Messenger(saveHandler);
+        intent.putExtra(ApgIntentService.EXTRA_MESSENGER, messenger);
+
+        // show progress dialog
+        saveHandler.showProgressDialog(fragment.getActivity());
+
+        // start service with intent
+        fragment.getActivity().startService(intent);
+
+        return true;
     }
 
     @Override
