@@ -486,11 +486,11 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     public void setShowPictures(Boolean show) {
         mShowPictures = show;
     }
-    
+
     public boolean haveHandledPgpMimeEncrypted() {
     	return mHandledPgpMimeEncrypted;
     }
-    
+
     public boolean haveHandledPgpMimeSigned() {
     	return mHandledPgpMimeSigned;
     }
@@ -562,17 +562,17 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     public boolean additionalHeadersVisible() {
         return mHeaderContainer.additionalHeadersVisible();
     }
-    
+
     public void setMessage(Account account, LocalMessage message, PgpData pgpData,
             MessagingController controller, MessagingListener listener ) throws MessagingException {
     	setMessage( account, message, pgpData, controller, listener, null );
     }
-    
+
     // The replacement message is one derived by decrypted the contents of the original message. We only care about its
     // attachments.
     public void setMessage(Account account, LocalMessage message, PgpData pgpData,
             MessagingController controller, MessagingListener listener, Message replacement ) throws MessagingException {
-    	
+
         resetView();
 
         String text = null;
@@ -585,20 +585,20 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         }
 
         mText = text;
-        
+
         mHasAttachments = message.hasAttachments();
-        
+
         Message showMyAttachments = message;
         if( replacement != null ) {
         	showMyAttachments = replacement;
         }
-        
+
         if(mHasAttachments ) {
         	int numAttachments = renderAttachments( showMyAttachments, 0, message, account, controller, listener, 0 );
         	if( numAttachments == 0 ) {
         		mHasAttachments = false;
         	}
-        } 
+        }
 
         mHiddenAttachments.setVisibility(View.GONE);
 
@@ -668,44 +668,42 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     public void updateCryptoLayout(CryptoProvider cp, PgpData pgpData, Message message) {
         mCryptoView.updateLayout(cp, pgpData, message);
     }
-    
+
     public boolean handlePgpEncrypted( Fragment fragment, Account account, File inputFile, PgpData pgpData ) {
-    	
-    	CryptoProvider cryptoProvider = account.getCryptoProvider();
-    	if( !cryptoProvider.supportsPgpMimeReceive( fragment.getActivity() ) || mHandledPgpMimeEncrypted ) {
+
+    	if (mHandledPgpMimeEncrypted ) {
     		return false;
     	}
-    	
+
     	mHandledPgpMimeEncrypted = true;
-    	
-    	return cryptoProvider.decryptFile( fragment, Uri.fromFile( inputFile ).toString(), false, pgpData );
-    	
+
+    	return new Apg().decryptFile( fragment, Uri.fromFile( inputFile ).toString(), false, pgpData );
+
     }
-    
+
     public boolean handlePgpSigned( Fragment fragment, Account account, byte[] data, String sig, PgpData pgpData ) {
-    	
-    	CryptoProvider cryptoProvider = account.getCryptoProvider();
-    	if( !cryptoProvider.supportsPgpMimeReceive( fragment.getActivity() ) || mHandledPgpMimeSigned ) {
+
+    	if (mHandledPgpMimeSigned ) {
     		return false;
     	}
-    	
+
     	mHandledPgpMimeSigned = true;
-    	
+
     	File f = null;
     	OutputStream os = null;
     	try {
-    		
+
     		f = File.createTempFile("verify", ".bin", fragment.getActivity().getExternalCacheDir() );
         	ByteArrayInputStream bais = new ByteArrayInputStream( data );
     		os = new BufferedOutputStream( new FileOutputStream( f ) );
-    		
+
     		IOUtils.copy( bais, os );
-    		
+
     	} catch( Exception e ) {
-    		
+
     		Log.e( K9.LOG_TAG, e.getMessage(), e );
     		return false;
-    		
+
     	} finally {
     		if( os != null ) {
     			try {
@@ -715,9 +713,9 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     			}
     		}
     	}
-    	
-    	return cryptoProvider.verify( fragment, Uri.fromFile( f ).toString(), sig, pgpData );
-    	
+
+    	return new Apg().verify( fragment, Uri.fromFile( f ).toString(), sig, pgpData );
+
     }
 
     public void showAttachments(boolean show) {
@@ -751,7 +749,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     	if( mFilterPgpAttachments && ( part.getMimeType().contains( "application/pgp-" ) || part.getMimeType().contains( "application/octet-stream" ) ) ) {
     		return numAttachments;
         }
-    	
+
     	if (part.getBody() instanceof Multipart) {
             Multipart mp = (Multipart) part.getBody();
             for (int i = 0; i < mp.getCount(); i++) {
@@ -789,7 +787,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         }
         return numAttachments;
     }
-    
+
     public void setFilterPgpAttachments( boolean filterPgpAttachments ) {
     	this.mFilterPgpAttachments = filterPgpAttachments;
     }
@@ -898,7 +896,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         boolean handledPgpMimeEncrypted;
         boolean handledPgpMimeSigned;
         boolean filterPgpAttachments;
-        
+
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
             @Override

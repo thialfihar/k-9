@@ -1478,7 +1478,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // HTML mode or not.  Should probably fix this so we don't mix up html and text parts.
         TextBody textBody = null;
         Body msgBody = null;
-        boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
+        boolean usePgpMime = mAccount.isCryptoUsePgpMime();
         if (mPgpData.getEncryptedData() != null && !usePgpMime ) {
             textBody = buildText( isDraft, mMessageFormat, mPgpData.getEncryptedData());
         } else {
@@ -1906,7 +1906,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		}
     	}
 
-        if (mPgpData.getEncryptedData() != null || ( mPgpData.getSignature() != null && mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this ) ) ) {
+        if (mPgpData.getEncryptedData() != null ||
+            (mPgpData.getSignature() != null &&
+                mAccount.isCryptoUsePgpMime())) {
             onSend();
         } else {
             Toast.makeText(this, R.string.send_aborted, Toast.LENGTH_SHORT).show();
@@ -1965,7 +1967,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // When using PGP/MIME, however, we must first package the signature in MIME format before
         // then applying the encryption, which is subsequently packaged in its own MIME format.
         // In this case, we must keep track of the signature data and the encrypted data separately.
-    	boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
+    	boolean usePgpMime = mAccount.isCryptoUsePgpMime();
 
     	try {
 
@@ -2028,15 +2030,16 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
 	        			}
 
-
 	        		}
 
+                    String filename = writeToTempFile( baos.toByteArray() );
+
 	        		if( filename != null ) {
-	        			success = crypto.encryptFile(this, Uri.fromFile( new File( filename ) ).toString(), mPgpData);
+	        			success = new Apg().encryptFile(this, Uri.fromFile( new File( filename ) ).toString(), mPgpData);
 	        		}
 
 	        	} else {
-	        		success = crypto.encrypt(this, textBody.getText(), mPgpData);
+	        		success = new Apg().encrypt(this, textBody.getText(), mPgpData);
 	        	}
 
 	        	if( !success ) {
@@ -2290,9 +2293,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      *         The MIME type we want our attachment to have.
      */
     private void onAddAttachment2(final String mime_type) {
-        //if (!mAccount.getCryptoProvider().supportsAttachments(this) ) {
-    	CryptoProvider crypto = mAccount.getCryptoProvider();
-    	if( crypto.isAvailable( this ) && ( !mAccount.isCryptoUsePgpMime() || !crypto.supportsPgpMimeSend( this ) ) ) {
+    	if (!mAccount.isCryptoUsePgpMime()) {
             Toast.makeText(this, R.string.attachment_encryption_unsupported, Toast.LENGTH_LONG).show();
         }
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
@@ -4302,7 +4303,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
     private void updateMessageFormat() {
         MessageFormat origMessageFormat = mAccount.getMessageFormat();
-        boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
+        boolean usePgpMime = mAccount.isCryptoUsePgpMime();
         SimpleMessageFormat messageFormat;
         if (origMessageFormat == MessageFormat.TEXT) {
             // The user wants to send text/plain messages. We don't override that choice under

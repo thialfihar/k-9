@@ -866,10 +866,9 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
                     if( attachment.decrypt.isChecked() ) {
 
                     	attachment.writeFile();
-                    	CryptoProvider cryptoProvider = account.getCryptoProvider();
                         File file = new File( attachment.savedName );
                         mPgpData.setFilename( null );
-                    	cryptoProvider.decryptFile( MessageViewFragment.this, Uri.fromFile( file ).toString(), !download, mPgpData );
+                    	new Apg().decryptFile( MessageViewFragment.this, Uri.fromFile( file ).toString(), !download, mPgpData );
                     } else {
                     	if (download) {
                     		attachment.writeFile();

@@ -16,7 +16,7 @@ import com.fsck.k9.mail.store.Pop3Store;
 import com.fsck.k9.mail.store.StorageManager.StorageProvider;
 import com.fsck.k9.mail.store.UnavailableStorageException;
 import com.fsck.k9.mail.store.WebDavStore;
-import com.imaeses.squeaky.K9;
+import com.fsck.k9.K9;
 
 /**
  * Store is the access point for an email message store. It's location can be

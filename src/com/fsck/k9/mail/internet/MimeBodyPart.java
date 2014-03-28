@@ -8,7 +8,7 @@ import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.CompositeBody;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
-import com.imaeses.squeaky.K9;
+import com.fsck.k9.K9;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

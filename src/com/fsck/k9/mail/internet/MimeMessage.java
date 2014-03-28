@@ -34,6 +34,8 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.store.UnavailableStorageException;
+import com.fsck.k9.K9;
+import org.thialfihar.android.apg.util.Log;
 
 /**
  * An implementation of Message that stores all of it's metadata in RFC 822 and

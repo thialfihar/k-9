@@ -2023,7 +2023,6 @@ public class LocalStore extends Store implements Serializable {
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_DISPOSITION,
                                                         String.format(Locale.US, "%s; size=%d",
-                                                        String.format("%s; size=%d",
                                                                       contentDisposition,
                                                                       size));
                                             }

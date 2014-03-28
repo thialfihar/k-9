@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.MessagingException;
-import com.imaeses.squeaky.K9;
+import com.fsck.k9.K9;
 
 import java.io.*;
 
@@ -48,15 +48,15 @@ public class TextBody implements Body {
             }
         }
     }
-    
+
     public void setRawOutput( boolean rawOutput ) {
     	this.rawOutput = rawOutput;
     }
-    
+
     public boolean isRawOutput() {
     	return rawOutput;
     }
-    
+
     /**
      * Get the text of the body in it's unencoded format.
      * @return
@@ -85,7 +85,7 @@ public class TextBody implements Body {
     public void setEncoding(String encoding) {
         mEncoding = encoding;
     }
-    
+
     public String getEncoding() {
     	return mEncoding;
     }

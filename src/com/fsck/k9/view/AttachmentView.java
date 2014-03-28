@@ -172,10 +172,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         if( ( name.endsWith( ".asc" ) && contentType.equals( "text/plain" ) ) ||
             ( ( name.endsWith( ".gpg" ) || name.endsWith( ".pgp" ) ) && contentType.equals( "application/octet-stream" ) ) ) {
 
-        	CryptoProvider crypto = account.getCryptoProvider();
-        	if( crypto.supportsAttachments( mContext ) ) {
-        		decrypt.setVisibility( View.VISIBLE );
-        	}
+    		decrypt.setVisibility( View.VISIBLE );
 
         }
 
